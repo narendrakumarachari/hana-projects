@@ -1,5 +1,7 @@
 # Door_Servo_ButtonOpen
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/button-door.html)
+
 > Press a button and a servo "door" opens slowly, stays open 5 seconds, then closes slowly.
 
 | | |

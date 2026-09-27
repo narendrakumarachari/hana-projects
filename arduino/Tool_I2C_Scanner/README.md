@@ -1,5 +1,7 @@
 # Tool_I2C_Scanner
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/i2c-scanner.html)
+
 > Finds every I2C device connected to the board and prints its address. Use it when an LCD stays blank or a sensor won't answer.
 
 | | |

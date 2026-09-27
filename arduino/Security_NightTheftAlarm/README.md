@@ -1,5 +1,7 @@
 # Security_NightTheftAlarm
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/night-theft-alarm.html)
+
 > Combines the night light and the object-removed alarm: at night it turns on a "street light" and arms the theft alarm. In the evening and during the day the alarm is off.
 
 | | |

@@ -1,5 +1,7 @@
 # Jun26c_LED_4Patterns_Button
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun26c-led-patterns.html)
+
 > 10 LEDs with 4 patterns: fast left-to-right, fast right-to-left, bounce, even/odd flash. The button cycles patterns with a beep. Fully non-blocking (`millis()`).
 
 | | |

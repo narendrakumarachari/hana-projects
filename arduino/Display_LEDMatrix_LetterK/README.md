@@ -1,5 +1,7 @@
 # Display_LEDMatrix_LetterK
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/led-matrix-k.html)
+
 > Shows the letter **K** on an 8×8 LED matrix driven by a MAX7219 chip.
 
 | | |

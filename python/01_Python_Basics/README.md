@@ -1,5 +1,7 @@
 # 01_Python_Basics
 
+<!-- circuit-card --> 🔌 **Circuit cards:** [Python Basics (13 lessons)](https://narendrakumarachari.github.io/hana-projects/cards/py-basics.html)
+
 13 small lessons, numbered in the order they were written (July 17 to August 27, 2026). Run any of them in the terminal:
 ```bat
 cd C:\Users\narendra\HanaProjects\python

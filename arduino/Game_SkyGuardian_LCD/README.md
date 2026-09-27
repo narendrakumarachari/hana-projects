@@ -1,5 +1,7 @@
 # Game_SkyGuardian_LCD
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/sky-guardian-lcd.html)
+
 > "Sky Guardian": the first version of the eagle game, on a 16×2 LCD. Fly the eagle with a joystick and shoot the bugs before they reach your nest and steal your eggs.
 
 | | |

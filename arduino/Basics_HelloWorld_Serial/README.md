@@ -1,5 +1,7 @@
 # Basics_HelloWorld_Serial
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/hello-world.html)
+
 > Prints `Hello World` to the Serial Monitor every 5 seconds. The "is my board alive?" test.
 
 | | |

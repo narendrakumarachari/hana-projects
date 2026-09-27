@@ -1,5 +1,7 @@
 # Jun17b_Sound_ClapDetect_LED
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun17b-clap-led.html)
+
 > The LED is on while the sound sensor hears a loud sound.
 
 | | |

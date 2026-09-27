@@ -1,5 +1,7 @@
 # Jun26b_Button_Serial
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun26b-button.html)
+
 > Prints `Push Button is Pressed` about 5 times a second while the button is held.
 
 | | |

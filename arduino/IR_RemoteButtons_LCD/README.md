@@ -1,5 +1,7 @@
 # IR_RemoteButtons_LCD
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/ir-remote-lcd.html)
+
 > Press a button on the IR remote and its name (POWER, VOL+, 1, 2, …) appears on a 16×2 LCD and in the Serial Monitor.
 
 | | |

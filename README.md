@@ -1,5 +1,7 @@
 # Hana Projects
 
+<!-- circuit-card --> 🔌 **Circuit cards for every project** (wiring pictures, parts, checklists): **https://narendrakumarachari.github.io/hana-projects/**
+
 [![Build](https://github.com/narendrakumarachari/hana-projects/actions/workflows/build.yml/badge.svg)](https://github.com/narendrakumarachari/hana-projects/actions/workflows/build.yml)
 
 Everything Hana built from **June to September 2026**, in one place:
@@ -37,6 +39,19 @@ HanaProjects/                     ← this repo (github.com/narendrakumarachari/
 | [`serial_button_to_keypress.py`](python/03_Arduino_ESP32_Companions/serial_button_to_keypress.py) | [`Input_Button_SerialEvent`](arduino/Input_Button_SerialEvent) | USB serial |
 | [`web_esp32_led_control.py`](python/03_Arduino_ESP32_Companions/web_esp32_led_control.py) | [`ESP32_WiFi_LED_WebAPI`](arduino/ESP32_WiFi_LED_WebAPI) | Wi-Fi (HTTP) |
 | clock sender, sensor reader, LED slider, TFT noticeboard | *board sketches not found yet* (see [python/TODO.md](python/TODO.md)) | USB serial |
+
+---
+
+## Circuit cards (wiring pictures for kids)
+Every project has a **circuit card**: the parts, a colour-coded wiring picture, a tick-off wire checklist, which program to upload, and how to test it.
+- **Open them:** <https://narendrakumarachari.github.io/hana-projects/> (or open `docs/index.html` on this PC).
+- **Standards on every card:** red wire = power, black = ground; numbered wires match the checklist; a breadboard power strip appears when several parts share power; ESP32 cards show the 3.3V warning.
+- **Keeping them up to date:** all wiring lives in [`tools/circuit_cards/data.py`](tools/circuit_cards/data.py). After changing a project's wiring, edit its entry there and run:
+  ```bat
+  python tools\circuit_cards\build.py          :: rebuilds docs\
+  python tools\circuit_cards\link_readmes.py   :: refreshes the card link in each README
+  ```
+  GitHub Actions fails if `docs/` doesn't match `data.py`, so an out-of-date card can't slip through.
 
 ---
 

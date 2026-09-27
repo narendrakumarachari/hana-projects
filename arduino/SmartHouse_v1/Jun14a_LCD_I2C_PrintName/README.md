@@ -1,5 +1,7 @@
 # Jun14a_LCD_I2C_PrintName
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun14a-lcd-name.html)
+
 > Prints a name on line 1 of a 16x2 I2C LCD (address 0x27).
 
 | | |

@@ -1,5 +1,7 @@
 # Sound_LoudnessAlarm_Analog
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/loudness-alarm.html)
+
 > Reads the sound level as a number (0–1023) and flashes an LED and beeps when it reaches 625 or more.
 
 | | |

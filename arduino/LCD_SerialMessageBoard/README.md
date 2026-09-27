@@ -1,5 +1,7 @@
 # LCD_SerialMessageBoard
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/lcd-message-board.html)
+
 > Type a message in the Serial Monitor and it appears on a 16×2 LCD.
 
 | | |

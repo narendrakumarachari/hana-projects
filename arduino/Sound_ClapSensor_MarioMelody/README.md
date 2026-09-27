@@ -1,5 +1,7 @@
 # Sound_ClapSensor_MarioMelody
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/clap-mario.html)
+
 > Plays the Super Mario Bros. theme on a buzzer, controlled by a sound sensor: the music plays while the sensor output is HIGH and stops when it goes LOW.
 
 | | |

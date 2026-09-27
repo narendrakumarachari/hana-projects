@@ -1,5 +1,7 @@
 # Jun14d_LED_Fade_5Times
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun14d-fade-5.html)
+
 > Fades one LED in and out 5 times (all inside `setup()`), then leaves it off. Change `numLoops` for more cycles.
 
 | | |

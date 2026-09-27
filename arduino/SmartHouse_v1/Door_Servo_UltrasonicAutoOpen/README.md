@@ -1,5 +1,7 @@
 # Door_Servo_UltrasonicAutoOpen
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-auto-door.html)
+
 > **Automatic door.** When a person is within 20 cm: 3 beeps, the servo opens slowly to 90°, stays 5 s, beeps, closes slowly, then waits until the person leaves before it can trigger again.
 
 | | |

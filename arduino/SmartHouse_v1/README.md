@@ -1,5 +1,7 @@
 # SmartHouse_v1: Smart House (working version 1)
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/smart-house.html)
+
 > A model smart house run by one Arduino Uno. It has an automatic door, a temperature display, a night light, a party mode with music and lights, a bedtime routine with an intruder alarm, and a mini LCD game, all switched by typing commands in the Serial Monitor.
 >
 > This folder also holds **22 small learning sketches** (June to August 2026), the building blocks that led up to it.

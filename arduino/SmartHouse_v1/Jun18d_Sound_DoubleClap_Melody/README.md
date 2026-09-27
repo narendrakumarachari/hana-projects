@@ -1,5 +1,7 @@
 # Jun18d_Sound_DoubleClap_Melody
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun18d-double-clap-tune.html)
+
 > Double clap within 1.5 s plays a short C-E-G-C-G-E-C melody.
 
 | | |

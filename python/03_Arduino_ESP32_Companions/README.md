@@ -1,5 +1,7 @@
 # 03_Arduino_ESP32_Companions
 
+<!-- circuit-card --> 🔌 **Circuit cards:** [Button → Keyboard (Python)](https://narendrakumarachari.github.io/hana-projects/cards/py-serial-button-keypress.html) · [ESP32 LED Web Remote (Python)](https://narendrakumarachari.github.io/hana-projects/cards/py-esp32-led-control.html) · [LED Brightness Slider (Python)](https://narendrakumarachari.github.io/hana-projects/cards/py-led-slider.html) · [PC Clock Sender (Python)](https://narendrakumarachari.github.io/hana-projects/cards/py-clock-sender.html) · [Sensor Reader (Python)](https://narendrakumarachari.github.io/hana-projects/cards/py-sensor-reader.html) · [TFT Animation & Noticeboard (Python)](https://narendrakumarachari.github.io/hana-projects/cards/py-tft-noticeboard.html)
+
 Python programs that run **on the PC** and talk to an **Arduino** (over the USB cable, using `pyserial`) or an **ESP32** (over Wi-Fi, using `requests`). Three of them are small **Flask** web servers, so you can control the board from a browser or phone.
 
 **Setup:** `pip install -r requirements.txt` (from the repo root) installs `pyserial`, `Flask`, `requests` and `keyboard`.

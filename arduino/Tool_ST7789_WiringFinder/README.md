@@ -1,5 +1,7 @@
 # Tool_ST7789_WiringFinder
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/screen-wiring-finder.html)
+
 > A screen-debugging tool for the 1.54" ST7789 TFT on the ESP32. It tries the correct wiring and the 5 most common wire mix-ups one after another, so you can see which one lights the screen.
 
 | | |

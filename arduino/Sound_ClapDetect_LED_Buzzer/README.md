@@ -1,5 +1,7 @@
 # Sound_ClapDetect_LED_Buzzer
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/clap-detector.html)
+
 > When the sound sensor hears a loud noise (a clap), an LED lights and an active buzzer sounds.
 
 | | |

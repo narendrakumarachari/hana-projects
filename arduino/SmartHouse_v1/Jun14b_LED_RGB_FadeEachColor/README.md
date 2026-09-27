@@ -1,5 +1,7 @@
 # Jun14b_LED_RGB_FadeEachColor
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun14b-rgb-fade.html)
+
 > Fades the red, then green, then blue channel of an RGB LED in and out, forever.
 
 | | |

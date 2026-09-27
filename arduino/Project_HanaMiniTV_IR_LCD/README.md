@@ -1,5 +1,7 @@
 # Project_HanaMiniTV_IR_LCD
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/hana-mini-tv.html)
+
 > "Hana TV": a pretend television on a 16×2 LCD, controlled by the IR remote. It has 9 channels of animations and mini-games, plus volume, pause, channel up/down and an emergency stop.
 
 | | |

@@ -1,5 +1,7 @@
 # IR_RemoteCodeReader
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/ir-code-reader.html)
+
 > Prints the hex code of every IR remote button you press. Use it to learn a new remote's codes.
 
 | | |

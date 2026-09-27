@@ -1,5 +1,7 @@
 # Hana Programs
 
+<!-- circuit-card --> 🔌 **Circuit cards for the Python programs:** https://narendrakumarachari.github.io/hana-projects/
+
 Hana's Python programs, written **July to September 2026**. They go from the very first `print("Hello py")` to **ChirpQuest**, a full kids' bird-guide web app with an AI chatbot. Along the way are PC programs that talk to Arduino and ESP32 boards over USB and Wi-Fi.
 
 > **Board side:** the Arduino / ESP32 sketches these programs talk to are in [`../arduino`](../arduino/README.md).

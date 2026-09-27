@@ -1,5 +1,7 @@
 # Jun22b_LDR_Light_Serial
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun22b-light-number.html)
+
 > Prints the raw LDR light reading once a second. Use it to calibrate the night-light thresholds.
 
 | | |

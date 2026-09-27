@@ -1,5 +1,7 @@
 # Game_FlappyBird_LCD
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/flappy-bird-lcd.html)
+
 > Flappy Bird on a 16×2 LCD: push the joystick up to flap, and fly through the gaps in the pipes. It speeds up as you go.
 
 | | |

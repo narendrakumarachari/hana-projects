@@ -1,5 +1,7 @@
 # Input_Button_SerialEvent
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/button-to-keypress.html)
+
 > A debounced push button that sends `BUTTON_PRESSED` and `=` over USB serial each time it is pressed. Probably meant to be read by a program on the PC.
 
 | | |

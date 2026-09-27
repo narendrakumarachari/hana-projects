@@ -1,5 +1,7 @@
 # Jun26a_Button_Buzzer
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun26a-button-beep.html)
+
 > The buzzer sounds a 1 kHz tone while the button is held. Prints `Pressed` / `Released`.
 
 | | |

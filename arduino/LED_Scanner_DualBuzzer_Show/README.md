@@ -1,5 +1,7 @@
 # LED_Scanner_DualBuzzer_Show
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/led-light-show.html)
+
 > A 10-LED light show with sound (scanner sweep, wave fill, centre burst and blink finale), written for two passive buzzers.
 
 | | |

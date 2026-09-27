@@ -1,5 +1,7 @@
 # 02_Mini_Projects
 
+<!-- circuit-card --> 🔌 **Circuit cards:** [Pet Care Agent](https://narendrakumarachari.github.io/hana-projects/cards/py-pet-care.html) · [Rose Library](https://narendrakumarachari.github.io/hana-projects/cards/py-rose-library.html)
+
 Bigger terminal programs that combine the basics. No packages needed.
 
 ---

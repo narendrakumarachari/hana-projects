@@ -1,5 +1,7 @@
 # Sensor_AutoNightLight_LDR
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/night-light.html)
+
 > An automatic night light: a light sensor (LDR) sets an LED to full, half or off depending on how dark it is.
 
 | | |

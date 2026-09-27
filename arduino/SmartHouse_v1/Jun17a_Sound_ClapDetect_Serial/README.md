@@ -1,5 +1,7 @@
 # Jun17a_Sound_ClapDetect_Serial
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun17a-clap.html)
+
 > Prints `Clap Detected` when the sound sensor's digital output goes HIGH.
 
 | | |

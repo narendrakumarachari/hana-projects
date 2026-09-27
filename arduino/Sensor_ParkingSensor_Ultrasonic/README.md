@@ -1,5 +1,7 @@
 # Sensor_ParkingSensor_Ultrasonic
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/parking-sensor.html)
+
 > A car parking sensor: the buzzer beeps faster as an object gets closer, and sounds continuously when very close.
 
 | | |

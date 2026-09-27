@@ -1,5 +1,7 @@
 # Jun19a_Ultrasonic_ObjectRemovedAlarm
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun19a-object-alarm.html)
+
 > Beeps 5 times whenever the object in front of the HC-SR04 is more than 5 cm away (anti-theft).
 
 | | |

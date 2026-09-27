@@ -1,5 +1,7 @@
 # Security_ObjectRemovedAlarm
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/object-removed-alarm.html)
+
 > An anti-theft alarm: put a valuable object in front of an ultrasonic sensor, and if it is moved away, the buzzer sounds.
 
 | | |

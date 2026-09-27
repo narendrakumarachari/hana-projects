@@ -1,5 +1,7 @@
 # Door_RFID_AccessControl
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/rfid-door.html)
+
 > An RFID door lock: tap the right card and the servo door opens with a happy beep. Tap a wrong card and it stays locked with a warning sound.
 
 | | |

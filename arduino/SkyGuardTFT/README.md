@@ -1,5 +1,7 @@
 # SkyGuardTFT: Sky Guard, TFT edition
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/sky-guard-tft.html)
+
 > The flagship game. An eagle defends its nest from waves of bugs on a 240×240 colour screen, with 4 feather weapons, a loop-the-loop talon grab, particle effects, sound, and a saved best score. Runs on an ESP32.
 
 | | |

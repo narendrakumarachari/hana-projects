@@ -1,5 +1,7 @@
 # Jul15b_MPU6050_TiltDirection
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jul15b-tilt.html)
+
 > Talks to an MPU6050 accelerometer directly over I2C (no library) and prints `LEFT`, `RIGHT`, `UP`, `DOWN` or `CENTER` from the tilt, every 2 s.
 
 | | |

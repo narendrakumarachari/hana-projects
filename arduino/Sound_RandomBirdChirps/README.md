@@ -1,5 +1,7 @@
 # Sound_RandomBirdChirps
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/bird-chirps.html)
+
 > Makes natural-sounding, random bird chirps from two buzzers, as if two birds are calling from different spots.
 
 | | |

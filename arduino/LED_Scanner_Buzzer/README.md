@@ -1,5 +1,7 @@
 # LED_Scanner_Buzzer
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/led-scanner.html)
+
 > A "Knight Rider" light: a band of 3 LEDs sweeps left and right across 10 LEDs, and each position plays a note.
 
 | | |

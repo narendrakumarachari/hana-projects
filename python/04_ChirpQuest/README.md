@@ -1,5 +1,7 @@
 # 04_ChirpQuest: North Texas Bird Guide ⭐
 
+<!-- circuit-card --> 🔌 **Circuit cards:** [ChirpQuest Bird Guide](https://narendrakumarachari.github.io/hana-projects/cards/py-chirpquest.html)
+
 > A web app for kids about 16 North Texas birds. Pip the Cockatiel, the mascot, answers bird questions using Google Gemini AI. It also has real bird photos, a spotting checklist, bird videos and unlockable badges. It's written in Python (Flask) with all the HTML, CSS and JavaScript in the same file.
 
 ## Run it

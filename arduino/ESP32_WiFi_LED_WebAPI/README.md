@@ -1,5 +1,7 @@
 # ESP32_WiFi_LED_WebAPI
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/esp32-wifi-led.html)
+
 > The ESP32 joins your Wi-Fi and runs a tiny web server. Visit `/on`, `/off` or `/bird` in a browser to control an LED.
 
 | | |

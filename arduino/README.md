@@ -1,5 +1,7 @@
 # Arduino & ESP32 Projects
 
+<!-- circuit-card --> 🔌 **Circuit cards for every sketch:** https://narendrakumarachari.github.io/hana-projects/
+
 ## Folder layout
 ```
 HanaProjects/arduino/     ← the Arduino IDE sketchbook folder

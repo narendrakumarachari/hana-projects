@@ -1,5 +1,7 @@
 # WIP_Bird_Empty (work in progress, empty)
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/wip-bird.html)
+
 > An empty placeholder sketch created on 2026-09-26. The `.ino` file has **0 bytes**, so there is no code yet.
 
 | | |

@@ -1,5 +1,7 @@
 # LED_RGB_ColorCycle
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/rgb-color-cycle.html)
+
 > Makes an RGB LED show red, then green, then blue, one second each, forever.
 
 | | |

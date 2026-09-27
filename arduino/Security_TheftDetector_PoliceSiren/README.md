@@ -1,5 +1,7 @@
 # Security_TheftDetector_PoliceSiren
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/police-siren-theft-detector.html)
+
 > "Smart Theft Detection System": the finished version of the security series. It adds a street light that follows daylight, a night-time object guard, and a police siren with flashing red and blue lights.
 
 | | |

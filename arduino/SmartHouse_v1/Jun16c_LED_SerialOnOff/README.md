@@ -1,5 +1,7 @@
 # Jun16c_LED_SerialOnOff
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun16c-led-on-off.html)
+
 > Type `ON` or `OFF` (any case) in the Serial Monitor to switch an LED. Anything else prints `Invalid Command`.
 
 | | |

@@ -1,5 +1,7 @@
 # Jun14e_LED_Fade_Forever
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun14e-fade-forever.html)
+
 > Fades one LED in and out forever ("breathing" light).
 
 | | |

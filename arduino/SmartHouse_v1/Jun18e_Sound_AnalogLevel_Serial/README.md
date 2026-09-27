@@ -1,5 +1,7 @@
 # Jun18e_Sound_AnalogLevel_Serial
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun18e-sound-number.html)
+
 > Prints the sound sensor's analog value (0-1023) once a second. Used to choose the threshold in `Sound_LoudnessAlarm_Analog`.
 
 | | |

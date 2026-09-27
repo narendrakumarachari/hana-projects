@@ -1,5 +1,7 @@
 # Jun16a_Music_HappyBirthday_Serial
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun16a-birthday.html)
+
 > Type `happy birthday` in the Serial Monitor to play Happy Birthday on a passive buzzer (tighter rhythm than the top-level `Music_HappyBirthday_Serial`).
 
 | | |

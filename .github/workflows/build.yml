@@ -61,7 +61,10 @@ jobs:
         run: pip install -r python/requirements.txt
 
       - name: Check every .py file compiles
-        run: python -m compileall -q python
+        run: python -m compileall -q python tools
+
+      - name: Check circuit cards are up to date with tools/circuit_cards/data.py
+        run: python tools/circuit_cards/build.py --check
 
       - name: Check ChirpQuest starts (without an API key)
         working-directory: python/04_ChirpQuest

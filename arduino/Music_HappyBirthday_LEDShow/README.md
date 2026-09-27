@@ -1,5 +1,7 @@
 # Music_HappyBirthday_LEDShow
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/birthday-light-show.html)
+
 > A birthday treat for Krish: plays Happy Birthday while 10 LEDs dance, then runs a light-and-sound celebration. Repeats forever.
 
 | | |

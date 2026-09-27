@@ -1,5 +1,7 @@
 # Aug16a_ESP32_WiFi_LED_WebAPI
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-aug16a-esp32-led.html)
+
 > Wi-Fi web server with `/on`, `/off` and `/PoP` (blink once) to control an LED. Earlier version of the top-level `ESP32_WiFi_LED_WebAPI`.
 
 | | |

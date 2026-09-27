@@ -1,5 +1,7 @@
 # Sound_BirdPiano_5Buttons
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/bird-piano.html)
+
 > Krish's Bird Piano / communication board: 5 buttons, each playing a different house-sparrow-style call that stands for a word (Food, Water, Play, Scritches, Outside).
 
 | | |

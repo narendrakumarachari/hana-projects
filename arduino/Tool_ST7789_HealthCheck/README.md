@@ -1,5 +1,7 @@
 # Tool_ST7789_HealthCheck
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/screen-health-check.html)
+
 > "Is my 1.54" ST7789 screen dead?" Checks each wire for shorts, asks the screen chip for its ID, then does a colour test, and prints a plain-English verdict.
 
 | | |

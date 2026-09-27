@@ -1,5 +1,7 @@
 # Jun18b_Sound_DoubleClap_Beeps
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun18b-double-clap-beep.html)
+
 > Counts claps. **Two claps within 1.5 s** play beep-beep-beeeep on an active buzzer. The first clap flashes the LED.
 
 | | |

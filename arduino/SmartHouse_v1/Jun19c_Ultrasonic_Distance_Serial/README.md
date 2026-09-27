@@ -1,5 +1,7 @@
 # Jun19c_Ultrasonic_Distance_Serial
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun19c-distance.html)
+
 > Prints the HC-SR04 distance in cm once a second.
 
 | | |

@@ -1,5 +1,7 @@
 # Jun24a_PIR_Motion_Serial
 
+<!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/l-jun24a-motion.html)
+
 > Prints `Motion Detected!` when the PIR sensor output is HIGH (then waits 1 s).
 
 | | |
