@@ -1,0 +1,27 @@
+# ================= Secrets: NEVER upload =================
+# Arduino: Wi-Fi name + password (each ESP32 sketch has an arduino_secrets.example.h instead)
+arduino_secrets.h
+# Python: API keys (python/04_ChirpQuest/.env.example is the template)
+.env
+
+# ================= Python environment & caches =================
+venv/
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# ================= Arduino build output =================
+# (arduino/libraries/ IS uploaded on purpose, so the repo builds as-is)
+build/
+*.o
+*.elf
+*.hex
+*.bin
+
+# ================= Editor / OS junk =================
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store

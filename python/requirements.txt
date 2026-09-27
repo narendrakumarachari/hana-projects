@@ -1,0 +1,7 @@
+# Packages used by the programs in this repo (versions from the working venv, Python 3.10).
+# Install everything with:   pip install -r requirements.txt
+Flask==3.1.3          # web apps: ChirpQuest and the Arduino/ESP32 web controllers
+requests==2.34.2      # ChirpQuest (Gemini + iNaturalist) and web_esp32_led_control.py
+pyserial==3.5         # all serial_*.py programs and the web controllers that use USB serial
+keyboard==0.13.5      # serial_button_to_keypress.py (types a key when the Arduino button is pressed)
+python-dotenv==1.2.3  # ChirpQuest: reads GEMINI_API_KEY from 04_ChirpQuest/.env
