@@ -104,12 +104,12 @@ These were saved inside the Smart House folder while learning each part. The Ard
 | `Door_Servo_UltrasonicAutoOpen` | `servodoor12345678910` | **Automatic door**: a person within 20 cm → 3 beeps, the door opens slowly, waits 5 s, beeps, closes slowly, then waits until the person leaves | Servo D10, TRIG D7, ECHO D6, active buzzer D8 |
 
 ### Notes on the learning sketches
-- ⚠️ **`Jun14a_LCD_I2C_PrintName` uses `lcd.begin()`**, but every other LCD sketch uses `lcd.init()`. The two calls come from **two different libraries** with the same header name `LiquidCrystal_I2C.h`, and both are installed (`libraries/LiquidCrystal_I2C` and `libraries/Arduino-LiquidCrystal-I2C-library-master`). Only one can win, so this sketch fails to build with the standard one. **Fix: change `lcd.begin();` to `lcd.init();`**, then delete the `Arduino-LiquidCrystal-I2C-library-master` folder so there's only one LCD library.
+- ✅ `Jun14a_LCD_I2C_PrintName` used `lcd.begin()` from a duplicate LCD library. It was fixed to `lcd.init()` on 2026-09-26, and the duplicate library was removed.
 - `Jun14a` prints a person's full name. Decide whether you want that in a public repo.
 - `Aug16a`'s comment says "ESP32 built-in LED", but it uses GPIO 23. The built-in LED is usually GPIO 2.
 
 ### To-do (learning sketches)
-- [ ] Change `lcd.begin()` → `lcd.init()` in Jun14a, and remove the duplicate LCD library.
+- [x] Change `lcd.begin()` → `lcd.init()` in Jun14a, and remove the duplicate LCD library.
 - [ ] Optional: move these 22 folders out to a top-level `Learning_Steps/` folder, so the Smart House folder only holds the Smart House.
 
 ## Libraries to install

@@ -18,11 +18,11 @@ Tick them off here as you go.
 - [ ] **LED_Scanner_DualBuzzer_Show**: buzzer 2 never sounds (Uno plays one `tone()` at a time).
 - [ ] **Project_HanaMiniTV_IR_LCD**: Showcase channel corrupts the Dino/Hero graphics. Reset `dinoInited`/`heroInited` on each sub-channel switch.
 - [ ] **Project_HanaMiniTV_IR_LCD**: 6 LCD texts are longer than 16 characters and get cut off.
-- [ ] **SmartHouse_v1/Jun14a_LCD_I2C_PrintName**: doesn't build. Change `lcd.begin()` → `lcd.init()`.
+- [x] **SmartHouse_v1/Jun14a_LCD_I2C_PrintName**: changed `lcd.begin()` → `lcd.init()` (2026-09-26).
 - [ ] **Sound_ClapSensor_MarioMelody**: "Clap"/"No Clap" labels look swapped, and it floods the Serial Monitor.
 
 ## 🟡 Clean-ups
-- [ ] Delete `libraries/Arduino-LiquidCrystal-I2C-library-master` (conflicts with the standard LiquidCrystal_I2C). Do it after fixing Jun14a.
+- [x] Deleted `libraries/Arduino-LiquidCrystal-I2C-library-master` (duplicate LCD library).
 - [ ] **IR_RemoteButtons_LCD**: remove the stray `0` / `;` line, and add button 8 (`0xAD52FF00`), NEXT (`0xBC39FF00`) and EQ.
 - [ ] **Door_Servo_ButtonOpen**: use `attach(servoPin)` instead of `attach(10)`. The `images/` show the old stock example, not this circuit.
 - [ ] **Display_LEDMatrix_LetterK**: rename the array `one` → `letterK`.
@@ -80,4 +80,4 @@ Tick them off here as you go.
 | Tool_ST7789_HealthCheck | — |
 | WIP_Bird_Empty | define or delete |
 | SmartHouse_v1 (main) | D5 buzzer, NaN temp, v2 ideas |
-| SmartHouse_v1 learning sketches | Jun14a fix, optional move |
+| SmartHouse_v1 learning sketches | optional move |

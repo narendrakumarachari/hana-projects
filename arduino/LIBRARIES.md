@@ -90,13 +90,12 @@ All on **Uno**.
 | ESP32_WiFi_LED_WebAPI | ESP32 | ESP32 board package + create `arduino_secrets.h` | `WiFi.h` `WebServer.h` `arduino_secrets.h` |
 | Tool_ST7789_WiringFinder | ESP32 | ESP32 board package, #8 (+ #9, #10) | `Adafruit_GFX.h` `Adafruit_ST7789.h` `SPI.h` |
 | Tool_ST7789_HealthCheck | ESP32 | ESP32 board package, #8 (+ #9, #10) | `Adafruit_GFX.h` `Adafruit_ST7789.h` `SPI.h` |
-| SmartHouse_v1/Jun14a_LCD_I2C_PrintName | Uno | #1 LiquidCrystal I2C **and** change `lcd.begin()` → `lcd.init()` (see conflict below) | `Wire.h` `LiquidCrystal_I2C.h` |
+| SmartHouse_v1/Jun14a_LCD_I2C_PrintName | Uno | #1 LiquidCrystal I2C | `Wire.h` `LiquidCrystal_I2C.h` |
 | SmartHouse_v1/Door_Servo_UltrasonicAutoOpen | Uno | #3 Servo | `Servo.h` |
 | SmartHouse_v1/Aug16a_ESP32_WiFi_LED_WebAPI | ESP32 | ESP32 board package + create `arduino_secrets.h` | `WiFi.h` `WebServer.h` `arduino_secrets.h` |
 
 ### Build check after installing (2026-09-26)
-With the libraries above installed, **53 of 55 sketches build**. The two that do not:
-- `SmartHouse_v1/Jun14a_LCD_I2C_PrintName` needs the one-line `lcd.init()` fix.
+With the libraries above installed, **54 of 55 sketches build**. GitHub Actions checks this on every push (see the main README). The one that does not:
 - `WIP_Bird_Empty` has no code yet.
 
 ---
@@ -105,22 +104,15 @@ With the libraries above installed, **53 of 55 sketches build**. The two that do
 | Error message | Fix |
 |---|---|
 | `Servo.h: No such file or directory` (or any `xxx.h: No such file`) | That library isn't installed. Find the header in the table above and install it |
-| `no matching function for call to 'LiquidCrystal_I2C::begin()'` | Use `lcd.init();`. See the conflict below |
+| `no matching function for call to 'LiquidCrystal_I2C::begin()'` | Use `lcd.init();` instead of `lcd.begin();` |
 | `'IrReceiver' was not declared` / `IRremote.hpp: No such file` | An old IRremote (2.x/3.x) is installed. Update it to **4.x** |
 | `WiFi.h: No such file` or `Preferences.h: No such file` | The board is set to Uno. Choose **ESP32 Dev Module** |
 | `arduino_secrets.h: No such file` | Copy `arduino_secrets.example.h` to `arduino_secrets.h` in the same folder |
-| `Multiple libraries were found for "LiquidCrystal_I2C.h"` | Two LCD libraries are installed. See below |
+| `Multiple libraries were found for "LiquidCrystal_I2C.h"` | Two LCD libraries are installed. Keep only Frank de Brabander's (see below) |
 | LCD lights up but shows no text | Address is 0x3F, not 0x27 (run `Tool_I2C_Scanner`), or turn the contrast screw |
 
-### Duplicate LCD library conflict
-Two folders in `libraries/` both provide `LiquidCrystal_I2C.h`:
-
-| Folder | Init call | Keep? |
-|---|---|---|
-| `LiquidCrystal_I2C` (Frank de Brabander 1.1.2, from Library Manager) | `lcd.init();` | ✅ **keep**: every sketch except Jun14a uses it |
-| `Arduino-LiquidCrystal-I2C-library-master` (manually downloaded ZIP) | `lcd.begin();` | ❌ delete after fixing Jun14a |
-
-The compiler currently chooses the correct one, but fixing `Jun14a` and deleting the ZIP copy removes the ambiguity.
+### Duplicate LCD library conflict (fixed 2026-09-26)
+Two libraries used to provide `LiquidCrystal_I2C.h`: the standard **LiquidCrystal I2C** by Frank de Brabander (`lcd.init()`) and a manually downloaded ZIP copy, `Arduino-LiquidCrystal-I2C-library-master` (`lcd.begin()`). `Jun14a` was changed to `lcd.init()` and the ZIP copy was removed, so only the standard library is left. If the IDE ever reports *"Multiple libraries were found for LiquidCrystal_I2C.h"*, delete the non-standard copy again.
 
 ---
 

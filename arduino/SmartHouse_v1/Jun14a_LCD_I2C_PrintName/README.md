@@ -10,7 +10,7 @@
 | **Part of** | Learning sketches for [SmartHouse_v1](../README.md#part-2-learning-sketches-inside-this-folder) |
 
 ## Notes
-⚠️ **Does not build** with the standard LiquidCrystal_I2C library: change `lcd.begin();` to `lcd.init();`. See [LIBRARIES.md](../../LIBRARIES.md#4--library-conflict-to-fix). It prints a person's full name, so decide whether that should be public.
+✅ Fixed 2026-09-26: it used `lcd.begin();`, which only existed in a duplicate LCD library. It now uses `lcd.init();` like every other LCD sketch. It prints a person's full name (kept by choice).
 
 Serial Monitor: 9600 baud, line ending **Newline**.
 
@@ -21,7 +21,6 @@ Serial Monitor: 9600 baud, line ending **Newline**.
 1. Select **Tools → Board → Arduino AVR Boards → Arduino Uno**.
 2. Open **Tools → Manage Libraries…** (Ctrl+Shift+I), search for each library below, check the author, and click **Install**:
    - **LiquidCrystal I2C** by Frank de Brabander (1.1.2)
-3. Also change `lcd.begin();` to `lcd.init();` or it won't build.
 4. Click **Upload** (→).
 
 Full list and troubleshooting: [LIBRARIES.md](../../LIBRARIES.md).
