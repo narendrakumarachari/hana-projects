@@ -69,7 +69,7 @@ Download **Arduino IDE 2.x** from <https://www.arduino.cc/en/software> and insta
 Uno = select **Tools → Board → Arduino AVR Boards → Arduino Uno**. ESP32 = **ESP32 Dev Module**.
 
 ### No libraries needed (just select the board and upload)
-Basics_HelloWorld_Serial · LED_RGB_ColorCycle · LED_Scanner_Buzzer · LED_Scanner_DualBuzzer_Show · Music_HappyBirthday_Serial · Music_HappyBirthday_LEDShow · Sound_RandomBirdChirps · Sound_BirdPiano_5Buttons · Sound_ClapDetect_LED_Buzzer · Sound_ClapSensor_MarioMelody · Sound_LoudnessAlarm_Analog · Sensor_AutoNightLight_LDR · Sensor_ParkingSensor_Ultrasonic · Security_ObjectRemovedAlarm · Security_NightTheftAlarm · Security_TheftDetector_PoliceSiren · Input_Button_SerialEvent · Tool_I2C_Scanner *(uses built-in Wire)* · WIP_Bird_Empty *(empty)*
+Basics_HelloWorld_Serial · LED_Brightness_WebSlider · LED_RGB_ColorCycle · LED_Scanner_Buzzer · LED_Scanner_DualBuzzer_Show · Music_HappyBirthday_Serial · Music_HappyBirthday_LEDShow · Sound_RandomBirdChirps · Sound_BirdPiano_5Buttons · Sound_ClapDetect_LED_Buzzer · Sound_ClapSensor_MarioMelody · Sound_LoudnessAlarm_Analog · Sensor_AutoNightLight_LDR · Sensor_ParkingSensor_Ultrasonic · Security_ObjectRemovedAlarm · Security_NightTheftAlarm · Security_TheftDetector_PoliceSiren · Input_Button_SerialEvent · Tool_I2C_Scanner *(uses built-in Wire)* · WIP_Bird_Empty *(empty)*
 and learning sketches Jun14b, Jun14d, Jun14e, Jun15a, Jun16a, Jun16c, Jun17a, Jun17b, Jun18b, Jun18d, Jun18e, Jun19a, Jun19c, Jun22b, Jun24a, Jun26a, Jun26b, Jun26c, Jul15b *(uses built-in Wire)*.
 All on **Uno**.
 

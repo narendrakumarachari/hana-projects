@@ -866,4 +866,6 @@ if __name__ == "__main__":
     key = get_current_gemini_key()
     if key in ("DUMMY_TEST_KEY_REPLACE_ME", "PUT_YOUR_KEY_HERE", ""):
         log.warning("No real Gemini key set. Set it with:  export GEMINI_API_KEY='your_key'")
-    app.run(debug=True, host="127.0.0.1", port=5000, load_dotenv=False)
+    # debug=False: ChirpQuest gets shared through ngrok, and Flask's debugger
+    # would let strangers run code on this laptop if an error page appeared.
+    app.run(debug=False, host="127.0.0.1", port=5000, load_dotenv=False)

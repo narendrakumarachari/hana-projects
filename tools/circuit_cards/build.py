@@ -594,6 +594,8 @@ def arduino_card(p, all_by_slug):
     out = [f'<main class="page"><nav class="crumbs"><a href="../index.html">← All circuit cards</a></nav>']
     out.append(f'<header class="hero"><div class="eyebrow">Hana\'s Circuit Cards · {E(p["group"])}</div><h1>{E(p["title"])}</h1>'
                f'<p class="lead">{p["what"]}</p><div class="chips">{"".join(chips)}</div></header>')
+    if p.get("showcase"):
+        out.append(SHOWCASE_BANNER)
     if p["board"] == "esp32":
         out.append('<div class="banner esp">⚡ <b>ESP32 = 3.3 volts.</b> Never connect 5V to an ESP32 pin. Everything on this card uses the <b>3V3</b> pin.</div>')
     if p.get("wip"):
@@ -727,6 +729,11 @@ def python_card(q):
     kind = {"usb": "Talks to an Arduino over USB", "wifi": "Talks to an ESP32 over Wi-Fi", "none": "No wires needed"}[q["kind"]]
     chips = [f'<span class="chip">Python</span>', f'<span class="chip">{kind}</span>']
     out.append(f'<header class="hero"><div class="eyebrow">Hana\'s Circuit Cards · Python</div><h1>{E(q["title"])}</h1><p class="lead">{q["what"]}</p><div class="chips">{"".join(chips)}</div></header>')
+    if q.get("showcase"):
+        out.append(SHOWCASE_BANNER)
+    elif q.get("ngrok"):
+        out.append('<a class="feature" href="../share-with-ngrok.html"><span class="feature-kicker">Share it with friends</span>'
+                   '<b>Put this website online with ngrok</b><span>One command, <code>ngrok http 5000</code>, gives you a link friends can open from anywhere. See the step-by-step guide →</span></a>')
     out.append(f'<section><div class="step-title"><span class="step-num">1</span><h2>How it connects</h2></div><figure><div class="mat">{flow_svg(q)}</div></figure>')
     if q.get("board_card"):
         out.append(f'<p class="hint">Wire and upload the board first: <a href="{q["board_card"]}.html">open its circuit card</a>.</p>')
@@ -766,6 +773,12 @@ def python_card(q):
     return "".join(out)
 
 
+SHOWCASE_BANNER = ('<div class="feature-row"><a class="feature" href="../led-from-anywhere.html"><span class="feature-kicker">★ Featured project</span>'
+                   '<b>Control this LED from anywhere in the world</b><span>The full step-by-step mission with ngrok, a QR code for your class, and a 5-minute school demo script →</span></a>'
+                   '<a class="feature alt" href="../share-with-ngrok.html"><span class="feature-kicker">ngrok guide</span><b>Share any project with a link</b>'
+                   '<span>How to install ngrok, connect it, and open a tunnel, explained for kids →</span></a></div>')
+
+
 def index_page():
     groups = {}
     for p in PROJECTS + LEARNING:
@@ -775,6 +788,18 @@ def index_page():
     out.append('<header class="hero"><div class="eyebrow">Hana\'s Circuit Cards</div><h1>Build it, wire it, run it</h1>'
                '<p class="lead">One card for every project: which parts you need, which pin each wire goes to, which program to upload, and how to test it.</p>'
                f'<div class="chips"><span class="chip">{len(PROJECTS)} Arduino &amp; ESP32 projects</span><span class="chip">{len(LEARNING)} learning steps</span><span class="chip">{len(PYTHON)} Python programs</span></div></header>')
+    out.append('<a class="hero-feature" href="led-from-anywhere.html">'
+               '<svg viewBox="0 0 520 120" role="img" aria-label="A phone taps ON, the signal crosses the world, and an LED lights up">'
+               '<rect x="10" y="22" width="44" height="76" rx="8" fill="#1d3552" stroke="#43d3ff" stroke-width="3"/><rect x="18" y="46" width="28" height="16" rx="4" fill="#39d98a"/>'
+               '<text x="32" y="58" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="10" fill="#0b1626">ON</text>'
+               '<path d="M66 60 H 440" stroke="#ffd23f" stroke-width="4" stroke-dasharray="3 10" stroke-linecap="round"/>'
+               '<circle cx="250" cy="60" r="30" fill="#123a5c" stroke="#43d3ff" stroke-width="3"/><ellipse cx="250" cy="60" rx="12" ry="30" fill="none" stroke="#43d3ff" stroke-width="2"/><line x1="220" y1="60" x2="280" y2="60" stroke="#43d3ff" stroke-width="2"/>'
+               '<circle cx="480" cy="56" r="34" fill="#ffd23f" opacity=".25"/><path d="M466 80 V52 a14 14 0 0 1 28 0 V80 Z" fill="#ffd23f"/><rect x="470" y="80" width="4" height="18" fill="#b0bec5"/><rect x="486" y="80" width="4" height="24" fill="#b0bec5"/>'
+               '</svg><span class="hf-text"><span class="feature-kicker">★ Featured project · school demo</span><b>Turn on an LED from anywhere in the world</b>'
+               '<span>Friends tap ON from their phones, and a light switches on at home. ESP32 + Python + ngrok, step by step.</span>'
+               '<span class="hf-links"><span class="hf-btn">Start the mission →</span></span></span></a>')
+    out.append('<a class="feature alt wide" href="share-with-ngrok.html"><span class="feature-kicker">ngrok guide</span><b>Share any of Hana\'s web projects with a link</b>'
+               '<span>ESP32 LED remote, LED slider, ChirpQuest, TFT noticeboard: install ngrok, connect it, and open a tunnel in 7 kid-sized steps →</span></a>')
     out.append('<section><h2>The rules on every card</h2><div class="rules">'
                f'<div class="rule"><span class="swatch" style="background:{RED}"></span><div><b>Red wire = power</b><p>5V on an Uno, 3.3V on an ESP32.</p></div></div>'
                f'<div class="rule"><span class="swatch" style="background:{BLACK}"></span><div><b>Black wire = ground (GND)</b><p>Every part needs a ground wire back to the board.</p></div></div>'
@@ -857,6 +882,17 @@ kbd{font-family:var(--mono);font-size:.85em;background:var(--bg);border:1px soli
 .tile-top{display:flex;justify-content:space-between;align-items:center;gap:6px}.star{font-size:.8rem;font-weight:700;color:var(--sun-ink);background:var(--sun);border-radius:999px;padding:2px 8px}
 .lessons{display:flex;flex-wrap:wrap;gap:8px}.lessons code{background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:4px 10px}
 footer{color:var(--ink-soft);font-size:.85rem;border-top:2px solid var(--line);padding-top:14px;display:grid;gap:4px}
+.feature-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.feature{display:grid;gap:6px;text-decoration:none;color:#eef5fb;background:linear-gradient(135deg,#0b1626 0%,#15293f 60%,#3a1d34 100%);border:3px solid #ffd23f;border-radius:20px;padding:18px 20px;box-shadow:0 8px 24px rgba(11,22,38,.25)}
+.feature:hover{transform:translateY(-2px)}.feature b{font-family:var(--display);font-size:1.35rem;line-height:1.15;color:#ffd23f}.feature span{color:#c9d8e6}
+.feature code{background:#050b12;color:#ffd23f;border-radius:6px;padding:0 5px}
+.feature.alt{border-color:#43d3ff}.feature.alt b{color:#43d3ff}
+.feature-kicker{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#ff9fb7!important}
+.hero-feature{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:center;text-decoration:none;color:#eef5fb;background:radial-gradient(circle at 85% 30%,rgba(255,210,63,.25),transparent 45%),linear-gradient(135deg,#0b1626,#15293f);border:3px solid #ffd23f;border-radius:24px;padding:22px}
+.hero-feature svg{width:100%;height:auto}.hf-text{display:grid;gap:8px}.hf-text b{font-family:var(--display);font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.1;color:#ffd23f}.hf-text span{color:#c9d8e6}
+.hf-btn{display:inline-block;background:#ffd23f;color:#2b2100!important;font-weight:800;font-family:var(--display);border-radius:999px;padding:6px 18px;font-size:1.05rem}
+@media (max-width:700px){.hero-feature{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.feature,.hero-feature{transition:transform .15s}.hero-feature:hover{transform:translateY(-2px)}}
 @media (max-width:520px){.wire{grid-template-columns:auto 1fr}.wire .swatch{display:none}}
 """
 
@@ -886,6 +922,10 @@ def build(out_dir, standalone=True):
     files["cards.css"] = CSS
     files["cards.js"] = JS
     files[".nojekyll"] = ""
+    show = os.path.join(HERE, "showcase")          # hand-written showcase pages, copied as-is
+    for name in sorted(os.listdir(show)):
+        with open(os.path.join(show, name), encoding="utf-8") as f:
+            files[name] = f.read()
     return files
 
 

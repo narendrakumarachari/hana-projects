@@ -8,6 +8,14 @@ Hana's Python programs, written **July to September 2026**. They go from the ver
 >
 > **Note:** everything here runs on the **PC** with normal Python 3 (CPython). None of it is MicroPython running on the ESP32 itself. The ESP32/Arduino side is written in Arduino C++.
 
+## ⭐ Featured: LED From Anywhere
+Two programs in `03_Arduino_ESP32_Companions/` make a web page that controls an LED, and **ngrok** turns that page into a link friends can open from anywhere in the world.
+- **Mission guide for kids:** https://narendrakumarachari.github.io/hana-projects/led-from-anywhere.html
+- **ngrok guide (share any web project):** https://narendrakumarachari.github.io/hana-projects/share-with-ngrok.html
+- **One-click demo:** double-click `03_Arduino_ESP32_Companions\DEMO_LED_from_anywhere_ESP32.bat` or `DEMO_LED_from_anywhere_Uno_slider.bat`
+
+Web projects you can share with `ngrok http 5000` (one at a time): the ESP32 LED web remote, the LED brightness slider, ChirpQuest, and the TFT noticeboard.
+
 ## Folder layout
 ```
 HanaProjects/python/
@@ -66,6 +74,7 @@ Every time after that, run `venv\Scripts\activate` first, then run programs with
 | [serial_sensor_reader.py](03_Arduino_ESP32_Companions/serial_sensor_reader.py) | Reads `Temperature:…,Humidity:…` lines from an Arduino (a tutorial; the whole file is commented out) | an Arduino DHT sketch (**not found**) | USB serial COM5, 115200 | `serialreads.py` |
 | [web_led_brightness_slider.py](03_Arduino_ESP32_Companions/web_led_brightness_slider.py) | Web page with a 0–255 slider that sets an LED's brightness on pin 11 | an Arduino PWM sketch (**not found**) | Flask :5000 → USB serial COM5, 9600 | `inoledblink.py` |
 | [web_esp32_led_control.py](03_Arduino_ESP32_Companions/web_esp32_led_control.py) | Web page with ON / OFF / BIRD (keep blinking) buttons that control the ESP32's LED over Wi-Fi | Arduino sketch `ESP32_WiFi_LED_WebAPI` | Flask :5000 → HTTP to `192.168.1.248` | `wificomunication.py` |
+| `DEMO_LED_from_anywhere_ESP32.bat` / `DEMO_LED_from_anywhere_Uno_slider.bat` | **One-click school demo:** starts the web remote **and** ngrok, which prints the world link | ESP32 / Uno | Flask + ngrok | *(new)* |
 | [web_tft_animation_noticeboard.py](03_Arduino_ESP32_Companions/web_tft_animation_noticeboard.py) | "TFT Display Controller": pick 1 of 5 screen animations, or send a text notice to the display | a TFT display sketch (**not found**) | Flask :5000 → USB serial COM5, 115200 | `animation.py` |
 
 ### 04_ChirpQuest: bird-guide web app ⭐

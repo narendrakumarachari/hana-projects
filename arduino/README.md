@@ -9,7 +9,7 @@ HanaProjects/arduino/     ← the Arduino IDE sketchbook folder
 ├── LIBRARIES.md          ← what to install for each project
 ├── TODO.md               ← all open to-dos
 ├── libraries/            ← Arduino libraries (must stay here for the IDE)
-└── <33 sketch folders>   ← listed below
+└── <34 sketch folders>   ← listed below
 ```
 - **New Arduino project:** a new folder here (folder name = `.ino` name).
 - **Arduino IDE setting:** File → Preferences → *Sketchbook location* = `C:\Users\narendra\HanaProjects\arduino`.
@@ -19,7 +19,9 @@ HanaProjects/arduino/     ← the Arduino IDE sketchbook folder
 
 ## Arduino & ESP32 projects
 
-A collection of **55 Arduino sketches** (33 projects + 22 learning steps) written between **June and September 2026**. It starts with blinking LEDs and ends with a full-colour ESP32 arcade game. Each project folder has its own `README.md` with the parts list, a wiring table, how to use it, code-review notes and a to-do list.
+> ⭐ **Featured:** [LED From Anywhere](https://narendrakumarachari.github.io/hana-projects/led-from-anywhere.html): control an LED from anywhere in the world with ESP32 + Python + ngrok.
+
+A collection of **56 Arduino sketches** (34 projects + 22 learning steps) written between **June and September 2026**. It starts with blinking LEDs and ends with a full-colour ESP32 arcade game. Each project folder has its own `README.md` with the parts list, a wiring table, how to use it, code-review notes and a to-do list.
 
 > **Coming back after a long time? Start here.**
 > 1. Find the project in the index below (the names say what they do).
@@ -68,6 +70,7 @@ Arduino requires the folder and the `.ino` file inside it to have **the same nam
 ### Basics & LEDs
 | Project | What it does | Board | Build | Old name |
 |---|---|---|---|---|
+| ⭐ [LED_Brightness_WebSlider](LED_Brightness_WebSlider) | A web-page slider (from Python, shareable worldwide with ngrok) dims an LED on pin 11. Part of **[LED From Anywhere](https://narendrakumarachari.github.io/hana-projects/led-from-anywhere.html)** | Uno | ✅ | *(teacher's code, 2026-08-07)* |
 | [Basics_HelloWorld_Serial](Basics_HelloWorld_Serial) | Prints "Hello World" every 5 s | Uno | ✅ | `HelloWorld` |
 | [LED_RGB_ColorCycle](LED_RGB_ColorCycle) | RGB LED: red → green → blue | Uno | ✅ | `TR5` |
 | [LED_Scanner_Buzzer](LED_Scanner_Buzzer) | Knight-Rider sweep on 10 LEDs, with a note per LED | Uno | ✅ | `ledunison353` |

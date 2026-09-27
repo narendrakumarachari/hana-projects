@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LED From Anywhere</title>
+<meta name="description" content="Hana's featured project: turn on an LED at home from anywhere in the world, using an ESP32, Python and an ngrok tunnel.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="showcase.css">
+</head>
+<body>
+<main class="page">
+
+  <nav class="crumbs"><a href="index.html">← All circuit cards</a><a href="share-with-ngrok.html">ngrok guide: share any project</a><a href="cards/esp32-wifi-led.html">ESP32 circuit card</a><a href="cards/py-esp32-led-control.html">Python card</a></nav>
+
+  <!-- ========== HERO ========== -->
+  <header class="hero">
+    <div class="eyebrow">Hana's featured project · school demo</div>
+    <h1>Turn on an LED from <span class="glow">anywhere in the world</span></h1>
+    <p class="lead">A friend in another city, or another country, taps <b>ON</b> on their phone, and a light at your house switches on. You'll build it with an ESP32, a little Python web page, and a free "tunnel" app called <b>ngrok</b>.</p>
+    <div class="chips">
+      <span class="chip hot">★ Featured</span>
+      <span class="chip">★★☆ Medium</span>
+      <span class="chip">About 45 minutes</span>
+      <span class="chip">Arduino + Python</span>
+      <span class="chip">School demo ready</span>
+    </div>
+  </header>
+
+  <!-- ========== JOURNEY ========== -->
+  <figure>
+    <div class="journey">
+      <svg viewBox="0 0 1080 270" role="img" aria-label="The journey of one button press: a friend's phone anywhere in the world, across the internet, through the ngrok tunnel, to the Python web remote on your laptop, over your home Wi-Fi, to the ESP32, which turns on the LED.">
+        <defs>
+          <radialGradient id="halo" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffd23f" stop-opacity=".9"/><stop offset="100%" stop-color="#ffd23f" stop-opacity="0"/></radialGradient>
+          <linearGradient id="track" x1="0" x2="1"><stop offset="0%" stop-color="#43d3ff"/><stop offset="50%" stop-color="#ff5c8a"/><stop offset="100%" stop-color="#ffd23f"/></linearGradient>
+        </defs>
+        <line x1="70" y1="120" x2="1010" y2="120" stroke="url(#track)" stroke-width="5" stroke-dasharray="3 12" stroke-linecap="round"/>
+
+        <!-- 1 phone -->
+        <g><rect x="44" y="72" width="54" height="96" rx="10" fill="#1d3552" stroke="#43d3ff" stroke-width="3"/><rect x="51" y="84" width="40" height="64" rx="4" fill="#0b1626"/>
+          <rect x="57" y="104" width="28" height="18" rx="5" fill="#39d98a"/><text x="71" y="117" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="11" fill="#0b1626">ON</text></g>
+        <text class="st-label" x="71" y="200" text-anchor="middle">Friend's phone</text>
+        <text class="st-sub" x="71" y="218" text-anchor="middle">anywhere on Earth</text>
+        <text class="st-sub" x="71" y="236" text-anchor="middle">taps ON</text>
+
+        <!-- 2 internet -->
+        <g><circle cx="230" cy="120" r="44" fill="#123a5c" stroke="#43d3ff" stroke-width="3"/>
+          <ellipse cx="230" cy="120" rx="18" ry="44" fill="none" stroke="#43d3ff" stroke-width="2"/><line x1="186" y1="120" x2="274" y2="120" stroke="#43d3ff" stroke-width="2"/>
+          <path d="M193 98 H267 M193 142 H267" stroke="#43d3ff" stroke-width="2"/></g>
+        <text class="st-label" x="230" y="200" text-anchor="middle">The internet</text>
+        <text class="st-sub" x="230" y="218" text-anchor="middle">carries the message</text>
+
+        <!-- 3 ngrok -->
+        <g><path d="M346 164 V104 a36 36 0 0 1 72 0 V164 Z" fill="#3a1d34" stroke="#ff5c8a" stroke-width="3"/>
+          <path d="M360 164 V108 a22 22 0 0 1 44 0 V164 Z" fill="#0b1626"/>
+          <text x="382" y="150" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="12" fill="#ff5c8a">ngrok</text></g>
+        <text class="st-label" x="382" y="200" text-anchor="middle">ngrok tunnel</text>
+        <text class="st-sub" x="382" y="218" text-anchor="middle">a secret door into</text>
+        <text class="st-sub" x="382" y="236" text-anchor="middle">your laptop</text>
+
+        <!-- 4 laptop -->
+        <g><rect x="488" y="80" width="120" height="76" rx="8" fill="#1d3552" stroke="#43d3ff" stroke-width="3"/><rect x="498" y="90" width="100" height="56" rx="3" fill="#0b1626"/>
+          <text x="548" y="114" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#39d98a">web remote</text>
+          <text x="548" y="132" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#ffd23f">port 5000</text>
+          <rect x="474" y="156" width="148" height="10" rx="4" fill="#27425f"/></g>
+        <text class="st-label" x="548" y="200" text-anchor="middle">Your laptop</text>
+        <text class="st-code" x="548" y="218" text-anchor="middle">web_esp32_led_control.py</text>
+
+        <!-- 5 wifi -->
+        <g fill="none" stroke="#43d3ff" stroke-width="5" stroke-linecap="round">
+          <path d="M680 116 a50 50 0 0 1 70 0"/><path d="M692 128 a32 32 0 0 1 46 0"/><path d="M704 140 a14 14 0 0 1 22 0"/></g>
+        <circle cx="715" cy="150" r="5" fill="#43d3ff"/>
+        <text class="st-label" x="715" y="200" text-anchor="middle">Home Wi-Fi</text>
+        <text class="st-sub" x="715" y="218" text-anchor="middle">same network only</text>
+
+        <!-- 6 esp32 -->
+        <g><rect x="800" y="90" width="110" height="60" rx="7" fill="#1f2a30" stroke="#90a4ae" stroke-width="2"/><rect x="848" y="98" width="54" height="44" rx="3" fill="#aab4ba"/>
+          <text x="875" y="125" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="13" fill="#2b3439">ESP32</text>
+          <g fill="#c9a227"><rect x="806" y="84" width="4" height="6"/><rect x="816" y="84" width="4" height="6"/><rect x="826" y="84" width="4" height="6"/><rect x="836" y="84" width="4" height="6"/><rect x="806" y="150" width="4" height="6"/><rect x="816" y="150" width="4" height="6"/><rect x="826" y="150" width="4" height="6"/><rect x="836" y="150" width="4" height="6"/></g></g>
+        <text class="st-label" x="855" y="200" text-anchor="middle">ESP32</text>
+        <text class="st-code" x="855" y="218" text-anchor="middle">ESP32_WiFi_LED_WebAPI</text>
+
+        <!-- 7 LED -->
+        <circle class="led-halo" cx="1010" cy="116" r="54" fill="url(#halo)"/>
+        <path d="M994 146 V112 a16 16 0 0 1 32 0 V146 Z" fill="#ffd23f" stroke="#fff3c4" stroke-width="2"/>
+        <rect x="998" y="146" width="4" height="22" fill="#b0bec5"/><rect x="1018" y="146" width="4" height="28" fill="#b0bec5"/>
+        <text class="st-label" x="1010" y="200" text-anchor="middle">LED ON!</text>
+        <text class="st-sub" x="1010" y="218" text-anchor="middle">at your house</text>
+
+        <circle class="pulse" r="9" fill="#ffffff" stroke="#ffd23f" stroke-width="4"/>
+      </svg>
+    </div>
+    <figcaption>Follow one button press from left to right. The whole trip takes less than a second.</figcaption>
+  </figure>
+
+  <!-- ========== WHY ========== -->
+  <section class="facts" aria-label="Why it's cool">
+    <div class="fact"><b>Your laptop becomes a website</b><p>A tiny Python program (Flask) makes a web page with buttons, right on your computer.</p></div>
+    <div class="fact"><b>A tunnel opens a secret door</b><p>Normally only people on your home Wi-Fi can reach that page. ngrok gives it a public address anyone can visit.</p></div>
+    <div class="fact"><b>It works from any country</b><p>If your friend has internet, they can switch on your LED: across the street or across the ocean.</p></div>
+  </section>
+
+  <!-- ========== VERSIONS ========== -->
+  <section style="display:grid;gap:16px">
+    <h2>Pick your version</h2>
+    <div class="versions">
+      <div class="version pick"><span class="badge">Best for the wow</span>
+        <h3>A · ESP32 over Wi-Fi</h3>
+        <p>Buttons <b>ON</b>, <b>OFF</b> and <b>BIRD</b> (blinks). The ESP32 is wireless: it can sit anywhere in the house.</p>
+        <dl class="kv">
+          <dt>Board</dt><dd>ESP32 DevKit, using its built-in blue LED. <b>No wires!</b></dd>
+          <dt>Board program</dt><dd><a href="cards/esp32-wifi-led.html"><code>arduino/ESP32_WiFi_LED_WebAPI</code></a></dd>
+          <dt>Python program</dt><dd><a href="cards/py-esp32-led-control.html"><code>web_esp32_led_control.py</code></a></dd>
+          <dt>One-click start</dt><dd><code>DEMO_LED_from_anywhere_ESP32.bat</code></dd>
+        </dl>
+      </div>
+      <div class="version"><span class="badge">Easiest</span>
+        <h3>B · Arduino Uno slider</h3>
+        <p>A <b>brightness slider</b> from 0 to 255. The Uno stays plugged into the laptop by USB, so there's no Wi-Fi setup.</p>
+        <dl class="kv">
+          <dt>Board</dt><dd>Arduino Uno + 1 LED + 220Ω resistor on pin ~11</dd>
+          <dt>Board program</dt><dd><a href="cards/led-brightness-web-slider.html"><code>arduino/LED_Brightness_WebSlider</code></a></dd>
+          <dt>Python program</dt><dd><a href="cards/py-led-slider.html"><code>web_led_brightness_slider.py</code></a></dd>
+          <dt>One-click start</dt><dd><code>DEMO_LED_from_anywhere_Uno_slider.bat</code></dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== MISSIONS ========== -->
+  <section style="display:grid;gap:16px">
+    <h2>Your mission, step by step</h2>
+    <p style="color:var(--ink-soft)">Tick each mission when it's done. <span class="progress" id="mprog" aria-live="polite"></span> Steps marked <span class="tag esp">ESP32</span> or <span class="tag uno">UNO</span> are only for that version.</p>
+    <div class="missions" id="missions">
+
+      <article class="mission">
+        <label class="m-head" for="m1"><span class="m-num">1</span><h3>Get ready <span class="m-time">(once, with a grown-up)</span></h3><input type="checkbox" id="m1"></label>
+        <ol>
+          <li>Install the <b>Arduino IDE</b> and set <kbd>File</kbd> → <kbd>Preferences</kbd> → Sketchbook to <code>HanaProjects\arduino</code>.</li>
+          <li>Set up Python. In a terminal:
+            <div class="cmd"><code class="path">cd HanaProjects\python &amp;&amp; python -m venv venv &amp;&amp; venv\Scripts\activate &amp;&amp; pip install -r requirements.txt</code><button class="copy" type="button">Copy</button></div></li>
+          <li>ngrok: a grown-up makes a free account at <a href="https://ngrok.com">ngrok.com</a>, downloads ngrok, and runs <code>ngrok config add-authtoken YOUR-TOKEN</code> once.</li>
+        </ol>
+        <p class="note">On Hana's laptop all of this is <b>already done</b>. ngrok is in <code>Downloads\04_TECHNOLOGY\Software\ngrok-v3-stable-windows-amd64</code>.</p>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="m2"><span class="m-num">2</span><h3>Build the circuit <span class="m-time">(2 minutes)</span></h3><input type="checkbox" id="m2"></label>
+        <ul>
+          <li><span class="tag esp">ESP32</span> Nothing to build: the ESP32 has a <b>blue LED on pin 2</b> already. Just plug in the USB cable.</li>
+          <li><span class="tag uno">UNO</span> LED <b>long leg</b> → 220Ω resistor → pin <b>~11</b>. LED <b>short leg</b> → <b>GND</b>. <a href="cards/led-brightness-web-slider.html">See the picture</a>.</li>
+        </ul>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="m3"><span class="m-num">3</span><h3>Upload the board program <span class="m-time">(5 minutes)</span></h3><input type="checkbox" id="m3"></label>
+        <ol>
+          <li><span class="tag esp">ESP32</span> In the folder <code>arduino\ESP32_WiFi_LED_WebAPI</code>, copy <code>arduino_secrets.example.h</code> to <code>arduino_secrets.h</code> and type your Wi-Fi name and password. <b>This file never goes online.</b></li>
+          <li>Open the <code>.ino</code> file in the Arduino IDE. Choose the board: <span class="tag esp">ESP32</span> <b>ESP32 Dev Module</b> or <span class="tag uno">UNO</span> <b>Arduino Uno</b>. Choose the <b>Port</b>, then click <b>Upload</b> (→).</li>
+          <li><span class="tag esp">ESP32</span> Open the Serial Monitor at <b>9600 baud</b>. Write down the address it prints, like <code>192.168.1.248</code>.</li>
+          <li><span class="tag uno">UNO</span> <b>Close the Serial Monitor</b>. The Python program needs the USB port to itself.</li>
+        </ol>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="m4"><span class="m-num">4</span><h3>Start the web remote <span class="m-time">(3 minutes)</span></h3><input type="checkbox" id="m4"></label>
+        <ol>
+          <li><span class="tag esp">ESP32</span> Open <code>python\03_Arduino_ESP32_Companions\web_esp32_led_control.py</code> and change <code>ESP32_IP = "..."</code> to the address from Mission 3. Save.</li>
+          <li><span class="tag uno">UNO</span> In <code>web_led_brightness_slider.py</code>, check <code>PORT = "COM5"</code> matches <kbd>Tools</kbd> → <kbd>Port</kbd>.</li>
+          <li>Run it (window 1):
+            <div class="cmd"><code class="path">cd HanaProjects\python &amp;&amp; venv\Scripts\activate &amp;&amp; python 03_Arduino_ESP32_Companions\web_esp32_led_control.py</code><button class="copy" type="button">Copy</button></div>
+            <span style="color:var(--ink-soft);font-size:.92rem">For the Uno, use <code>web_led_brightness_slider.py</code> instead.</span></li>
+          <li>Test it on the laptop: open <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a> and press <b>ON</b> (or move the slider). The LED should react!</li>
+        </ol>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="m5"><span class="m-num">5</span><h3>Open the tunnel to the world <span class="m-time">(1 minute)</span></h3><input type="checkbox" id="m5"></label>
+        <ol>
+          <li>Open a <b>second</b> window and go to the ngrok folder, then run:
+            <div class="cmd"><code class="path">ngrok http 5000</code><button class="copy" type="button">Copy</button></div></li>
+          <li>Find the <b>Forwarding</b> line. The <b>https</b> address on it is your world link:</li>
+        </ol>
+        <div class="term" role="img" aria-label="Example ngrok screen with the Forwarding line highlighted"><span class="dim">ngrok                                         (Ctrl+C to quit)</span>
+Session Status    <span style="color:#39d98a">online</span>
+Region            United States (us)
+Web Interface     http://127.0.0.1:4040
+Forwarding        <span class="hi">https://your-name.ngrok-free.dev</span> -&gt; http://localhost:5000</div>
+        <p class="note"><b>Your link stays the same every time.</b> ngrok gives each free account one permanent address (it belongs to your account). Hana first used hers on <b>7 August 2026</b> to share ChirpQuest. Because it never changes, keep it as private as a house key.</p>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="m6"><span class="m-num">6</span><h3>Share it and demo! <span class="m-time">(the fun part)</span></h3><input type="checkbox" id="m6"></label>
+        <ol>
+          <li>Open the world link on <b>your own phone using mobile data</b> (Wi-Fi off) to prove it works from outside.</li>
+          <li>ngrok first shows a warning page. Tap <b>Visit</b>. That's normal for free ngrok links, and it won't appear again in that browser for 7 days.</li>
+          <li>Send the link to a friend, or show the QR code below to your class. Because the link never changes, you can even print the QR code.</li>
+        </ol>
+        <div class="qr">
+          <div style="display:grid;gap:10px">
+            <label for="qrurl"><b>Make a QR code for your class</b><br><span style="color:var(--ink-soft);font-size:.92rem">Paste today's world link. The code is made in your browser; nothing is sent anywhere.</span></label>
+            <input id="qrurl" type="url" placeholder="https://your-link.ngrok-free.dev" autocomplete="off">
+          </div>
+          <div id="qrbox" aria-live="polite">Your QR code appears here</div>
+        </div>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="m7"><span class="m-num">7</span><h3>Close the door when you're done</h3><input type="checkbox" id="m7"></label>
+        <ul>
+          <li>Press <kbd>Ctrl</kbd> + <kbd>C</kbd> in the <b>ngrok</b> window. The world link stops working straight away.</li>
+          <li>Press <kbd>Ctrl</kbd> + <kbd>C</kbd> in the <b>web remote</b> window.</li>
+        </ul>
+        <p class="note">Shortcut for next time: double-click <code>DEMO_LED_from_anywhere_ESP32.bat</code> (or <code>..._Uno_slider.bat</code>) in <code>python\03_Arduino_ESP32_Companions</code>. It opens both windows for you.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ========== HOW IT WORKS ========== -->
+  <section style="display:grid;gap:16px">
+    <h2>What's really happening?</h2>
+    <div class="explain">
+      <div class="card"><h3>🏠 Room number vs street address</h3><p>Your laptop's Wi-Fi address (like <code>192.168.1.157</code>) is like a <b>room number</b> inside your house: only people already inside can find it. ngrok gives it a <b>street address</b> (<code>…ngrok-free.dev</code>) that anyone in the world can visit, and walks visitors to your room.</p></div>
+      <div class="card"><h3>📨 A button press is a message</h3><p>Pressing ON sends a tiny web message, <code>/on</code>. It travels: phone → internet → ngrok → your laptop (port 5000) → Wi-Fi → ESP32. The ESP32 reads it and runs <code>digitalWrite(LED, HIGH)</code>.</p></div>
+      <div class="card"><h3>🚪 Why a tunnel?</h3><p>Home routers block visitors from the internet to keep you safe. ngrok gets around this by having <b>your laptop call out</b> to ngrok first and keep that line open. Visitors come back through the same line.</p></div>
+    </div>
+  </section>
+
+  <!-- ========== SCHOOL DEMO ========== -->
+  <section style="display:grid;gap:16px">
+    <h2>5-minute school demo script</h2>
+    <div class="script">
+      <div class="beat"><span class="t">0:00</span><div><h3>Show the light</h3><p class="say">"This little blue light is on an ESP32 at my house… well, here on my desk. I'm going to let <b>you</b> switch it on from your phones."</p></div></div>
+      <div class="beat"><span class="t">0:30</span><div><h3>Press ON yourself</h3><p>Show the web remote on the laptop and press ON / BIRD. <span class="say">"My laptop is running a website I made with Python."</span></p></div></div>
+      <div class="beat"><span class="t">1:15</span><div><h3>Explain the tunnel</h3><p>Show the journey picture at the top of this page. <span class="say">"ngrok is a secret door that lets the internet reach my laptop."</span></p></div></div>
+      <div class="beat"><span class="t">2:15</span><div><h3>Class takes control</h3><p>Show the QR code. Classmates scan it, tap <b>Visit</b>, and press ON / OFF / BIRD. The light goes wild!</p></div></div>
+      <div class="beat"><span class="t">4:00</span><div><h3>Close the door</h3><p>Press Ctrl+C in ngrok. Ask someone to press ON again: nothing happens. <span class="say">"That's why you always close the tunnel: the link is like a key."</span></p></div></div>
+    </div>
+    <h3>Questions your class might ask</h3>
+    <div class="qa">
+      <details><summary>Could a hacker control my LED?</summary><p>Only people who know your link, and only while ngrok is running. Your link stays the same, so never post it online, and always close ngrok after the demo.</p></details>
+      <details><summary>Why is there an ngrok warning page?</summary><p>Free ngrok links show it so people know they're visiting a site running on someone's computer. Tap "Visit" to continue.</p></details>
+      <details><summary>Does it cost money?</summary><p>No. ngrok's free plan, Python, Flask and the Arduino IDE are all free.</p></details>
+      <details><summary>Could it control bigger things?</summary><p>Yes: the same idea can switch a fan, open a door or feed a pet, using a relay module (with a grown-up, because mains electricity is dangerous).</p></details>
+    </div>
+  </section>
+
+  <!-- ========== HELP ========== -->
+  <section style="display:grid;gap:16px">
+    <h2>If it doesn't work</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+      <tbody>
+        <tr><td>"Can't reach the ESP32" under the buttons</td><td>The ESP32 is off, on a different Wi-Fi, or <code>ESP32_IP</code> is wrong. Check its Serial Monitor for the address.</td></tr>
+        <tr><td>ESP32 Serial Monitor only prints dots <code>.....</code></td><td>The Wi-Fi name or password in <code>arduino_secrets.h</code> is wrong. The ESP32 only works on 2.4 GHz Wi-Fi.</td></tr>
+        <tr><td>"Could not open COM5" <span class="tag uno">UNO</span></td><td>Close the Arduino Serial Monitor, plug the Uno in, and check the COM number in <kbd>Tools</kbd> → <kbd>Port</kbd>.</td></tr>
+        <tr><td>ngrok says <code>authentication failed</code></td><td>Run <code>ngrok config add-authtoken YOUR-TOKEN</code> again (a grown-up finds the token on ngrok.com).</td></tr>
+        <tr><td>World link says the endpoint is offline</td><td>ngrok isn't running. Run <code>ngrok http 5000</code> again: your same link comes back to life.</td></tr>
+        <tr><td>Link opens but buttons do nothing</td><td>Window 1 (the web remote) was closed. Start it again. Both windows must stay open.</td></tr>
+        <tr><td>"Address already in use"</td><td>An old copy is still running. Close all black windows and start again.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ========== SAFETY ========== -->
+  <section style="display:grid;gap:16px">
+    <h2>Safety rules</h2>
+    <div class="rules">
+      <div class="rule"><b>The link is a key</b><p>Only share it with people you know. Never post it on social media.</p></div>
+      <div class="rule"><b>Close the tunnel</b><p>Always press Ctrl+C in ngrok when the demo is over.</p></div>
+      <div class="rule"><b>Secrets stay secret</b><p>Never show or share your Wi-Fi password, <code>arduino_secrets.h</code>, or the ngrok token.</p></div>
+      <div class="rule"><b>Grown-up for big stuff</b><p>LEDs only. Anything that plugs into the wall needs a grown-up.</p></div>
+    </div>
+  </section>
+
+  <!-- ========== GLOSSARY ========== -->
+  <section style="display:grid;gap:16px">
+    <h2>Words to know</h2>
+    <div class="gloss">
+      <div><b>ESP32</b>: a small computer board with Wi-Fi built in.</div>
+      <div><b>Web server</b>: a program that sends web pages when someone asks.</div>
+      <div><b>Flask</b>: the Python tool that makes our web server.</div>
+      <div><b>Port 5000</b>: the "door number" our web server listens on.</div>
+      <div><b>IP address</b>: a device's address on a network, like <code>192.168.1.248</code>.</div>
+      <div><b>Tunnel</b>: a private path that lets the internet reach your laptop.</div>
+      <div><b>ngrok</b>: the free app that makes the tunnel and the world link.</div>
+      <div><b>Request</b>: a message asking a server for something, like <code>/on</code>.</div>
+    </div>
+  </section>
+
+  <footer>
+    <span><b>Files in this project:</b>
+      <a href="https://github.com/narendrakumarachari/hana-projects/tree/main/arduino/ESP32_WiFi_LED_WebAPI"><code>arduino/ESP32_WiFi_LED_WebAPI</code></a> ·
+      <a href="https://github.com/narendrakumarachari/hana-projects/tree/main/arduino/LED_Brightness_WebSlider"><code>arduino/LED_Brightness_WebSlider</code></a> ·
+      <a href="https://github.com/narendrakumarachari/hana-projects/tree/main/python/03_Arduino_ESP32_Companions"><code>python/03_Arduino_ESP32_Companions</code></a></span>
+    <span>History: ESP32 web LED first built 16–17 Aug 2026 · slider web page shared on the home network 4 Aug 2026 · first worldwide ngrok link (ChirpQuest) 7 Aug 2026.</span>
+  </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function () {
+  // mission checklist, remembered in this browser only
+  var KEY = "led-from-anywhere-missions";
+  var boxes = [].slice.call(document.querySelectorAll('#missions input[type=checkbox]'));
+  var prog = document.getElementById('mprog');
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(boxes.filter(function (b) { return b.checked; }).map(function (b) { return b.id; }))); } catch (e) {} }
+  function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; prog.textContent = n === boxes.length ? "Mission complete! 🎉" : n + " of " + boxes.length + " missions done"; }
+  var s = load(); boxes.forEach(function (b) { b.checked = s.indexOf(b.id) !== -1; b.addEventListener('change', function () { save(); upd(); }); }); upd();
+
+  // copy buttons
+  [].slice.call(document.querySelectorAll('.copy')).forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = btn.parentNode.querySelector('.path'), t = el.textContent;
+      function sel() { var r = document.createRange(); r.selectNodeContents(el); var w = window.getSelection(); w.removeAllRanges(); w.addRange(r); btn.textContent = "Selected: Ctrl+C"; }
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(function () { btn.textContent = "Copied!"; }, sel); } else { sel(); }
+      setTimeout(function () { btn.textContent = "Copy"; }, 2500);
+    });
+  });
+
+  // QR code maker (runs in the browser)
+  var input = document.getElementById('qrurl'), box = document.getElementById('qrbox'), qr = null;
+  input.addEventListener('input', function () {
+    var v = input.value.trim();
+    if (!/^https?:\/\/\S+\.\S+/.test(v)) { box.textContent = v ? "Paste the full https:// link" : "Your QR code appears here"; qr = null; return; }
+    if (typeof QRCode === "undefined") { box.textContent = "QR maker needs the internet. Read the link out instead!"; return; }
+    box.textContent = ""; qr = new QRCode(box, { text: v, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
+  });
+})();
+</script>
+</body>
+</html>

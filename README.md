@@ -8,12 +8,29 @@ Everything Hana built from **June to September 2026**, in one place:
 - **Arduino and ESP32 hardware projects**: LEDs, sensors, alarms, a smart house, LCD and colour-screen games.
 - **Python programs**: first lessons, mini projects, PC apps that control the boards, and the **ChirpQuest** bird-guide web app.
 
+## ⭐ Featured: turn on an LED from anywhere in the world
+A friend anywhere on Earth taps **ON** on their phone, and an LED at home switches on.
+**ESP32 + a Python web page + ngrok** (the free "tunnel" app that makes a public link). Built for sharing and school demos.
+
+| | |
+|---|---|
+| **Step-by-step mission** (kid-friendly, with QR code + 5-minute demo script) | **https://narendrakumarachari.github.io/hana-projects/led-from-anywhere.html** |
+| **ngrok guide: share any web project** | **https://narendrakumarachari.github.io/hana-projects/share-with-ngrok.html** |
+| Version A: ESP32 over Wi-Fi (ON / OFF / BIRD) | [`arduino/ESP32_WiFi_LED_WebAPI`](arduino/ESP32_WiFi_LED_WebAPI) + [`python/…/web_esp32_led_control.py`](python/03_Arduino_ESP32_Companions/web_esp32_led_control.py) |
+| Version B: Uno brightness slider (0–255) | [`arduino/LED_Brightness_WebSlider`](arduino/LED_Brightness_WebSlider) + [`python/…/web_led_brightness_slider.py`](python/03_Arduino_ESP32_Companions/web_led_brightness_slider.py) |
+| One-click demo | double-click `python\03_Arduino_ESP32_Companions\DEMO_LED_from_anywhere_ESP32.bat` (or `…_Uno_slider.bat`) |
+
+Quick version: start the web remote, then in a second window run `ngrok http 5000`, and share the `https://….ngrok-free.dev` link.
+⚠️ The free ngrok link **never changes**, so treat it like a house key: share it only with people you know, and press Ctrl+C in ngrok when you're done.
+
+---
+
 ## What's inside
 ```
 HanaProjects/                     ← this repo (github.com/narendrakumarachari/hana-projects)
 ├── README.md                     ← you are here
 ├── .gitignore                    ← keeps Wi-Fi passwords, API keys and venv/ off GitHub
-├── arduino/                      ← Arduino IDE sketchbook: 33 projects + 22 learning sketches
+├── arduino/                      ← Arduino IDE sketchbook: 34 projects + 22 learning sketches
 │   ├── README.md                 ← index of every sketch
 │   ├── LIBRARIES.md              ← what to install
 │   ├── TODO.md
@@ -38,7 +55,9 @@ HanaProjects/                     ← this repo (github.com/narendrakumarachari/
 |---|---|---|
 | [`serial_button_to_keypress.py`](python/03_Arduino_ESP32_Companions/serial_button_to_keypress.py) | [`Input_Button_SerialEvent`](arduino/Input_Button_SerialEvent) | USB serial |
 | [`web_esp32_led_control.py`](python/03_Arduino_ESP32_Companions/web_esp32_led_control.py) | [`ESP32_WiFi_LED_WebAPI`](arduino/ESP32_WiFi_LED_WebAPI) | Wi-Fi (HTTP) |
-| clock sender, sensor reader, LED slider, TFT noticeboard | *board sketches not found yet* (see [python/TODO.md](python/TODO.md)) | USB serial |
+| [`web_led_brightness_slider.py`](python/03_Arduino_ESP32_Companions/web_led_brightness_slider.py) | [`LED_Brightness_WebSlider`](arduino/LED_Brightness_WebSlider) | USB serial |
+| clock sender, sensor reader, TFT noticeboard | *board sketches not found yet* (see [python/TODO.md](python/TODO.md)) | USB serial |
+| any web project above | the whole world, via **ngrok** ([guide](https://narendrakumarachari.github.io/hana-projects/share-with-ngrok.html)) | internet tunnel |
 
 ---
 

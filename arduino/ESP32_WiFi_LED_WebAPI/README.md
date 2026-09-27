@@ -2,6 +2,8 @@
 
 <!-- circuit-card --> 🔌 **Circuit card:** [wiring picture, parts, and step-by-step checklist](https://narendrakumarachari.github.io/hana-projects/cards/esp32-wifi-led.html)
 
+> ⭐ **Featured project:** this sketch is the board half of **[LED From Anywhere](https://narendrakumarachari.github.io/hana-projects/led-from-anywhere.html)**. With the Python web remote and ngrok, friends anywhere in the world can switch this LED on.
+>
 > The ESP32 joins your Wi-Fi and runs a tiny web server. Visit `/on`, `/off` or `/bird` in a browser to control an LED.
 
 | | |

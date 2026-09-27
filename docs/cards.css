@@ -48,4 +48,15 @@ kbd{font-family:var(--mono);font-size:.85em;background:var(--bg);border:1px soli
 .tile-top{display:flex;justify-content:space-between;align-items:center;gap:6px}.star{font-size:.8rem;font-weight:700;color:var(--sun-ink);background:var(--sun);border-radius:999px;padding:2px 8px}
 .lessons{display:flex;flex-wrap:wrap;gap:8px}.lessons code{background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:4px 10px}
 footer{color:var(--ink-soft);font-size:.85rem;border-top:2px solid var(--line);padding-top:14px;display:grid;gap:4px}
+.feature-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.feature{display:grid;gap:6px;text-decoration:none;color:#eef5fb;background:linear-gradient(135deg,#0b1626 0%,#15293f 60%,#3a1d34 100%);border:3px solid #ffd23f;border-radius:20px;padding:18px 20px;box-shadow:0 8px 24px rgba(11,22,38,.25)}
+.feature:hover{transform:translateY(-2px)}.feature b{font-family:var(--display);font-size:1.35rem;line-height:1.15;color:#ffd23f}.feature span{color:#c9d8e6}
+.feature code{background:#050b12;color:#ffd23f;border-radius:6px;padding:0 5px}
+.feature.alt{border-color:#43d3ff}.feature.alt b{color:#43d3ff}
+.feature-kicker{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#ff9fb7!important}
+.hero-feature{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:center;text-decoration:none;color:#eef5fb;background:radial-gradient(circle at 85% 30%,rgba(255,210,63,.25),transparent 45%),linear-gradient(135deg,#0b1626,#15293f);border:3px solid #ffd23f;border-radius:24px;padding:22px}
+.hero-feature svg{width:100%;height:auto}.hf-text{display:grid;gap:8px}.hf-text b{font-family:var(--display);font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.1;color:#ffd23f}.hf-text span{color:#c9d8e6}
+.hf-btn{display:inline-block;background:#ffd23f;color:#2b2100!important;font-weight:800;font-family:var(--display);border-radius:999px;padding:6px 18px;font-size:1.05rem}
+@media (max-width:700px){.hero-feature{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.feature,.hero-feature{transition:transform .15s}.hero-feature:hover{transform:translateY(-2px)}}
 @media (max-width:520px){.wire{grid-template-columns:auto 1fr}.wire .swatch{display:none}}

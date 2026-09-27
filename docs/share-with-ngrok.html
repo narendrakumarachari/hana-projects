@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Share It With ngrok</title>
+<meta name="description" content="A step-by-step ngrok guide for kids: turn any project running on your laptop into a link friends can open from anywhere.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="showcase.css">
+<style>
+.door{background:linear-gradient(180deg,var(--night-2),#0d1b2d);border:2px solid var(--line);border-radius:24px;padding:14px;overflow-x:auto}
+.door svg{display:block;width:100%;min-width:720px;height:auto}
+.projects{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+.proj{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:18px;display:grid;gap:10px;align-content:start;position:relative}
+.proj.star{border-color:var(--led);box-shadow:0 0 0 4px rgba(255,210,63,.12)}
+.proj h3{font-size:1.3rem}
+.proj .kv{font-size:.92rem}
+.proj .fun{color:var(--led);font-weight:700}
+.nope{background:var(--panel);border:2px dashed var(--line);border-radius:16px;padding:14px 16px;color:var(--ink-soft)}
+.limits{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.limit{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:14px;text-align:center;display:grid;gap:2px}
+.limit b{font-family:var(--display);font-size:1.8rem;color:var(--cyan);line-height:1}
+.limit span{color:var(--ink-soft);font-size:.9rem}
+.source{font-size:.85rem;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<main class="page">
+
+  <nav class="crumbs"><a href="index.html">← All circuit cards</a><a href="led-from-anywhere.html">★ LED From Anywhere</a></nav>
+
+  <header class="hero">
+    <div class="eyebrow">Hana's Circuit Cards · ngrok guide</div>
+    <h1>Share your project with <span class="glow">the whole world</span></h1>
+    <p class="lead">Any project that makes a web page on your laptop can become a <b>link your friends can open from anywhere</b>. The free app that does it is called <b>ngrok</b>. Here's how to use it, step by step.</p>
+    <div class="chips"><span class="chip hot">Works with 5 of Hana's projects</span><span class="chip">Free</span><span class="chip">10 minutes the first time</span><span class="chip">1 minute after that</span></div>
+  </header>
+
+  <!-- ===== what it is ===== -->
+  <figure>
+    <div class="door">
+      <svg viewBox="0 0 960 230" role="img" aria-label="Without ngrok, the router blocks friends outside your house. With ngrok, your laptop opens a tunnel to the ngrok cloud, and friends reach your project through your ngrok link.">
+        <!-- house -->
+        <path d="M520 70 L700 70 L700 190 L520 190 Z" fill="#112238" stroke="#27425f" stroke-width="3"/>
+        <path d="M505 74 L610 16 L715 74" fill="none" stroke="#27425f" stroke-width="5" stroke-linejoin="round"/>
+        <text x="610" y="58" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="16" fill="#a9bfd3">your house</text>
+        <!-- laptop in house -->
+        <rect x="560" y="96" width="100" height="62" rx="6" fill="#1d3552" stroke="#43d3ff" stroke-width="3"/><rect x="568" y="104" width="84" height="46" rx="3" fill="#0b1626"/>
+        <text x="610" y="124" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#39d98a">your project</text>
+        <text x="610" y="140" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#ffd23f">port 5000</text>
+        <rect x="548" y="158" width="124" height="8" rx="3" fill="#27425f"/>
+        <!-- router wall -->
+        <rect x="496" y="96" width="14" height="94" rx="3" fill="#ff5c8a"/>
+        <text x="503" y="214" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif" font-weight="700" font-size="12" fill="#ff9fb7">router blocks visitors</text>
+        <!-- friend -->
+        <circle cx="80" cy="96" r="22" fill="#ffd23f"/><path d="M48 170 a32 36 0 0 1 64 0 Z" fill="#ffd23f"/>
+        <text x="80" y="200" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="16" fill="#eef5fb">your friend</text>
+        <!-- ngrok cloud -->
+        <g><circle cx="290" cy="70" r="30" fill="#3a1d34"/><circle cx="330" cy="58" r="36" fill="#3a1d34"/><circle cx="370" cy="72" r="28" fill="#3a1d34"/><rect x="262" y="70" width="136" height="30" fill="#3a1d34"/>
+          <text x="330" y="84" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="15" fill="#ff5c8a">ngrok cloud</text></g>
+        <!-- friend -> cloud -->
+        <path d="M110 110 C 170 90, 210 80, 258 80" fill="none" stroke="#ffd23f" stroke-width="4" stroke-dasharray="8 7"/>
+        <text x="180" y="72" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#ffd23f">opens your link</text>
+        <!-- tunnel laptop -> cloud (goes out through the wall) -->
+        <path d="M560 118 C 470 118, 440 100, 398 92" fill="none" stroke="#43d3ff" stroke-width="7" stroke-linecap="round"/>
+        <text x="450" y="150" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#43d3ff">ngrok http 5000</text>
+        <text x="450" y="166" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif" font-size="12" fill="#a9bfd3">your laptop dials OUT,</text>
+        <text x="450" y="181" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif" font-size="12" fill="#a9bfd3">so the router lets it through</text>
+      </svg>
+    </div>
+    <figcaption>Your router is a wall that stops strangers getting in. ngrok works because <b>your laptop calls out first</b> and keeps a tunnel open. Your friend's visit comes back through that tunnel.</figcaption>
+  </figure>
+
+  <!-- ===== steps ===== -->
+  <section style="display:grid;gap:16px">
+    <h2>The steps</h2>
+    <p style="color:var(--ink-soft)">Steps 1–3 happen <b>only once</b>. After that, sharing takes one command. <span class="progress" id="mprog" aria-live="polite"></span></p>
+    <div class="missions" id="missions">
+
+      <article class="mission">
+        <label class="m-head" for="s1"><span class="m-num">1</span><h3>A grown-up makes a free ngrok account <span class="m-time">(once)</span></h3><input type="checkbox" id="s1"></label>
+        <ol>
+          <li>Go to <a href="https://dashboard.ngrok.com/signup">dashboard.ngrok.com/signup</a> and sign up (Google or email works).</li>
+          <li>The grown-up owns the account and keeps the password safe.</li>
+        </ol>
+        <p class="note">✅ Already done for Hana's laptop.</p>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="s2"><span class="m-num">2</span><h3>Install ngrok on the laptop <span class="m-time">(once)</span></h3><input type="checkbox" id="s2"></label>
+        <ol>
+          <li><b>Easiest:</b> open the <b>Microsoft Store</b>, search <b>ngrok</b>, click <b>Get</b>.</li>
+          <li><b>Or:</b> download the Windows zip from <a href="https://download.ngrok.com?tab=download">download.ngrok.com</a>, then right-click it → <b>Extract All</b>. Inside is <code>ngrok.exe</code>.</li>
+          <li>Check it works. Open a terminal and type:
+            <div class="cmd"><code class="path">ngrok version</code><button class="copy" type="button">Copy</button></div>
+            You should see something like <code>ngrok version 3.39.10</code>.</li>
+        </ol>
+        <p class="note">✅ Already on Hana's laptop: <code>Downloads\04_TECHNOLOGY\Software\ngrok-v3-stable-windows-amd64\ngrok.exe</code>. In that folder, type <code>.\ngrok</code> instead of <code>ngrok</code>.</p>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="s3"><span class="m-num">3</span><h3>Connect ngrok to the account <span class="m-time">(once)</span></h3><input type="checkbox" id="s3"></label>
+        <ol>
+          <li>The grown-up logs in and opens <a href="https://dashboard.ngrok.com/get-started/your-authtoken">dashboard.ngrok.com/get-started/your-authtoken</a>.</li>
+          <li>Copy the long <b>authtoken</b>. It's like a password, so don't show it to anyone.</li>
+          <li>In the terminal, type this, pasting the token instead of <code>YOUR_TOKEN</code>:
+            <div class="cmd"><code class="path">ngrok config add-authtoken YOUR_TOKEN</code><button class="copy" type="button">Copy</button></div></li>
+          <li>It answers <i>"Authtoken saved to configuration file"</i>. Done forever on this laptop.</li>
+        </ol>
+        <p class="note">✅ Already done for Hana's laptop (saved in <code>AppData\Local\ngrok\ngrok.yml</code>, which must never be shared).</p>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="s4"><span class="m-num">4</span><h3>Start your project first</h3><input type="checkbox" id="s4"></label>
+        <ol>
+          <li>Pick a project from the list below and start it in <b>window 1</b>. For example:
+            <div class="cmd"><code class="path">cd HanaProjects\python &amp;&amp; venv\Scripts\activate &amp;&amp; python 04_ChirpQuest\chirpquest.py</code><button class="copy" type="button">Copy</button></div></li>
+          <li>Check it works on the laptop first: open <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a>.</li>
+          <li>Remember the <b>port number</b>: it's the number after the colon. All of Hana's web projects use <b>5000</b>.</li>
+        </ol>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="s5"><span class="m-num">5</span><h3>Open the door: start ngrok</h3><input type="checkbox" id="s5"></label>
+        <ol>
+          <li>Open a <b>second</b> terminal (window 2) and type:
+            <div class="cmd"><code class="path">ngrok http 5000</code><button class="copy" type="button">Copy</button></div>
+            That means: <i>"make a public web link that leads to port 5000 on this laptop."</i></li>
+          <li>ngrok fills the window. Look for the line that says <b>Forwarding</b>:</li>
+        </ol>
+        <div class="term" role="img" aria-label="Example ngrok screen with the Forwarding line highlighted"><span class="dim">ngrok                                         (Ctrl+C to quit)</span>
+Session Status    <span style="color:#39d98a">online</span>
+Account           Grown-up's Name (Plan: Free)
+Forwarding        <span class="hi">https://your-name.ngrok-free.dev</span> -&gt; http://localhost:5000
+<span class="dim">Connections       ttl  opn  rt1   rt5   p50   p90</span>
+<span class="dim">                  0    0    0.00  0.00  0.00  0.00</span></div>
+        <p class="note">The <b>https://…</b> address is your <b>world link</b>. It's your account's own free address, and <b>it stays the same every time</b> you run ngrok.</p>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="s6"><span class="m-num">6</span><h3>Test it, then share it</h3><input type="checkbox" id="s6"></label>
+        <ol>
+          <li>Turn <b>Wi-Fi off</b> on your phone (use mobile data) and open the world link. If it works, it works for everyone!</li>
+          <li>The first time, ngrok shows a warning page that says the site runs on ngrok. Tap <b>Visit</b>. It remembers for 7 days.</li>
+          <li>Send the link to a friend, or make a QR code for it on the <a href="led-from-anywhere.html#m6">LED From Anywhere</a> page.</li>
+          <li>The <b>Connections</b> numbers in window 2 go up each time someone visits. To see every visit, the grown-up can open <a href="https://dashboard.ngrok.com/traffic-inspector">dashboard.ngrok.com/traffic-inspector</a>.</li>
+        </ol>
+      </article>
+
+      <article class="mission">
+        <label class="m-head" for="s7"><span class="m-num">7</span><h3>Close the door when you're done</h3><input type="checkbox" id="s7"></label>
+        <ol>
+          <li>Click window 2 and press <kbd>Ctrl</kbd> + <kbd>C</kbd>. The link stops working right away.</li>
+          <li>Press <kbd>Ctrl</kbd> + <kbd>C</kbd> in window 1 to stop your project.</li>
+        </ol>
+        <p class="note warn">Your link stays the same next time, so anyone who has it can visit again <b>whenever ngrok is running</b>. Treat it like a house key.</p>
+      </article>
+    </div>
+    <p class="source">Steps follow ngrok's official quickstart: <a href="https://ngrok.com/docs/share-localhost/quickstart">ngrok.com/docs/share-localhost/quickstart</a>. Free-plan facts: <a href="https://ngrok.com/docs/pricing-limits/free-plan-limits/">ngrok.com/docs/pricing-limits/free-plan-limits</a>.</p>
+  </section>
+
+  <!-- ===== projects ===== -->
+  <section style="display:grid;gap:16px">
+    <h2>Hana's projects you can share</h2>
+    <p style="color:var(--ink-soft)">These all make a web page (or API) on the laptop, so ngrok can share them. Run <b>one at a time</b>: they all use port 5000.</p>
+    <div class="projects">
+      <div class="proj star"><span class="badge">★ Featured</span>
+        <h3>ESP32 LED Web Remote</h3>
+        <p class="fun">Friends press ON / OFF / BIRD and your ESP32's light obeys.</p>
+        <dl class="kv"><dt>Start</dt><dd><code>web_esp32_led_control.py</code></dd><dt>Share</dt><dd><code>ngrok http 5000</code></dd><dt>Guide</dt><dd><a href="led-from-anywhere.html">LED From Anywhere</a></dd></dl>
+      </div>
+      <div class="proj">
+        <h3>LED Brightness Slider</h3>
+        <p class="fun">Friends slide 0–255 and dim an LED on your Uno.</p>
+        <dl class="kv"><dt>Start</dt><dd><code>web_led_brightness_slider.py</code></dd><dt>Share</dt><dd><code>ngrok http 5000</code></dd><dt>Card</dt><dd><a href="cards/py-led-slider.html">Slider card</a></dd></dl>
+      </div>
+      <div class="proj">
+        <h3>ChirpQuest Bird Guide</h3>
+        <p class="fun">Friends explore 16 birds and chat with Pip the Cockatiel.</p>
+        <dl class="kv"><dt>Start</dt><dd><code>04_ChirpQuest\chirpquest.py</code></dd><dt>Share</dt><dd><code>ngrok http 5000</code></dd><dt>Card</dt><dd><a href="cards/py-chirpquest.html">ChirpQuest card</a></dd></dl>
+        <p class="note">Every question to Pip uses the Gemini key. Share with a few friends, not the whole internet.</p>
+      </div>
+      <div class="proj">
+        <h3>TFT Animation &amp; Noticeboard</h3>
+        <p class="fun">Friends pick an animation or send a message to your colour screen.</p>
+        <dl class="kv"><dt>Start</dt><dd><code>web_tft_animation_noticeboard.py</code></dd><dt>Share</dt><dd><code>ngrok http 5000</code></dd><dt>Card</dt><dd><a href="cards/py-tft-noticeboard.html">Noticeboard card</a></dd></dl>
+        <p class="note">Needs its board program first (still on the to-do list).</p>
+      </div>
+      <div class="proj">
+        <h3>ESP32 direct (no Python!) <span class="tag esp">ADVANCED</span></h3>
+        <p class="fun">Share the ESP32's own web API: <code>/on</code>, <code>/off</code>, <code>/bird</code>.</p>
+        <dl class="kv"><dt>Start</dt><dd>Just power the ESP32 (running <code>ESP32_WiFi_LED_WebAPI</code>)</dd><dt>Share</dt><dd><code>ngrok http 192.168.1.248:80</code> (use your ESP32's address)</dd><dt>Try</dt><dd><code>https://your-name.ngrok-free.dev/on</code></dd></dl>
+        <p class="note">ngrok can point at another device on your Wi-Fi, not only your laptop.</p>
+      </div>
+    </div>
+    <div class="nope"><b>Can't be shared (yet):</b> Pet Care Agent, Rose Library and the Python Basics lessons run in the terminal and don't make a web page. A fun next project is to give one of them a Flask web page, so friends could play it too!</div>
+  </section>
+
+  <!-- ===== API fun ===== -->
+  <section style="display:grid;gap:16px">
+    <h2>Bonus: your link is also an API</h2>
+    <p>An <b>API</b> is a link that <i>programs</i> can use, not just people. Your friend can switch on your LED <b>from their own Python code</b>:</p>
+    <div class="term">import requests
+
+LINK = "https://your-name.ngrok-free.dev"   # the world link you shared
+
+# the header skips ngrok's warning page for programs
+requests.get(LINK + "/on", headers={"ngrok-skip-browser-warning": "yes"})</div>
+    <p style="color:var(--ink-soft)">Or from any terminal: <code>curl -H "ngrok-skip-browser-warning: yes" https://your-name.ngrok-free.dev/on</code>. Challenge: write a program that blinks your friend's LED 10 times!</p>
+  </section>
+
+  <!-- ===== limits ===== -->
+  <section style="display:grid;gap:16px">
+    <h2>What the free plan gives you</h2>
+    <div class="limits">
+      <div class="limit"><b>1</b><span>permanent free link for your account</span></div>
+      <div class="limit"><b>3</b><span>tunnels open at the same time</span></div>
+      <div class="limit"><b>20,000</b><span>visits (requests) per month</span></div>
+      <div class="limit"><b>1 GB</b><span>of data per month</span></div>
+    </div>
+    <p class="source">From ngrok's free-plan limits page. Plenty for a school demo: a whole class pressing buttons for an hour uses a few hundred requests.</p>
+  </section>
+
+  <!-- ===== safety ===== -->
+  <section style="display:grid;gap:16px">
+    <h2>Safety rules</h2>
+    <div class="rules">
+      <div class="rule"><b>Your link is a key</b><p>It never changes. Share it only with people you know. Never post it online.</p></div>
+      <div class="rule"><b>Close the door</b><p>Ctrl+C in the ngrok window when you're finished.</p></div>
+      <div class="rule"><b>The token is secret</b><p>Never share the authtoken or the <code>ngrok.yml</code> file.</p></div>
+      <div class="rule"><b>Only share toys</b><p>Share LEDs, games and pages. Never share folders, files or anything private.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Hana's first worldwide link: ChirpQuest, 7 August 2026, shared with <code>ngrok http 5000</code>.</span>
+    <span>One-click launchers: <code>python\03_Arduino_ESP32_Companions\DEMO_LED_from_anywhere_ESP32.bat</code> and <code>DEMO_LED_from_anywhere_Uno_slider.bat</code>.</span>
+  </footer>
+</main>
+<script>
+(function () {
+  var KEY = "share-with-ngrok-steps";
+  var boxes = [].slice.call(document.querySelectorAll('#missions input[type=checkbox]'));
+  var prog = document.getElementById('mprog');
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(boxes.filter(function (b) { return b.checked; }).map(function (b) { return b.id; }))); } catch (e) {} }
+  function upd() { var n = boxes.filter(function (b) { return b.checked; }).length; prog.textContent = n === boxes.length ? "All steps done! 🎉" : n + " of " + boxes.length + " steps done"; }
+  var s = load(); boxes.forEach(function (b) { b.checked = s.indexOf(b.id) !== -1; b.addEventListener('change', function () { save(); upd(); }); }); upd();
+  [].slice.call(document.querySelectorAll('.copy')).forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = btn.parentNode.querySelector('.path'), t = el.textContent;
+      function sel() { var r = document.createRange(); r.selectNodeContents(el); var w = window.getSelection(); w.removeAllRanges(); w.addRange(r); btn.textContent = "Selected: Ctrl+C"; }
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(function () { btn.textContent = "Copied!"; }, sel); } else { sel(); }
+      setTimeout(function () { btn.textContent = "Copy"; }, 2500);
+    });
+  });
+})();
+</script>
+</body>
+</html>
