@@ -501,6 +501,109 @@ TEXAS_BIRDS = [
      "art": {"body": "#2563eb", "belly": "#3b82f6", "head": "#1d4ed8", "wing": "#1e40af", "tail_color": "#1e3a8a",
              "beak": "#94a3b8", "beak_type": "cone", "tail": "short"},
      "call": {"notes": [[5000, 4600, .12, .04], [5000, 4600, .12, .08], [4200, 4400, .12, .04], [4200, 4400, .12, .08], [3800, 4600, .15, 0]]}},
+    # ---- 18 more (73 total): a cowbird, sparrows, prairie birds and shorebirds ----
+    {"id": "cowbird", "name": "Brown-headed Cowbird", "emoji": "🐄", "inat": "Molothrus ater", "habitat": "open",
+     "marks": ["Glossy black body with a brown head (males)", "Follows cows to catch the bugs they stir up"],
+     "art": {"body": "#111827", "belly": "#1f2937", "shimmer": "#4338ca", "head": "#5b3a29", "wing": "#0b0f19",
+             "tail_color": "#0b0f19", "beak": "#111827", "beak_type": "cone", "tail": "short"},
+     "call": {"notes": [[600, 900, .15, .05], [2500, 9000, .3, 0]]}},
+    {"id": "chippingsparrow", "name": "Chipping Sparrow", "emoji": "🧢", "inat": "Spizella passerina", "habitat": "backyard",
+     "marks": ["Bright rusty cap", "White eyebrow with a black line through the eye"],
+     "art": {"body": "#a8a29e", "belly": "#e5e7eb", "head": "#d1d5db", "cap": "#c2410c", "cap_h": .45, "brow_color": "#ffffff",
+             "eye_line": "#111827", "wing": "#92400e", "wing_bars": "#f5f5f4", "tail_color": "#78716c", "beak": "#1f2937",
+             "beak_type": "cone", "legs": "#fda4af", "tail": "fork"},
+     "call": {"notes": [[5000, 5200, .03, .02]] * 18}},
+    {"id": "whitecrowned", "name": "White-crowned Sparrow", "emoji": "👑", "inat": "Zonotrichia leucophrys", "habitat": "backyard",
+     "marks": ["Bold black-and-white striped crown", "Orange-pink beak — a winter visitor"],
+     "art": {"body": "#9ca3af", "belly": "#e5e7eb", "head": "#d1d5db", "cap": "#111827", "cap_h": .55, "crown_stripe": "#ffffff",
+             "brow_color": "#ffffff", "eye_line": "#111827", "wing": "#92400e", "wing_bars": "#ffffff", "tail_color": "#78716c",
+             "beak": "#fb923c", "beak_type": "cone", "legs": "#fda4af", "tail": "long"},
+     "call": {"notes": [[3800, 3800, .5, .05], [3300, 3500, .2, .05], [4200, 3800, .15, .03]] + [[3000, 3400, .06, .02]] * 4}},
+    {"id": "harrissparrow", "name": "Harris's Sparrow", "emoji": "🎭", "inat": "Zonotrichia querula", "habitat": "backyard",
+     "marks": ["Black face and bib with a pink beak", "Biggest sparrow — spends winter in Texas"],
+     "art": {"body": "#a8a29e", "belly": "#f5f5f4", "flanks": "#d6b48c", "streaks": "#57534e", "head": "#9ca3af", "cap": "#111827",
+             "cap_h": .5, "bib": "#111827", "wing": "#92400e", "wing_bars": "#f5f5f4", "tail_color": "#78716c", "beak": "#f9a8d4",
+             "beak_type": "cone", "legs": "#fda4af", "tail": "long"},
+     "call": {"notes": [[3600, 3600, .5, .3], [3200, 3200, .5, 0]]}},
+    {"id": "songsparrow", "name": "Song Sparrow", "emoji": "🎵", "inat": "Melospiza melodia", "habitat": "backyard",
+     "marks": ["Streaky brown with a dark spot on the chest", "Pumps its tail when it flies"],
+     "art": {"body": "#a47551", "belly": "#f5f5f4", "streaks": "#5b3a1e", "breast_spot": "#5b3a1e", "head": "#a47551",
+             "eye_line": "#5b3a1e", "brow_color": "#d6d3d1", "wing": "#8b5e3c", "wing_bars": "#5b3a1e", "tail_color": "#8b5e3c",
+             "beak": "#78716c", "beak_type": "cone", "legs": "#fda4af", "tail": "long"},
+     "call": {"notes": [[3000, 3000, .08, .08]] * 3 + [[4500, 3500, .4, .05], [2800, 3600, .05, .02], [2800, 3600, .05, .02], [3200, 2600, .3, 0]]}},
+    {"id": "whitethroated", "name": "White-throated Sparrow", "emoji": "🍋", "inat": "Zonotrichia albicollis", "habitat": "backyard",
+     "marks": ["Bright white throat & yellow spot by the eye", "Sings 'Oh-sweet-Canada-Canada'"],
+     "art": {"body": "#a47551", "belly": "#d1d5db", "head": "#9ca3af", "cap": "#111827", "cap_h": .55, "crown_stripe": "#ffffff",
+             "brow_color": "#ffffff", "forehead": "#facc15", "throat": "#ffffff", "wing": "#92400e", "wing_bars": "#f5f5f4",
+             "tail_color": "#78716c", "beak": "#78716c", "beak_type": "cone", "legs": "#fda4af", "tail": "long"},
+     "call": {"notes": [[3000, 3000, .4, .05], [3900, 3900, .4, .05]] + [[3500, 3500, .2, .03]] * 6}},
+    {"id": "larksparrow", "name": "Lark Sparrow", "emoji": "🤡", "inat": "Chondestes grammacus", "habitat": "open",
+     "marks": ["Clown-like chestnut, black & white face", "One dark spot in the middle of its white chest"],
+     "art": {"body": "#a8a29e", "belly": "#f8fafc", "breast_spot": "#111827", "head": "#f8fafc", "cheek": "#9a3412", "cap": "#9a3412",
+             "cap_h": .4, "crown_stripe": "#f8fafc", "eye_line": "#111827", "wing": "#78716c", "wing_bars": "#e7e5e4",
+             "tail_color": "#44403c", "beak": "#94a3b8", "beak_type": "cone", "legs": "#fda4af", "tail": "fan"},
+     "call": {"wave": "triangle", "notes": [[3200, 3800, .1, .03], [3800, 3000, .1, .03], [2400, 2400, .2, .05]] + [[4200, 4000, .04, .02]] * 6}},
+    {"id": "savannahsparrow", "name": "Savannah Sparrow", "emoji": "🌾", "inat": "Passerculus sandwichensis", "habitat": "open",
+     "marks": ["Streaky brown with a yellow eyebrow", "Hides in grassy fields all winter"],
+     "art": {"body": "#a47551", "belly": "#f5f5f4", "streaks": "#5b3a1e", "head": "#a47551", "brow_color": "#fde047",
+             "wing": "#8b5e3c", "wing_bars": "#5b3a1e", "tail_color": "#8b5e3c", "beak": "#fda4af", "beak_type": "small",
+             "legs": "#fda4af", "tail": "fork"},
+     "call": {"notes": [[6000, 6000, .03, .05]] * 3 + [[7000, 7500, .5, .05], [4000, 3800, .2, 0]]}},
+    {"id": "dickcissel", "name": "Dickcissel", "emoji": "🌻", "inat": "Spiza americana", "habitat": "open",
+     "marks": ["Yellow chest with a black V (like a mini meadowlark)", "Sings its name: dick-dick-ciss-ciss-ciss!"],
+     "art": {"body": "#a8a29e", "belly": "#fde047", "throat": "#ffffff", "necklace": "#111827", "head": "#9ca3af",
+             "brow_color": "#fde047", "shoulder": "#b45309", "wing": "#78716c", "tail_color": "#57534e", "beak": "#94a3b8",
+             "beak_type": "cone", "legs": "#fda4af", "tail": "short"},
+     "call": {"wave": "square", "vol": .2, "notes": [[3000, 2600, .08, .1], [3000, 2600, .08, .15]] + [[4500, 3500, .06, .05]] * 3}},
+    {"id": "shrike", "name": "Loggerhead Shrike", "emoji": "🦹", "inat": "Lanius ludovicianus", "habitat": "open",
+     "marks": ["Gray with a black bandit mask", "'Butcher bird' — stores its food on thorns!"],
+     "art": {"body": "#9ca3af", "belly": "#f8fafc", "head": "#9ca3af", "mask": "#111827", "eye_line": "#111827", "wing": "#111827",
+             "wing_patch": "#ffffff", "tail_color": "#111827", "beak": "#111827", "beak_type": "hook", "legs": "#111827", "tail": "long"},
+     "call": {"wave": "sawtooth", "vol": .3, "notes": [[2000, 1800, .12, .1]] * 4}},
+    {"id": "bobwhite", "name": "Northern Bobwhite", "emoji": "🐔", "inat": "Colinus virginianus", "habitat": "open",
+     "marks": ["Round little quail with a white throat & eyebrow", "Whistles its name: bob-WHITE!"],
+     "art": {"shape": "small-head", "body": "#9a5b2e", "belly": "#f5e6c8", "streaks": "#5b3a1e", "head": "#7c2d12", "throat": "#ffffff",
+             "brow_color": "#ffffff", "eye_line": "#111827", "wing": "#8b5e34", "spots": "#f5e6c8", "tail_color": "#7c2d12",
+             "beak": "#44403c", "beak_type": "small", "legs": "#a8a29e", "tail": "short"},
+     "call": {"notes": [[1300, 1500, .15, .15], [1500, 2900, .35, 0]]}},
+    {"id": "uplandsandpiper", "name": "Upland Sandpiper", "emoji": "🏞️", "inat": "Bartramia longicauda", "habitat": "open",
+     "marks": ["A sandpiper that lives on prairies, not beaches", "Small head with big dark eyes on a long neck"],
+     "art": {"shape": "wader", "body": "#c8a27a", "belly": "#fef3c7", "streaks": "#5b3a1e", "head": "#c8a27a", "eye_scale": 1.2,
+             "wing": "#a47551", "spots": "#5b3a1e", "tail_color": "#a47551", "beak": "#facc15", "beak_type": "thin",
+             "legs": "#facc15", "leg_len": 22, "tail": "wader"},
+     "call": {"notes": [[1500, 2500, .4, .05], [2500, 4000, .6, .05], [4000, 2000, .9, 0]]}},
+    {"id": "spottedsandpiper", "name": "Spotted Sandpiper", "emoji": "🔵", "inat": "Actitis macularius", "habitat": "water",
+     "marks": ["Big dark spots on a white belly (summer)", "Bobs its tail up and down all the time"],
+     "art": {"shape": "wader", "body": "#78716c", "belly": "#ffffff", "streaks": "#111827", "head": "#78716c", "brow_color": "#ffffff",
+             "wing": "#57534e", "tail_color": "#57534e", "beak": "#f97316", "beak_type": "thin", "legs": "#fda4af", "leg_len": 16, "tail": "wader"},
+     "call": {"notes": [[3800, 3400, .1, .06]] * 5}},
+    {"id": "leastsandpiper", "name": "Least Sandpiper", "emoji": "🤏", "inat": "Calidris minutilla", "habitat": "water",
+     "marks": ["World's smallest sandpiper", "Yellow-green legs & a thin drooping beak"],
+     "art": {"shape": "wader", "body": "#8b5e34", "belly": "#ffffff", "streaks": "#5b3a1e", "head": "#8b5e34", "brow_color": "#e7e5e4",
+             "wing": "#6b4423", "wing_bars": "#d6b48c", "tail_color": "#5b3a1e", "beak": "#111827", "beak_type": "thin",
+             "legs": "#a3e635", "leg_len": 14, "tail": "wader"},
+     "call": {"notes": [[5000, 6000, .15, .1], [5000, 6000, .15, 0]]}},
+    {"id": "yellowlegs", "name": "Greater Yellowlegs", "emoji": "🦵", "inat": "Tringa melanoleuca", "habitat": "water",
+     "marks": ["Long, bright yellow legs", "Calls 'tew-tew-tew' when it flies off"],
+     "art": {"shape": "wader", "body": "#6b7280", "belly": "#ffffff", "streaks": "#374151", "head": "#9ca3af", "wing": "#4b5563",
+             "spots": "#f8fafc", "tail_color": "#4b5563", "beak": "#111827", "beak_type": "long", "legs": "#facc15", "leg_len": 28, "tail": "wader"},
+     "call": {"notes": [[3200, 2800, .12, .06]] * 3}},
+    {"id": "stilt", "name": "Black-necked Stilt", "emoji": "🩰", "inat": "Himantopus mexicanus", "habitat": "water",
+     "marks": ["Sharp black-and-white tuxedo", "Super-long bright pink legs"],
+     "art": {"shape": "wader", "body": "#111827", "belly": "#ffffff", "head": "#111827", "throat": "#ffffff", "iris": "#dc2626",
+             "wing": "#0b0f19", "tail_color": "#e5e7eb", "beak": "#111827", "beak_type": "needle", "legs": "#f472b6", "leg_len": 30, "tail": "wader"},
+     "call": {"wave": "square", "vol": .2, "notes": [[2400, 2200, .08, .1]] * 6}},
+    {"id": "avocet", "name": "American Avocet", "emoji": "🥢", "inat": "Recurvirostra americana", "habitat": "water",
+     "marks": ["Cinnamon head with a thin upturned beak", "Swishes its beak side to side to catch food"],
+     "art": {"shape": "wader", "body": "#ffffff", "belly": "#ffffff", "head": "#e6a77a", "wing": "#111827", "wing_edge": "#ffffff",
+             "tail_color": "#e5e7eb", "beak": "#111827", "beak_type": "upturned", "legs": "#93c5fd", "leg_len": 28, "tail": "wader"},
+     "call": {"notes": [[2800, 3200, .1, .1]] * 5}},
+    {"id": "snipe", "name": "Wilson's Snipe", "emoji": "🥷", "inat": "Gallinago delicata", "habitat": "water",
+     "marks": ["Super-long straight beak", "Striped head — hides perfectly in marsh grass"],
+     "art": {"shape": "small-head", "body": "#8b5e34", "belly": "#f5e6c8", "streaks": "#3f2a14", "head": "#8b5e34", "crown_stripe": "#f5e6c8",
+             "brow_color": "#f5e6c8", "eye_line": "#3f2a14", "wing": "#6b4423", "wing_bars": "#f5e6c8", "tail_color": "#ea580c",
+             "beak": "#57534e", "beak_type": "needle", "legs": "#a3e635", "leg_len": 10, "tail": "short"},
+     "call": {"wave": "sawtooth", "vol": .3, "buzz": 3000, "notes": [[3000, 2600, .15, .4]] * 2}},
 ]
 
 # ---- Cartoon art generator ----
@@ -515,6 +618,7 @@ GEOMETRY = {  # body (cx, cy, rx, ry), head (hx, hy, r)
     "roadrunner":  {"body": (56, 74, 31, 19), "head": (82, 48, 17)},
     "hummingbird": {"body": (58, 74, 22, 17), "head": (76, 54, 15)},
     "duck":        {"body": (58, 78, 36, 20), "head": (86, 46, 17)},
+    "wader":       {"body": (52, 62, 28, 17), "head": (78, 40, 13)},   # shorebirds: raised body for long legs
 }
 TAILS = {  # drawn behind the body, pointing left
     "short":   "M36,70 L10,80 L14,92 L40,86 Z",
@@ -526,6 +630,7 @@ TAILS = {  # drawn behind the body, pointing left
     "stiff":   "M36,78 L16,100 L24,104 L42,86 Z",
     "tiny":    "M40,78 L20,88 L26,96 L42,86 Z",
     "fork":    "M36,72 L6,78 L18,84 L6,92 L40,86 Z",
+    "wader":   "M30,58 L8,62 L10,72 L32,68 Z",
 }
 
 
@@ -556,8 +661,9 @@ def _songbird_parts(a):
     if shape == "duck":
         o.append(_st(0, '<path d="M8,98 Q30,92 60,98 T112,98" stroke="#7dd3fc" stroke-width="3" fill="none" stroke-linecap="round"/>'
                         '<ellipse cx="60" cy="100" rx="44" ry="6" fill="#bae6fd" opacity="0.6"/>'))
-    else:
-        o.append(_st(0, '<ellipse cx="60" cy="112" rx="30" ry="5" fill="#0f172a" opacity="0.12"/>'))
+    else:  # shadow right under the feet (so long-legged shorebirds don't float)
+        feet_y = min(112, cy + ry - 3 + a.get("leg_len", 12) + 3)
+        o.append(_st(0, f'<ellipse cx="60" cy="{feet_y}" rx="30" ry="5" fill="#0f172a" opacity="0.12"/>'))
     o.append(_st(3, f'<path d="{TAILS[a.get("tail", "short")]}" fill="{a["tail_color"]}" stroke="{S}" stroke-width="2.5" stroke-linejoin="round"/>'))
     if shape != "duck":
         lc, ll = a.get("legs", "#f59e0b"), a.get("leg_len", 12)
@@ -576,6 +682,8 @@ def _songbird_parts(a):
     if a.get("streaks"):
         for dx, dy in ((0, 0), (8, 4), (16, 0), (4, 10), (12, 12), (20, 8)):
             m.append(f'<ellipse cx="{_n(cx+rx*.15+dx)}" cy="{_n(cy+ry*.15+dy)}" rx="1.4" ry="3" fill="{a["streaks"]}" opacity="0.8"/>')
+    if a.get("breast_spot"):  # one dark spot in the middle of the chest (song & lark sparrows)
+        m.append(f'<circle cx="{_n(cx+rx*.6)}" cy="{_n(cy-ry*.05)}" r="3.2" fill="{a["breast_spot"]}"/>')
     if a.get("shimmer"):
         m.append(f'<path d="M{cx-14},{cy-8} Q{cx},{cy-16} {cx+14},{cy-8}" stroke="{a["shimmer"]}" stroke-width="3" fill="none" opacity="0.7" stroke-linecap="round"/>')
     o.append(_st(6, '<g clip-path="url(#b__UID__)">' + "".join(m) + '</g>'))
@@ -624,6 +732,11 @@ def _songbird_parts(a):
         f.append(f'<ellipse cx="{_n(hx+r*.15)}" cy="{_n(hy+r*.5)}" rx="{_n(r*.8)}" ry="{_n(r*.5)}" fill="{a["cheek"]}"/>')
     if a.get("cap"):
         f.append(f'<rect x="{hx-r}" y="{hy-r}" width="{2*r}" height="{_n(r*a.get("cap_h", .8))}" fill="{a["cap"]}"/>')
+    if a.get("crown_stripe"):  # a pale stripe along the middle of the crown (white-crowned & white-throated sparrows)
+        f.append(f'<path d="M{_n(hx-r*.95)},{_n(hy-r*.5)} Q{_n(hx)},{_n(hy-r*.85)} {_n(hx+r*.6)},{_n(hy-r*.62)}" '
+                 f'stroke="{a["crown_stripe"]}" stroke-width="2.6" fill="none" stroke-linecap="round"/>')
+    if a.get("eye_line"):  # a dark line through the eye
+        f.append(f'<path d="M{_n(hx-r*.95)},{_n(hy-r*.02)} L{_n(hx+r*.72)},{_n(hy-r*.14)}" stroke="{a["eye_line"]}" stroke-width="2.6" stroke-linecap="round"/>')
     if a.get("nape"):  # small patch on the back of the head (woodpeckers)
         f.append(f'<ellipse cx="{_n(hx-r*.85)}" cy="{_n(hy-r*.3)}" rx="{_n(r*.3)}" ry="{_n(r*.25)}" fill="{a["nape"]}"/>')
     if a.get("mask"):
@@ -686,6 +799,9 @@ def _songbird_parts(a):
         d = f"M{_n(bx-1)},{_n(by-r*.22)} L{_n(bx+r*.95)},{_n(by)} L{_n(bx-1)},{_n(by+r*.22)} Z"
     elif bt == "needle":
         d = f"M{_n(bx-1)},{_n(by-1.6)} L{_n(bx+r*1.9)},{_n(by)} L{_n(bx-1)},{_n(by+1.6)} Z"
+    elif bt == "upturned":  # avocet
+        d = (f"M{_n(bx-1)},{_n(by-r*.18)} Q{_n(bx+r*1.2)},{_n(by-r*.2)} {_n(bx+r*1.9)},{_n(by-r*.9)} "
+             f"Q{_n(bx+r*1.1)},{_n(by+r*.15)} {_n(bx-1)},{_n(by+r*.2)} Z")
     elif bt == "bill":
         d = (f"M{_n(bx-2)},{_n(by-r*.3)} Q{_n(bx+r*.9)},{_n(by-r*.3)} {_n(bx+r*.95)},{_n(by+r*.1)} "
              f"Q{_n(bx+r*.5)},{_n(by+r*.35)} {_n(bx-2)},{_n(by+r*.25)} Z")
@@ -747,6 +863,15 @@ def _owl_parts(a):
     return "".join(o)
 
 
+def face_viewbox(a):
+    """The square part of a cartoon that shows the bird's head and beak (used for map pins)."""
+    shape = a.get("shape", "songbird")
+    if shape == "owl":
+        return "28 6 64 64"
+    hx, hy, r = (86, 20, 11) if shape == "heron" else GEOMETRY[shape]["head"]
+    return f"{_n(hx - 1.35 * r)} {_n(hy - 1.5 * r)} {_n(3 * r)} {_n(3 * r)}"
+
+
 def cartoon_bird_svg(bird):
     a = bird["art"]
     shape = a.get("shape", "songbird")
@@ -756,6 +881,7 @@ def cartoon_bird_svg(bird):
 
 for _b in TEXAS_BIRDS:
     _b["svg"] = cartoon_bird_svg(_b)
+    _b["face_vb"] = face_viewbox(_b["art"])
     _b["wiki"] = _b.get("wiki") or _b["name"][0] + _b["name"][1:].lower()       # "Northern cardinal"
     _b["wiki_url"] = "https://en.wikipedia.org/wiki/" + _b["wiki"].replace(" ", "_")
     # Cornell Lab's All About Birds, e.g. .../guide/Coopers_Hawk (no apostrophes in their links)
@@ -930,6 +1056,42 @@ def fetch_taxon_photos(taxon):
 def fetch_quiz_photos(bird):
     """Different real photos of one of our birds, taken in Texas."""
     return fetch_cc_photos(bird["inat"])
+
+# ---- Real bird sounds: the best-rated Creative-Commons recordings on iNaturalist ----
+# They are passed through this server (not linked directly) because a browser is only allowed to
+# analyze audio from its own website, and the spectrogram needs to analyze it.
+MAX_SOUND_BYTES = 1_500_000   # skip huge recordings (long WAV files)
+_sound_list_cache = {}
+_sound_file_cache = {}
+
+def fetch_sound_list(taxon):
+    """Up to 12 recordings of a bird; taxon is a scientific name or an iNaturalist taxon id."""
+    if taxon not in _sound_list_cache:
+        which = {"taxon_id": taxon} if isinstance(taxon, int) else {"taxon_name": taxon}
+        r = requests.get(f"{INAT_API}/observations", headers=HTTP_HEADERS, timeout=12, params={
+            **which, "sounds": "true", "quality_grade": "research", "sound_license": "cc-by,cc-by-nc,cc0",
+            "per_page": 12, "order_by": "votes"})
+        r.raise_for_status()
+        sounds = []
+        for obs in r.json().get("results", []):
+            for s in obs.get("sounds") or []:
+                if s.get("file_url") and (s.get("file_content_type") or "").startswith("audio/"):
+                    sounds.append({"url": s["file_url"], "credit": s.get("attribution") or ""})
+                    break
+        _sound_list_cache[taxon] = sounds
+    return _sound_list_cache[taxon]
+
+def fetch_sound_file(url):
+    if url not in _sound_file_cache:
+        r = requests.get(url, headers=HTTP_HEADERS, timeout=20, stream=True)
+        r.raise_for_status()
+        data = r.raw.read(MAX_SOUND_BYTES + 1, decode_content=True)
+        if len(data) > MAX_SOUND_BYTES:
+            raise ValueError("recording too big")
+        if len(_sound_file_cache) > 250:  # keep memory use small
+            _sound_file_cache.clear()
+        _sound_file_cache[url] = (r.headers.get("Content-Type", "audio/mpeg").split(";")[0], data)
+    return _sound_file_cache[url]
 
 # ---- Bird holidays: on these days the Welcome banner says "Happy ...!" with a real iNaturalist photo ----
 # "when" rules:  ("date", month, day)  ·  ("nth", month, weekday, n) with Monday=0, e.g. 2nd Saturday = (5, 5, 2)
@@ -1220,6 +1382,7 @@ WEB_PAGE = r"""
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ChirpQuest</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -1262,6 +1425,7 @@ body { font-family:'Comic Sans MS',cursive,sans-serif; background:linear-gradien
 .sidebar { width:240px; background:#0f766e; color:#fff; display:flex; flex-direction:column; box-shadow:4px 0 15px rgba(0,0,0,0.05); z-index:10; flex-shrink:0; }
 .logo-area { padding:25px 20px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.1); }
 .logo-badge { width:44px; height:44px; background:rgba(255,255,255,0.15); border-radius:14px; display:flex; align-items:center; justify-content:center; border:2px solid rgba(255,255,255,0.3); flex-shrink:0; }
+.logo-badge svg { width:38px; height:38px; }
 .logo-text-wrap h1 { font-size:1.4em; margin:0; letter-spacing:0.5px; color:#fff; }
 .logo-text-wrap p { font-size:0.75em; margin:0; color:#99f6e4; }
 .nav-links { padding:20px 15px; display:flex; flex-direction:column; gap:6px; flex:1; }
@@ -1325,7 +1489,7 @@ button { font-family:inherit; }
 .top-list li { margin-bottom:9px; font-size:0.86em; }
 .top-bar { height:10px; border-radius:6px; background:#5eead4; margin-top:3px; transition:width 0.6s ease; }
 .top-list li.book .top-bar { background:#f59e0b; }
-.book-pin { font-size:20px; text-align:center; line-height:26px; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5)); }
+.leaflet-marker-icon { filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
 .map-popup img { width:150px; height:110px; object-fit:cover; border-radius:8px; display:block; margin-bottom:4px; }
 .map-popup { font-family:'Comic Sans MS',cursive,sans-serif; }
 
@@ -1409,6 +1573,9 @@ button { font-family:inherit; }
 .puzzle-stats div { background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:8px 4px; font-size:0.8em; color:#64748b; }
 .puzzle-stats b { display:block; font-size:1.5em; color:#0f766e; }
 
+#now-playing { position:fixed; right:16px; bottom:16px; max-width:min(420px, calc(100vw - 32px)); background:#0f172a; color:#e2e8f0; font-size:0.78em; padding:8px 12px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.25); opacity:0; transform:translateY(10px); transition:opacity 0.3s, transform 0.3s; pointer-events:none; z-index:50; }
+#now-playing.show { opacity:0.95; transform:none; }
+
 /* DRAW BIRDS */
 .draw-steps { display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:14px; margin-top:16px; }
 .draw-step { background:#fff; border:3px solid #e2e8f0; border-radius:18px; padding:10px; text-align:center; position:relative; }
@@ -1451,6 +1618,7 @@ button { font-family:inherit; }
 </style>
 </head>
 <body>
+<div id="now-playing" role="status"></div>
 <div class="bg-emoji" style="top:8%;left:4%;">🍃</div>
 <div class="bg-emoji" style="top:70%;left:90%;animation-delay:1.2s;">🍃</div>
 <div class="bg-emoji" style="top:40%;left:96%;animation-delay:2.4s;">☁️</div>
@@ -1458,17 +1626,7 @@ button { font-family:inherit; }
 <div class="app-layout">
     <aside class="sidebar">
         <div class="logo-area">
-            <div class="logo-badge">
-                <svg viewBox="0 0 100 100" style="width:32px;height:32px;">
-                    <path d="M 20,80 Q 50,85 80,50 Q 90,30 75,20 Q 55,25 35,45 Q 20,60 20,80 Z" fill="url(#rainbowGrad)"/>
-                    <path d="M 32,70 Q 50,75 70,45 Q 60,35 45,50 Z" fill="#fff" opacity="0.3"/>
-                    <defs><linearGradient id="rainbowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#ef4444"/><stop offset="20%" stop-color="#f97316"/>
-                        <stop offset="40%" stop-color="#eab308"/><stop offset="60%" stop-color="#10b981"/>
-                        <stop offset="80%" stop-color="#06b6d4"/><stop offset="100%" stop-color="#8b5cf6"/>
-                    </linearGradient></defs>
-                </svg>
-            </div>
+            <div class="logo-badge">__LOGO__</div>
             <div class="logo-text-wrap"><h1>ChirpQuest</h1><p>North Texas Bird Guide</p></div>
         </div>
         <nav class="nav-links">
@@ -1522,7 +1680,7 @@ button { font-family:inherit; }
                             <p id="daily-extra" class="small" style="margin:2px 0 0;"></p>
                             <div class="card-buttons">
                                 <button class="sound-btn" id="daily-ask" onclick="askAboutDailyBird()">💬 Ask Pip about it</button>
-                                <button class="sound-btn" id="daily-hear" onclick="playBirdCall(dailyBird)" style="display:none;">🔊 Hear it</button>
+                                <button class="sound-btn" id="daily-hear" onclick="hearDailyBird()">🔊 Hear it</button>
                             </div>
                         </div>
                         <div class="card span-2">
@@ -1530,7 +1688,7 @@ button { font-family:inherit; }
                             <canvas id="spectrogram" width="600" height="90"></canvas>
                             <p id="sound-bird-name" style="font-weight:bold;margin:8px 0 0;color:#0f766e;">Press play to see a call as a picture!</p>
                             <button class="sound-btn" onclick="playRandomBirdCall()">Play a Random Bird 🎵</button>
-                            <p class="small" style="margin:6px 0 0;">These calls are made-up computer sounds just for fun — every bird has its own, and they change a little each time.</p>
+                            <p class="small" id="sound-credit" style="margin:6px 0 0;">Real bird recordings shared by iNaturalist users — a different one each time you play.</p>
                         </div>
                         <div class="card">
                             <h2>🌤️ Birding Weather</h2>
@@ -1552,7 +1710,7 @@ button { font-family:inherit; }
                             <div>
                                 <h3 style="margin:0 0 8px;color:#0f766e;font-size:1em;">🏅 Most-seen birds</h3>
                                 <ul class="top-list" id="top-list"><div class="skeleton"></div><div class="skeleton"></div></ul>
-                                <p class="small">⭐ orange = in your Bird Book. Each pin is a real sighting someone photographed and shared on iNaturalist.</p>
+                                <p class="small">📍 Pins with a bird face are Bird Book birds; gray <b>?</b> pins are other birds. Tap any pin to see the photo. ⭐ Orange bars = in your Bird Book. Every pin is a real sighting someone photographed and shared on iNaturalist.</p>
                             </div>
                         </div>
                     </div>
@@ -1789,7 +1947,11 @@ async function showDailyBird(){
         + (dailyBird ? " · ⭐ in your Bird Book" : "")
         + (b.wiki ? ` · <a href="${esc(b.wiki)}" target="_blank" rel="noopener">Wikipedia</a>` : "")
         + (b.credit ? `<br><span style="font-size:0.85em;">📷 ${esc(b.credit)}</span>` : "");
-    $("daily-hear").style.display = dailyBird ? "" : "none";
+}
+function hearDailyBird(){  // works for any bird, even ones not in the Bird Book
+    const b=dailyPick[mode]; if(!b) return;
+    $("sound-bird-name").textContent=`${dailyBird?dailyBird.emoji+" ":"🐦 "}${b.name}`;
+    playBirdCall(dailyBird || {taxon_id:b.taxon_id, name:b.name});
 }
 function askAboutDailyBird(){
     const b=dailyPick[mode]; if(!b) return;
@@ -1842,7 +2004,53 @@ function mimicPhrase(){  // the mockingbird borrows bits of 3 other birds' calls
     const singers=shuffle(allBirds.filter(b=>!b.call.noise && !b.call.mimic && b.call.notes.length)).slice(0,3);
     return singers.flatMap(b=>{ const bit=b.call.notes.slice(0,3); return [...bit, ...bit]; });
 }
-function playBirdCall(bird){
+// Real recordings: picked by the server from iNaturalist's best-rated Creative-Commons sounds.
+// They play straight into the analyser, so the spectrogram draws exactly what you hear.
+const MAX_CALL_SECONDS=10;
+const decodedCalls=new Map();  // recording file → decoded audio, so a replay starts instantly
+let currentCall=null, callToken=0;
+let toastTimer=null;
+function setSoundCredit(text, seconds){  // the credit shows on the Welcome card, and as a small note on every other tab
+    const el=$("sound-credit"); if(el) el.textContent=text;
+    const toast=$("now-playing"); toast.textContent=text; toast.classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove("show"), (seconds||4)*1000+1500);
+}
+function stopCall(){ if(currentCall){ try{ currentCall.stop(); }catch(e){} currentCall=null; } }
+async function playBirdCall(bird){
+    if(!bird) return 0;
+    const c=getAudio(), token=++callToken;
+    stopCall();
+    const query = bird.id ? "bird="+encodeURIComponent(bird.id) : bird.taxon_id ? "taxon="+encodeURIComponent(bird.taxon_id) : null;
+    setSoundCredit("⏳ Loading a real recording…");
+    try{
+        if(!query) throw new Error("no bird");
+        const info=await (await fetch("/api/sound?"+query)).json();
+        if(!info.file) throw new Error("no recording");
+        let buf=decodedCalls.get(info.file);
+        if(!buf){ buf=await c.decodeAudioData(await (await fetch(info.file)).arrayBuffer()); decodedCalls.set(info.file,buf); }
+        if(token!==callToken) return 0;  // another sound was started while this one was loading
+        const dur=Math.min(buf.duration, MAX_CALL_SECONDS), data=buf.getChannelData(0);
+        let peak=0;  // even out loud and quiet recordings
+        for(let i=0, end=Math.min(data.length, buf.sampleRate*dur); i<end; i+=4) peak=Math.max(peak, Math.abs(data[i]));
+        const src=c.createBufferSource(), g=c.createGain(), t=c.currentTime+0.02, vol=Math.min(4, 0.8/Math.max(peak,0.01));
+        src.buffer=buf;
+        g.gain.setValueAtTime(vol,t); g.gain.setValueAtTime(vol,t+Math.max(0,dur-0.4)); g.gain.linearRampToValueAtTime(0.0001,t+dur);
+        src.connect(g); g.connect(analyser);  // analyser → speakers, and the spectrogram reads it
+        src.start(t,0,dur); currentCall=src;
+        startSpectrogram(dur);
+        setSoundCredit(`🎙️ ${bird.name ? bird.name+" — " : ""}real recording: ${info.credit || "an iNaturalist user"} · iNaturalist`, dur);
+        return dur;
+    }catch(e){
+        if(token!==callToken) return 0;
+        if(!bird.call) { setSoundCredit("No recording available right now."); return 0; }
+        setSoundCredit("🎛️ No recording right now — playing ChirpQuest's made-up version instead.");
+        return playSynthCall(bird);
+    }
+}
+function playMysteryCall(id){  // quiz: same recording, but the credit note doesn't say which bird it is
+    const b=birdById[id]; playBirdCall({id:b.id, call:b.call});
+}
+function playSynthCall(bird){  // the old made-up calls: a backup when a recording can't load (e.g. offline)
     if(!bird || !bird.call) return 0;
     const c=getAudio(), s=bird.call, p=0.93+Math.random()*0.14;  // tiny pitch wobble: never exactly the same twice
     const notes=s.mimic ? mimicPhrase() : s.notes;
@@ -1878,7 +2086,7 @@ function drawSpectrogram(){
     }
     if(performance.now()<specUntil) requestAnimationFrame(drawSpectrogram); else specRunning=false;
 }
-function pipWhistle(){ playBirdCall({call:{notes:[[1800,3200,.12,.04],[3200,2400,.12,.04],[2000,3600,.2,0]]}}); }
+function pipWhistle(){ playSynthCall({call:{notes:[[1800,3200,.12,.04],[3200,2400,.12,.04],[2000,3600,.2,0]]}}); }
 
 // ---------- facts ----------
 async function loadFacts(){
@@ -1965,6 +2173,24 @@ async function loadSightings(){
         lastSightings=await r.json(); drawSightings();
     }catch(e){ $("map-status").textContent="Couldn't load sightings right now."; }
 }
+// Map pins: a teal pin with the bird's cartoon face for Bird Book birds, a smaller gray "?" pin for every other bird.
+// Each kind of pin is drawn once as an image and reused.
+const pinIcons={};
+function birdPinIcon(book){
+    const key=book ? book.id : "?";
+    if(!pinIcons[key]){
+        const face = book
+            ? `<svg x="19" y="13" width="62" height="62" viewBox="${book.face_vb}">${book.svg.replace(/^<svg[^>]*>/,"").replace(/<\/svg>\s*$/,"").replaceAll("__UID__","pin")}</svg>`
+            : `<text x="50" y="59" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" font-weight="bold" fill="#475569">?</text>`;
+        const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><defs><clipPath id="pinFace"><circle cx="50" cy="44" r="31"/></clipPath></defs>`
+            +`<path d="M50,117 C50,117 10,72 10,44 A40,40 0 1 1 90,44 C90,72 50,117 50,117 Z" fill="${book?"#14b8a6":"#cbd5e1"}" stroke="#1e293b" stroke-width="5" stroke-linejoin="round"/>`
+            +`<circle cx="50" cy="44" r="31" fill="#fff"/><g clip-path="url(#pinFace)">${face}</g>`
+            +`<circle cx="50" cy="44" r="31" fill="none" stroke="#1e293b" stroke-width="3"/></svg>`;
+        const [w,h]=book ? [40,48] : [24,29];
+        pinIcons[key]=L.icon({iconUrl:"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg), iconSize:[w,h], iconAnchor:[w/2,h], popupAnchor:[0,-h+4]});
+    }
+    return pinIcons[key];
+}
 function drawSightings(){
     const d=lastSightings; if(!d) return;
     mapLayer.clearLayers();
@@ -1973,8 +2199,7 @@ function drawSightings(){
     const shown=d.sightings.filter(s=>!mapState.bookOnly||s.bird_id);
     shown.forEach(s=>{
         const book=s.bird_id?birdById[s.bird_id]:null;
-        const marker=book ? L.marker([s.lat,s.lng],{icon:L.divIcon({className:"book-pin",html:esc(book.emoji),iconSize:[26,26]})})
-                          : L.circleMarker([s.lat,s.lng],{radius:5,color:"#0f766e",weight:1.5,fillColor:"#5eead4",fillOpacity:0.9});
+        const marker=L.marker([s.lat,s.lng],{icon:birdPinIcon(book), zIndexOffset:book?100:0, title:s.name, alt:s.name});
         marker.bindPopup(`<div class="map-popup">${s.photo?`<img src="${esc(s.photo.replace("/square.","/small."))}" alt="">`:""}
             <b>${esc(s.name)}</b>${book?" ⭐":""}<br>📅 ${esc(s.date||"")}<br><span style="font-size:0.75em;color:#64748b;">${esc(s.credit)}</span><br>
             <a href="${esc(s.link)}" target="_blank" rel="noopener">See it on iNaturalist ↗</a></div>`);
@@ -2218,7 +2443,7 @@ async function nextQuestion(){
     stage.querySelectorAll(".choice").forEach(b=>b.addEventListener("click",()=>answerQuestion(b.dataset.id)));
     const pic=$("quiz-picture");
     if(quiz.mode==="cartoon") pic.innerHTML=birdArt(answer);
-    else if(quiz.mode==="sound"){ pic.innerHTML=`<button class="big-btn alt" style="font-size:1.3em;" onclick="playBirdCall(birdById['${answer.id}'])">🔊 Play the call again</button>`; playBirdCall(answer); }
+    else if(quiz.mode==="sound"){ pic.innerHTML=`<button class="big-btn alt" style="font-size:1.3em;" onclick="playMysteryCall('${answer.id}')">🔊 Play the call again</button>`; playMysteryCall(answer.id); }
     else{
         try{ const d=await (await fetch("/api/quiz_photo?bird="+answer.id)).json();
              if(!d.url) throw new Error();
@@ -2436,6 +2661,20 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 </html>
 """
 
+# The ChirpQuest logo ("Pip Badge"): Pip's face in a mint circle. Used in the sidebar and as the browser-tab icon.
+LOGO_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="ChirpQuest logo">
+<defs><clipPath id="logoPipHead"><circle cx="52" cy="56" r="24"/></clipPath></defs>
+<circle cx="50" cy="50" r="47" fill="#ccfbf1" stroke="#0f766e" stroke-width="4"/>
+<path d="M40,42 Q34,40 29,35 L35,33 Q29,29 26,23 L32,21 Q27,16 25,8 L62,36 Z" fill="#facc15" stroke="#1e293b" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="52" cy="56" r="24" fill="#fde68a"/>
+<g clip-path="url(#logoPipHead)"><ellipse cx="32" cy="64" rx="14" ry="24" fill="#9ca3af"/></g>
+<circle cx="52" cy="56" r="24" fill="none" stroke="#1e293b" stroke-width="2.5"/>
+<circle cx="60" cy="66" r="7" fill="#fb923c"/>
+<circle cx="60" cy="50" r="7.2" fill="#fff" stroke="#1e293b" stroke-width="2"/><circle cx="61.4" cy="50.8" r="4.2" fill="#0f172a"/><circle cx="63" cy="48.6" r="1.7" fill="#fff"/>
+<path d="M73,52 Q83,52 81,62 L77,59 L73,63 Z" fill="#a8a29e" stroke="#1e293b" stroke-width="2" stroke-linejoin="round"/>
+</svg>"""
+WEB_PAGE = WEB_PAGE.replace("__LOGO__", LOGO_SVG)
+
 # ==========================================
 # 6. ROUTES
 # ==========================================
@@ -2444,6 +2683,10 @@ app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # Photo ID uploads (already 
 @app.route("/")
 def home():
     return Response(WEB_PAGE, mimetype="text/html")
+
+@app.route("/favicon.svg")
+def favicon():
+    return Response(LOGO_SVG, mimetype="image/svg+xml")
 
 # Bird of the Day, for the 🎬 Demo / 💾 Normal switch at the top right of the page:
 #   Normal → a random bird that stays the same all day (the date is the random seed)
@@ -2574,6 +2817,47 @@ def get_holiday():
         result["today"] = {k: today.get(k) for k in ("id", "name", "emoji", "message", "link")}
         result["today"]["photo"] = photo
     return jsonify(result)
+
+def _sound_request():
+    """Which bird a /api/sound request is about: a Bird Book id (?bird=) or an iNaturalist taxon id (?taxon=)."""
+    bird = BIRDS_BY_ID.get(request.args.get("bird", ""))
+    if bird:
+        return bird["inat"], f"bird={bird['id']}"
+    t = request.args.get("taxon", "")
+    return (int(t), f"taxon={t}") if t.isdigit() else (None, None)
+
+@app.route("/api/sound")
+def get_sound():
+    """Pick one of the bird's top recordings at random (so it sounds a bit different each time)."""
+    taxon, query = _sound_request()
+    if taxon is None:
+        return jsonify({"error": "unknown bird"}), 404
+    try:
+        sounds = fetch_sound_list(taxon)[:6]
+    except Exception as e:
+        log.warning("Sound list failed for %s: %s", taxon, e)
+        sounds = []
+    for n in random.sample(range(len(sounds)), len(sounds)):
+        try:
+            fetch_sound_file(sounds[n]["url"])  # make sure it downloads and isn't too big
+            return jsonify({"file": f"/api/sound_file?{query}&n={n}", "credit": sounds[n]["credit"]})
+        except Exception as e:
+            log.warning("Skipping a recording of %s: %s", taxon, e)
+    return jsonify({"file": None})
+
+@app.route("/api/sound_file")
+def get_sound_file():
+    taxon, _ = _sound_request()
+    n = request.args.get("n", "")
+    try:
+        sounds = fetch_sound_list(taxon) if taxon is not None else []
+        if not (n.isdigit() and int(n) < len(sounds)):
+            return jsonify({"error": "no such recording"}), 404
+        ctype, data = fetch_sound_file(sounds[int(n)]["url"])
+    except Exception as e:
+        log.warning("Sound file failed: %s", e)
+        return jsonify({"error": "recording unavailable"}), 502
+    return Response(data, mimetype=ctype, headers={"Cache-Control": "max-age=86400"})
 
 @app.route("/api/sample_photo")
 def get_sample_photo():
