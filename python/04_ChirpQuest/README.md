@@ -109,13 +109,49 @@ All three share the same `.env`.
 - ✅ *(fixed Oct 24: now `log.debug`)* It logged the **full Gemini response** on every chat (`Gemini raw response: …`). That's useful while debugging, but noisy. Lower it to `log.debug`.
 - `debug=False`, because the app gets shared through ngrok.
 - `load_dotenv=False` in `app.run()` was a workaround for the empty `dotenv.py` file (now deleted). It's harmless, because the script loads `.env` itself.
-- The file is about 1,950 lines, mostly HTML/CSS/JS in one big string (now a raw string served as-is, not a Jinja template). Moving the page into `templates/index.html` and `static/` would make it much easier to edit.
+- The file is about 3,300 lines, mostly HTML/CSS/JS in one big string (now a raw string served as-is, not a Jinja template). Moving the page into `templates/index.html` and `static/` would make it much easier to edit.
 
 ## To-do
-- [x] Escape chat text (use `textContent` instead of `innerHTML`).
-- [x] Change the "raw response" log line to debug level.
-- [ ] Optional: split HTML/CSS/JS into `templates/` and `static/`.
-- [x] More birds (95 now).
-- [x] Real recorded bird calls (from iNaturalist) instead of the made-up ones.
-- [x] New logo: the **Pip Badge** (Pip's face in a mint circle), also used as the browser-tab icon (`/favicon.svg`). The "Bird Map Pin" idea became the map's sighting pins. Runner-up idea: "Lone Star Lookout" (a cardinal on the Texas star).
-- [ ] Optional: link it to the Arduino/ESP32 bird projects, for example a button on the ESP32 that plays a bird call when a bird is ticked off.
+
+### ✅ Before we start next time
+1. Get the latest code: `git pull` (or clone the repo again).
+2. Make sure `04_ChirpQuest/.env` exists and has a working `GEMINI_API_KEY`. Test the key first; if it's broken, get a new one at <https://aistudio.google.com/apikey> and change it **only in `.env`**, never in the code.
+3. Run it: `python 04_ChirpQuest\chirpquest.py` and open <http://127.0.0.1:5000>.
+
+### 🎯 Next up (planned Oct 24, 2026)
+
+**1. 📰 Local bird events & news near me**
+- **Goal:** pick a place (type a city like *Plano*, or use 📍 Near me) and see bird-related things happening nearby.
+- **What it could show:** upcoming events such as bird banding, guided bird walks, bird counts (like the Christmas Bird Count), nature-center programs and Audubon chapter meetings, plus short local news stories about bird conservation.
+- **Each item shows:** what, when, where, how far away, and a link to the real event page.
+- **To figure out first:**
+  - Where to get the events: local Audubon chapter calendars, city nature centers and parks departments, Texas Parks & Wildlife, local news. Check which ones have a free feed or API, and which need a key.
+  - How far to search (10 miles? 25?), and whether to show only free, kid-friendly events.
+  - Keep it safe for kids: only trusted sources, no personal info, and always link to the original page. Gemini could turn long event pages into short kid-friendly summaries.
+
+**2. 🐦 More birds + a "Research this bird" helper**
+- **More birds:** keep adding common North Texas birds (95 now). Check each one's sighting count near DFW first, and only add non-native birds if they're *extremely* common.
+  - Already checked, but seen less often: Inca Dove (~440 sightings near DFW), Chimney Swift (~340), Horned Lark (~70).
+  - Ideas to check: Gadwall, American Wigeon, Northern Pintail, Lesser Scaup, Snow Goose, Little Blue Heron, Black-crowned Night Heron, White Ibis, Neotropic Cormorant, Franklin's Gull, Forster's Tern, Red-headed Woodpecker, Ladder-backed Woodpecker, Eastern & Spotted Towhee, Orange-crowned Warbler, Common Yellowthroat, Barn Owl, Wild Turkey.
+- **Research helper:** a "🔎 Research this bird" button on Bird Book cards, Bird of the Day and Photo ID results. It would open one page with:
+  - a kid-friendly summary, plus what it eats, where it nests, and how big it is ("about the size of a robin")
+  - when and where to find it in North Texas (season chart and map)
+  - real photos and recordings
+  - its conservation status (how it's doing in the wild)
+  - "Ask Pip" follow-up questions
+  - trusted links: All About Birds, Audubon, Wikipedia, iNaturalist
+- **Maybe:** a "My Research Notebook" where kids save facts and notes, then print them as a one-page report for school.
+
+### 💭 Maybe later
+- **3. Demo tour** *(probably not)*: in 🎬 Demo mode, every refresh shows a short "how to use ChirpQuest" walkthrough with Pip pointing at each part, plus a Skip button.
+- **Accounts:** so each person has their own saved progress, and Normal mode can be started over.
+- **Season data by place:** the season charts and the "most seen this month" order use all of Texas right now. They could use North Texas only, or wherever 📍 Near me is.
+- **Code cleanup:** split the HTML/CSS/JS out of `chirpquest.py` into `templates/` and `static/` files.
+
+### ✔️ Done
+- [x] Chat text is escaped (`textContent`), and the raw Gemini log line is at debug level.
+- [x] 95 birds with cartoons, real recorded calls, facts, season charts and drawing guides.
+- [x] New logo: the **Pip Badge**, also the browser-tab icon. The map-pin idea became the map's bird-face pins. Runner-up: "Lone Star Lookout".
+- [x] Live map that checks every 10 seconds, with a pin for every Bird Book bird seen.
+- [x] The birds seen most this month are listed first.
+- [x] Badges: Owl Ears, Master Artist, Puzzle Pro and more.
