@@ -604,6 +604,119 @@ TEXAS_BIRDS = [
              "brow_color": "#f5e6c8", "eye_line": "#3f2a14", "wing": "#6b4423", "wing_bars": "#f5e6c8", "tail_color": "#ea580c",
              "beak": "#57534e", "beak_type": "needle", "legs": "#a3e635", "leg_len": 10, "tail": "short"},
      "call": {"wave": "sawtooth", "vol": .3, "buzz": 3000, "notes": [[3000, 2600, .15, .4]] * 2}},
+    {"id": "rockpigeon", "name": "Rock Pigeon", "emoji": "🏙️", "inat": "Columba livia", "habitat": "backyard", "wiki": "Rock dove",
+     "marks": ["Also called the Rock Dove — the city pigeon!", "Blue-gray with 2 black wing bars & a shiny green-purple neck"],
+     "art": {"shape": "small-head", "body": "#94a3b8", "belly": "#cbd5e1", "head": "#64748b", "throat": "#0d9488", "shimmer": "#a855f7",
+             "forehead": "#f1f5f9", "iris": "#f97316", "wing": "#a3aebd", "wing_bars": "#111827", "tail_color": "#475569",
+             "beak": "#334155", "beak_type": "small", "legs": "#f472b6", "tail": "short"},
+     "call": {"vol": .9, "notes": [[400, 450, .3, .05], [450, 380, .5, .3], [420, 360, .5, 0]]}},
+    # ---- 21 more (95 total): water birds, raptors and backyard birds ----
+    {"id": "whistlingduck", "name": "Black-bellied Whistling-Duck", "emoji": "🎶", "inat": "Dendrocygna autumnalis", "habitat": "water",
+     "marks": ["Bright pink bill & gray face", "Black belly — whistles instead of quacking!"],
+     "art": {"shape": "duck", "body": "#9a3412", "belly": "#111827", "head": "#a8a29e", "cap": "#9a3412", "cap_h": .4, "eye_ring": "#ffffff",
+             "wing": "#78716c", "wing_patch": "#ffffff", "tail_color": "#111827", "beak": "#f472b6", "beak_type": "bill", "tail": "short"},
+     "call": {"notes": [[2600, 3200, .12, .04], [3200, 2600, .12, .04], [2800, 3400, .15, .04], [3400, 2400, .2, 0]]}},
+    {"id": "pelican", "name": "American White Pelican", "emoji": "🐋", "inat": "Pelecanus erythrorhynchos", "habitat": "water",
+     "marks": ["Huge white bird with a giant orange bill & pouch", "Black wingtips — winters on Texas lakes"],
+     "art": {"shape": "pelican", "body": "#ffffff", "belly": "#f8fafc", "head": "#ffffff", "iris": "#fde047", "wing": "#f1f5f9",
+             "wing_tips": "#111827", "tail_color": "#e5e7eb", "beak": "#fb923c", "beak_type": "pouch", "tail": "short"},
+     "call": {"wave": "sawtooth", "vol": .3, "buzz": 300, "notes": [[200, 180, .3, .3]]}},
+    {"id": "grebe", "name": "Pied-billed Grebe", "emoji": "🤿", "inat": "Podilymbus podiceps", "habitat": "water",
+     "marks": ["Little brown diver with a black ring on its pale bill", "Can sink slowly like a submarine!"],
+     "art": {"shape": "duck", "body": "#8b5e34", "belly": "#a47551", "head": "#78716c", "throat": "#111827", "eye_ring": "#ffffff",
+             "wing": "#6b4423", "tail_color": "#6b4423", "beak": "#f5f5f4", "beak_type": "small", "beak_ring": "#111827", "tail": "tiny"},
+     "call": {"notes": [[900, 800, .15, .05]] * 4 + [[700, 500, .3, .05]] * 3}},
+    {"id": "teal", "name": "Blue-winged Teal", "emoji": "🌙", "inat": "Spatula discors", "habitat": "water",
+     "marks": ["White crescent moon on a blue-gray face (males)", "Sky-blue patch on the wing"],
+     "art": {"shape": "duck", "body": "#a16207", "belly": "#a47551", "streaks": "#5b3a1e", "head": "#475569", "forehead": "#ffffff",
+             "wing": "#78716c", "wing_patch": "#60a5fa", "tail_color": "#3f2a14", "beak": "#1f2937", "beak_type": "bill", "tail": "short"},
+     "call": {"notes": [[5000, 4000, .08, .06]] * 5}},
+    {"id": "bufflehead", "name": "Bufflehead", "emoji": "🎈", "inat": "Bucephala albeola", "habitat": "water",
+     "marks": ["Tiny black-and-white duck", "Big white patch on the back of its head (males)"],
+     "art": {"shape": "duck", "body": "#ffffff", "belly": "#f8fafc", "head": "#111827", "head_patch": "#ffffff", "shimmer": "#7c3aed",
+             "wing": "#111827", "tail_color": "#334155", "beak": "#64748b", "beak_type": "bill", "tail": "short"},
+     "call": {"wave": "sawtooth", "vol": .3, "buzz": 800, "notes": [[500, 450, .12, .1]] * 3}},
+    {"id": "ruddyduck", "name": "Ruddy Duck", "emoji": "💙", "inat": "Oxyura jamaicensis", "habitat": "water",
+     "marks": ["Bright sky-blue bill & white cheeks (males)", "Stiff tail held straight up"],
+     "art": {"shape": "duck", "body": "#9a3412", "belly": "#a8a29e", "head": "#111827", "cheek": "#ffffff", "wing": "#7c2d12",
+             "tail_color": "#1f2937", "beak": "#3b82f6", "beak_type": "bill", "tail": "up"},
+     "call": {"notes": [[300, 400, .05, .05]] * 6 + [[500, 300, .2, 0]]}},
+    {"id": "cattleegret", "name": "Cattle Egret", "emoji": "🐄", "inat": "Ardea ibis", "habitat": "open",
+     "marks": ["Small white heron with orange-buff plumes", "Follows cows and tractors to catch bugs"],
+     "art": {"shape": "heron", "body": "#ffffff", "neck": "#fdba74", "head": "#fdba74", "wing": "#f8fafc", "beak": "#facc15", "legs": "#f59e0b"},
+     "call": {"wave": "sawtooth", "vol": .3, "buzz": 400, "notes": [[380, 300, .25, 0]]}},
+    {"id": "nightheron", "name": "Yellow-crowned Night Heron", "emoji": "🌃", "inat": "Nyctanassa violacea", "habitat": "water",
+     "marks": ["Black head with a white cheek & pale crown", "Hunts crawfish at night"],
+     "art": {"shape": "heron", "body": "#9ca3af", "neck": "#9ca3af", "head": "#111827", "cheek": "#ffffff", "plume": "#f8fafc",
+             "iris": "#f97316", "wing": "#6b7280", "beak": "#111827", "legs": "#facc15"},
+     "call": {"wave": "sawtooth", "vol": .35, "buzz": 600, "notes": [[700, 500, .2, 0]]}},
+    {"id": "kite", "name": "Mississippi Kite", "emoji": "🪁", "inat": "Ictinia mississippiensis", "habitat": "open",
+     "marks": ["Sleek gray hawk with a pale head & red eyes", "Floats over Texas towns all summer, catching dragonflies"],
+     "art": {"body": "#64748b", "belly": "#94a3b8", "head": "#e2e8f0", "iris": "#dc2626", "eye_ring": "#111827", "wing": "#475569",
+             "tail_color": "#111827", "beak": "#1f2937", "beak_type": "hook", "legs": "#facc15", "tail": "long"},
+     "call": {"notes": [[3000, 3200, .15, .05], [3200, 2400, .5, 0]]}},
+    {"id": "blackvulture", "name": "Black Vulture", "emoji": "🖤", "inat": "Coragyps atratus", "habitat": "open",
+     "marks": ["Black with a bald gray head", "White wingtips — shows up when it flies"],
+     "art": {"shape": "small-head", "body": "#111827", "belly": "#1f2937", "head": "#4b5563", "wing": "#0b0f19", "wing_tips": "#e5e7eb",
+             "tail_color": "#0b0f19", "beak": "#d6d3d1", "beak_type": "hook", "legs": "#e5e7eb", "tail": "fan"},
+     "call": {"noise": True, "q": .7, "vol": .6, "notes": [[1300, 0, .7, 0]]}},
+    {"id": "osprey", "name": "Osprey", "emoji": "🐟", "inat": "Pandion haliaetus", "habitat": "water",
+     "marks": ["White head with a dark stripe through the eye", "Dives feet-first to catch fish!"],
+     "art": {"body": "#4a3728", "belly": "#ffffff", "head": "#ffffff", "eye_line": "#3f2a14", "iris": "#facc15", "wing": "#3f2a14",
+             "tail_color": "#4a3728", "beak": "#111827", "beak_type": "hook", "legs": "#cbd5e1", "tail": "short"},
+     "call": {"notes": [[2800, 3200, .08, .06]] * 7}},
+    {"id": "harrier", "name": "Northern Harrier", "emoji": "🌬️", "inat": "Circus hudsonius", "habitat": "open",
+     "marks": ["Owl-like face & a white patch above the tail", "Glides low over prairies, hunting by sound"],
+     "art": {"body": "#9ca3af", "belly": "#f8fafc", "streaks": "#c2410c", "vent": "#ffffff", "head": "#9ca3af", "cheek": "#e5e7eb",
+             "iris": "#facc15", "wing": "#6b7280", "wing_tips": "#111827", "tail_color": "#9ca3af", "beak": "#1f2937", "beak_type": "hook",
+             "legs": "#facc15", "tail": "long"},
+     "call": {"wave": "sawtooth", "vol": .3, "notes": [[2600, 2400, .1, .06]] * 6}},
+    {"id": "collareddove", "name": "Eurasian Collared-Dove", "emoji": "📿", "inat": "Streptopelia decaocto", "habitat": "backyard",
+     "marks": ["Pale sandy dove with a black half-collar", "Not native, but very common in Texas towns"],
+     "art": {"shape": "small-head", "body": "#d6cfc4", "belly": "#e7e2da", "head": "#d6cfc4", "half_collar": "#111827", "iris": "#dc2626",
+             "wing": "#c4b8a8", "tail_color": "#bfb3a2", "beak": "#1f2937", "beak_type": "small", "legs": "#f472b6", "tail": "long"},
+     "call": {"vol": .9, "notes": [[500, 520, .25, .05], [560, 540, .5, .1], [480, 470, .3, 0]]}},
+    {"id": "gnatcatcher", "name": "Blue-gray Gnatcatcher", "emoji": "🦟", "inat": "Polioptila caerulea", "habitat": "backyard",
+     "marks": ["Tiny blue-gray bird with a white eye ring", "Long black tail with white edges, always flicking"],
+     "art": {"body": "#94a3b8", "belly": "#f8fafc", "head": "#94a3b8", "eye_ring": "#ffffff", "brow_color": "#111827", "wing": "#64748b",
+             "tail_color": "#111827", "beak": "#111827", "beak_type": "thin", "tail": "long"},
+     "call": {"notes": [[5500, 5000, .08, .05]] * 6}},
+    {"id": "kinglet", "name": "Ruby-crowned Kinglet", "emoji": "💍", "inat": "Corthylio calendula", "habitat": "backyard",
+     "marks": ["Tiny olive bird with a bold white eye ring", "Hidden red crown it flashes when excited"],
+     "art": {"body": "#8a9a5b", "belly": "#e7e5c9", "head": "#8a9a5b", "eye_ring": "#ffffff", "crown_stripe": "#ef4444", "wing": "#5b6b3a",
+             "wing_bars": "#ffffff", "tail_color": "#5b6b3a", "beak": "#111827", "beak_type": "small", "tail": "fork"},
+     "call": {"notes": [[6000, 6000, .05, .05]] * 4 + [[4000, 4500, .08, .02]] * 6}},
+    {"id": "bewickswren", "name": "Bewick's Wren", "emoji": "🎤", "inat": "Thryomanes bewickii", "habitat": "backyard",
+     "marks": ["Gray-brown wren with a long white eyebrow", "Long tail that it waves side to side"],
+     "art": {"body": "#8b6f5c", "belly": "#e7e5e4", "head": "#8b6f5c", "brow_color": "#ffffff", "eye_line": "#5b4636", "wing": "#6b5545",
+             "wing_bars": "#5b4636", "tail_color": "#5b4636", "beak": "#44403c", "beak_type": "long", "tail": "up"},
+     "call": {"notes": [[3000, 3000, .1, .05], [4000, 3500, .2, .05]] + [[3500, 3000, .04, .02]] * 8}},
+    {"id": "sapsucker", "name": "Yellow-bellied Sapsucker", "emoji": "🍯", "inat": "Sphyrapicus varius", "habitat": "backyard",
+     "marks": ["Red forehead & black bib", "Drills neat rows of holes to drink tree sap"],
+     "art": {"body": "#f5f5f4", "belly": "#fef9c3", "head": "#ffffff", "cap": "#dc2626", "cap_h": .35, "eye_line": "#111827",
+             "throat": "#dc2626", "bib": "#111827", "wing": "#111827", "wing_patch": "#ffffff", "wing_spots": "#ffffff",
+             "tail_color": "#111827", "beak": "#1f2937", "beak_type": "chisel", "tail": "stiff"},
+     "call": {"noise": True, "q": 3, "notes": [[1500, 0, .02, .03]] * 6 + [[1500, 0, .02, .15]] * 4}},
+    {"id": "hermitthrush", "name": "Hermit Thrush", "emoji": "🎻", "inat": "Catharus guttatus", "habitat": "backyard",
+     "marks": ["Brown back, spotted chest & a rusty tail", "One of the most beautiful songs in North America"],
+     "art": {"body": "#8b6f4e", "belly": "#ffffff", "streaks": "#3f2a14", "head": "#8b6f4e", "eye_ring": "#ffffff", "wing": "#7a5f42",
+             "tail_color": "#b45309", "beak": "#44403c", "beak_type": "thin", "legs": "#fda4af", "tail": "short"},
+     "call": {"vib": 25, "vibDepth": 120, "notes": [[2500, 2500, .4, .1], [3500, 4500, .15, .05], [4500, 3800, .15, 0]]}},
+    {"id": "summertanager", "name": "Summer Tanager", "emoji": "🍓", "inat": "Piranga rubra", "habitat": "backyard",
+     "marks": ["Rosy red all over (males) — no crest or mask", "Catches bees & wasps and knocks off their stingers"],
+     "art": {"body": "#ef4444", "belly": "#f87171", "head": "#ef4444", "wing": "#dc2626", "tail_color": "#dc2626",
+             "beak": "#fde68a", "beak_type": "cone", "tail": "short"},
+     "call": {"notes": [[2500, 2800, .15, .04], [2800, 2400, .15, .04], [2600, 3000, .15, .04], [3000, 2500, .2, 0]]}},
+    {"id": "cliffswallow", "name": "Cliff Swallow", "emoji": "🌉", "inat": "Petrochelidon pyrrhonota", "habitat": "open",
+     "marks": ["Pale forehead spot & chestnut throat", "Builds gourd-shaped mud nests under bridges"],
+     "art": {"body": "#1e3a5f", "belly": "#f5f5f4", "head": "#1e3a5f", "throat": "#9a3412", "forehead": "#fef3c7", "wing": "#172554",
+             "tail_color": "#172554", "beak": "#111827", "beak_type": "small", "tail": "short"},
+     "call": {"wave": "triangle", "notes": [[2800, 3400, .06, .03]] * 8}},
+    {"id": "crestedflycatcher", "name": "Great Crested Flycatcher", "emoji": "🌋", "inat": "Myiarchus crinitus", "habitat": "backyard",
+     "marks": ["Lemon-yellow belly & gray throat", "Rusty tail & a loud 'WHEEP!' call"],
+     "art": {"body": "#78716c", "belly": "#fde047", "head": "#78716c", "crest": "#78716c", "throat": "#d1d5db", "wing": "#57534e",
+             "wing_bars": "#ffffff", "tail_color": "#b45309", "beak": "#1f2937", "beak_type": "thin", "tail": "long"},
+     "call": {"notes": [[1800, 3400, .35, 0]]}},
 ]
 
 # ---- Cartoon art generator ----
@@ -619,6 +732,7 @@ GEOMETRY = {  # body (cx, cy, rx, ry), head (hx, hy, r)
     "hummingbird": {"body": (58, 74, 22, 17), "head": (76, 54, 15)},
     "duck":        {"body": (58, 78, 36, 20), "head": (86, 46, 17)},
     "wader":       {"body": (52, 62, 28, 17), "head": (78, 40, 13)},   # shorebirds: raised body for long legs
+    "pelican":     {"body": (52, 80, 36, 20), "head": (72, 46, 16)},   # floats like a duck; head set back for the long bill
 }
 TAILS = {  # drawn behind the body, pointing left
     "short":   "M36,70 L10,80 L14,92 L40,86 Z",
@@ -658,14 +772,15 @@ def _songbird_parts(a):
     o = [f'<defs><clipPath id="b__UID__"><ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}"/></clipPath>'
          f'<clipPath id="h__UID__"><circle cx="{hx}" cy="{hy}" r="{r}"/></clipPath>'
          f'<clipPath id="w__UID__"><path d="{wing}"/></clipPath></defs>']
-    if shape == "duck":
+    floats = shape in ("duck", "pelican")  # water birds: a ripple instead of legs
+    if floats:
         o.append(_st(0, '<path d="M8,98 Q30,92 60,98 T112,98" stroke="#7dd3fc" stroke-width="3" fill="none" stroke-linecap="round"/>'
                         '<ellipse cx="60" cy="100" rx="44" ry="6" fill="#bae6fd" opacity="0.6"/>'))
     else:  # shadow right under the feet (so long-legged shorebirds don't float)
         feet_y = min(112, cy + ry - 3 + a.get("leg_len", 12) + 3)
         o.append(_st(0, f'<ellipse cx="60" cy="{feet_y}" rx="30" ry="5" fill="#0f172a" opacity="0.12"/>'))
     o.append(_st(3, f'<path d="{TAILS[a.get("tail", "short")]}" fill="{a["tail_color"]}" stroke="{S}" stroke-width="2.5" stroke-linejoin="round"/>'))
-    if shape != "duck":
+    if not floats:
         lc, ll = a.get("legs", "#f59e0b"), a.get("leg_len", 12)
         top = cy + ry - 3
         o.append(_st(5, "".join(f'<path d="M{lx},{top} L{lx},{top+ll} M{lx-4},{top+ll} L{lx+5},{top+ll}" stroke="{lc}" '
@@ -732,6 +847,10 @@ def _songbird_parts(a):
         f.append(f'<ellipse cx="{_n(hx+r*.15)}" cy="{_n(hy+r*.5)}" rx="{_n(r*.8)}" ry="{_n(r*.5)}" fill="{a["cheek"]}"/>')
     if a.get("cap"):
         f.append(f'<rect x="{hx-r}" y="{hy-r}" width="{2*r}" height="{_n(r*a.get("cap_h", .8))}" fill="{a["cap"]}"/>')
+    if a.get("head_patch"):  # big patch on the back of the head (bufflehead)
+        f.append(f'<ellipse cx="{_n(hx-r*.5)}" cy="{_n(hy-r*.2)}" rx="{_n(r*.42)}" ry="{_n(r*.5)}" fill="{a["head_patch"]}"/>')
+    if a.get("half_collar"):  # black crescent on the back of the neck (collared-dove)
+        f.append(f'<path d="M{_n(hx-r*.95)},{_n(hy+r*.25)} Q{_n(hx-r*.6)},{_n(hy+r*.75)} {_n(hx-r*.05)},{_n(hy+r*.8)}" stroke="{a["half_collar"]}" stroke-width="3.5" fill="none" stroke-linecap="round"/>')
     if a.get("crown_stripe"):  # a pale stripe along the middle of the crown (white-crowned & white-throated sparrows)
         f.append(f'<path d="M{_n(hx-r*.95)},{_n(hy-r*.5)} Q{_n(hx)},{_n(hy-r*.85)} {_n(hx+r*.6)},{_n(hy-r*.62)}" '
                  f'stroke="{a["crown_stripe"]}" stroke-width="2.6" fill="none" stroke-linecap="round"/>')
@@ -799,6 +918,9 @@ def _songbird_parts(a):
         d = f"M{_n(bx-1)},{_n(by-r*.22)} L{_n(bx+r*.95)},{_n(by)} L{_n(bx-1)},{_n(by+r*.22)} Z"
     elif bt == "needle":
         d = f"M{_n(bx-1)},{_n(by-1.6)} L{_n(bx+r*1.9)},{_n(by)} L{_n(bx-1)},{_n(by+1.6)} Z"
+    elif bt == "pouch":  # pelican: long flat bill with a pouch underneath
+        d = (f"M{_n(bx-2)},{_n(by-r*.25)} L{_n(bx+r*2)},{_n(by-r*.05)} Q{_n(bx+r*2.1)},{_n(by+r*.15)} {_n(bx+r*1.9)},{_n(by+r*.2)} "
+             f"Q{_n(bx+r*1)},{_n(by+r*.9)} {_n(bx-2)},{_n(by+r*.35)} Z")
     elif bt == "upturned":  # avocet
         d = (f"M{_n(bx-1)},{_n(by-r*.18)} Q{_n(bx+r*1.2)},{_n(by-r*.2)} {_n(bx+r*1.9)},{_n(by-r*.9)} "
              f"Q{_n(bx+r*1.1)},{_n(by+r*.15)} {_n(bx-1)},{_n(by+r*.2)} Z")
@@ -808,6 +930,8 @@ def _songbird_parts(a):
     else:
         d = f"M{_n(bx-1)},{_n(by-r*.24)} L{_n(bx+r*.5)},{_n(by)} L{_n(bx-1)},{_n(by+r*.24)} Z"
     beak = f'<path d="{d}" fill="{a["beak"]}" stroke="{S}" stroke-width="2" stroke-linejoin="round"/>'
+    if a.get("beak_ring"):  # grebe: dark ring around the bill
+        beak += f'<path d="M{_n(bx+r*.22)},{_n(by-r*.22)} L{_n(bx+r*.22)},{_n(by+r*.22)}" stroke="{a["beak_ring"]}" stroke-width="3"/>'
     if bt == "cone":
         beak += f'<path d="M{_n(bx-1)},{_n(by)} L{_n(bx+r*.6)},{_n(by)}" stroke="{S}" stroke-width="1.4"/>'
     o.append(_st(4, beak))
@@ -826,10 +950,12 @@ def _heron_parts(a):
     o.append(_st(1, f'<ellipse cx="50" cy="64" rx="28" ry="15" transform="rotate(-12 50 64)" fill="{a["body"]}" stroke="{S}" stroke-width="2.5"/>'))
     o.append(_st(3, f'<path class="cb-wing" d="M28,58 Q50,46 70,56 Q56,76 24,70 Q20,62 28,58 Z" fill="{a["wing"]}" stroke="{S}" stroke-width="2.2" stroke-linejoin="round"/>'))
     o.append(_st(2, f'<circle cx="86" cy="20" r="11" fill="{a["head"]}" stroke="{S}" stroke-width="2.5"/>'))
+    if a.get("cheek"):  # night heron: white cheek
+        o.append(_st(6, f'<ellipse cx="88" cy="25" rx="6" ry="3.5" fill="{a["cheek"]}"/>'))
     if a.get("plume"):
         o.append(_st(6, f'<path d="M80,13 Q90,9 96,15" stroke="{a["plume"]}" stroke-width="4" fill="none" stroke-linecap="round"/>'
                         f'<path d="M80,14 Q70,12 62,18" stroke="{a["plume"]}" stroke-width="3" fill="none" stroke-linecap="round"/>'))
-    o.append(_st(4, '<g class="bird-blink"><circle cx="89" cy="19" r="3.8" fill="#fde047" stroke="#1e293b" stroke-width="1.6"/>'
+    o.append(_st(4, f'<g class="bird-blink"><circle cx="89" cy="19" r="3.8" fill="{a.get("iris", "#fde047")}" stroke="#1e293b" stroke-width="1.6"/>'
                     '<circle cx="89.6" cy="19.3" r="1.7" fill="#0f172a"/></g>'))
     o.append(_st(4, f'<path d="M95,19 L119,23 L95,26 Z" fill="{a["beak"]}" stroke="{S}" stroke-width="2" stroke-linejoin="round"/>'))
     o.append(_st(6, '<ellipse cx="84" cy="25" rx="2.6" ry="1.5" fill="#fb7185" opacity="0.45"/>'))
@@ -950,13 +1076,15 @@ LIVE_CAMS = [
 ]
 
 # "type" says what a badge counts: birds checked off, best quiz score, Photo ID finds, puzzles solved,
-# or "art" = different Bird Book birds you drew well enough for Photo ID to recognize (likeness 60+).
+# "art" = different Bird Book birds you drew well enough for Photo ID to recognize (likeness 60+),
+# or "owlears" = perfect 8/8 rounds of the Sound quiz.
 # Listed easiest first (by goal), so the Prizes tab reads in order.
 PRIZE_BADGES = [
     {"id": "hatchling", "name": "Hatchling Spotter", "goal": 1, "emoji": "🥚", "color": "#94a3b8", "type": "spotted"},
     {"id": "photo_detective", "name": "Photo Detective", "goal": 1, "emoji": "🕵️", "color": "#14b8a6", "type": "photoid"},
     {"id": "fledgling", "name": "Fledgling Birder", "goal": 5, "emoji": "🐤", "color": "#22c55e", "type": "spotted"},
     {"id": "puzzle_pro", "name": "Puzzle Pro", "goal": 5, "emoji": "🧩", "color": "#6366f1", "type": "puzzle"},
+    {"id": "owl_ears", "name": "Owl Ears", "goal": 5, "emoji": "👂", "color": "#8b5cf6", "type": "owlears"},
     {"id": "quiz_whiz", "name": "Quiz Whiz", "goal": 8, "emoji": "🧠", "color": "#ec4899", "type": "quiz"},
     {"id": "master_artist", "name": "Master Artist", "goal": 10, "emoji": "🎨", "color": "#f97316", "type": "art"},
     {"id": "flock_leader", "name": "Flock Leader", "goal": 15, "emoji": "🐦", "color": "#0ea5e9", "type": "spotted"},
@@ -973,6 +1101,26 @@ TEXAS_PLACE_ID = 18                 # iNaturalist's id for the state of Texas
 DFW_CENTER = (32.78, -96.97)        # between Dallas and Fort Worth
 SIGHTING_RADIUS_KM = 50
 
+# Every iNaturalist request goes through inat_get(), which spaces them out (iNaturalist asks apps to stay
+# around 60 requests a minute and answers "429 too many" otherwise). If it still says 429, wait and retry.
+INAT_MIN_GAP = 1.0  # seconds between requests
+_inat_lock = threading.Lock()
+_inat_last = [0.0]
+
+def inat_get(url, **kwargs):
+    kwargs.setdefault("headers", HTTP_HEADERS)
+    for attempt in range(3):
+        with _inat_lock:
+            wait = _inat_last[0] + INAT_MIN_GAP - time.time()
+            if wait > 0:
+                time.sleep(wait)
+            _inat_last[0] = time.time()
+        r = requests.get(url, **kwargs)
+        if r.status_code != 429:
+            return r
+        time.sleep(3 * (attempt + 1))
+    return r
+
 _photo_cache = {}
 
 def fetch_inat_photo(scientific_name):
@@ -980,7 +1128,7 @@ def fetch_inat_photo(scientific_name):
     if scientific_name in _photo_cache:
         return _photo_cache[scientific_name]
     try:
-        r = requests.get(
+        r = inat_get(
             f"{INAT_API}/taxa",
             params={"q": scientific_name, "rank": "species", "per_page": 1},
             headers=HTTP_HEADERS, timeout=8,
@@ -1000,7 +1148,7 @@ def fetch_inat_photo(scientific_name):
 _season_cache = {}
 
 def _texas_month_counts(**taxon):
-    r = requests.get(f"{INAT_API}/observations/histogram", headers=HTTP_HEADERS, timeout=10, params={
+    r = inat_get(f"{INAT_API}/observations/histogram", headers=HTTP_HEADERS, timeout=10, params={
         **taxon, "place_id": TEXAS_PLACE_ID, "interval": "month_of_year", "date_field": "observed", "verifiable": "true"})
     r.raise_for_status()
     months = r.json()["results"]["month_of_year"]
@@ -1014,7 +1162,34 @@ def fetch_season(bird):
     if bird["id"] not in _season_cache:
         mine = _texas_month_counts(taxon_name=bird["inat"])
         _season_cache[bird["id"]] = [round(1000 * m / a, 2) if a else 0 for m, a in zip(mine, _season_cache["all"])]
+        save_season_file()
     return _season_cache[bird["id"]]
+
+# Season data hardly changes, so it's also saved to a file (not uploaded to GitHub) and reused for 30 days.
+# That way restarting the website doesn't ask iNaturalist for all ~95 birds again.
+SEASON_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "season_cache.json")
+SEASON_FILE_DAYS = 30
+_season_file_lock = threading.Lock()
+
+def save_season_file():
+    with _season_file_lock:
+        try:
+            with open(SEASON_FILE, "w", encoding="utf-8") as f:
+                json.dump({"saved": time.time(), "seasons": _season_cache}, f)
+        except OSError as e:
+            log.warning("Couldn't save %s: %s", SEASON_FILE, e)
+
+def load_season_file():
+    try:
+        with open(SEASON_FILE, encoding="utf-8") as f:
+            data = json.load(f)
+        if time.time() - data.get("saved", 0) < SEASON_FILE_DAYS * 86400:
+            _season_cache.update(data.get("seasons", {}))
+            log.info("Loaded season data for %d birds from %s.", len(_season_cache) - ("all" in _season_cache), SEASON_FILE)
+    except (OSError, ValueError):
+        pass  # no file yet (or a broken one): it will be downloaded again
+
+load_season_file()
 
 _cc_photo_cache = {}
 
@@ -1028,7 +1203,7 @@ def fetch_cc_photos(taxon_name, place_id=TEXAS_PLACE_ID):  # taxon_name: species
                   "photo_license": "cc-by,cc-by-nc,cc0", "per_page": 30, "order_by": "votes"}
         if place_id:
             params["place_id"] = place_id
-        r = requests.get(f"{INAT_API}/observations", headers=HTTP_HEADERS, timeout=10, params=params)
+        r = inat_get(f"{INAT_API}/observations", headers=HTTP_HEADERS, timeout=10, params=params)
         r.raise_for_status()
         photos = []
         for obs in r.json().get("results", []):
@@ -1044,9 +1219,9 @@ def fetch_taxon_photos(taxon):
     """The hand-picked photos iNaturalist curators chose to show what a bird looks like (clear, close-up).
     Only Creative-Commons ones; the first 3 are the most typical."""
     if taxon not in _taxon_photo_cache:
-        tid = taxon if isinstance(taxon, int) else requests.get(
+        tid = taxon if isinstance(taxon, int) else inat_get(
             f"{INAT_API}/taxa", headers=HTTP_HEADERS, timeout=10, params={"q": taxon, "per_page": 1}).json()["results"][0]["id"]
-        r = requests.get(f"{INAT_API}/taxa/{tid}", headers=HTTP_HEADERS, timeout=10)
+        r = inat_get(f"{INAT_API}/taxa/{tid}", headers=HTTP_HEADERS, timeout=10)
         r.raise_for_status()
         photos = [{"url": tp["photo"]["medium_url"], "credit": tp["photo"].get("attribution", "")}
                   for tp in r.json()["results"][0].get("taxon_photos", []) if tp["photo"].get("license_code")]
@@ -1068,7 +1243,7 @@ def fetch_sound_list(taxon):
     """Up to 12 recordings of a bird; taxon is a scientific name or an iNaturalist taxon id."""
     if taxon not in _sound_list_cache:
         which = {"taxon_id": taxon} if isinstance(taxon, int) else {"taxon_name": taxon}
-        r = requests.get(f"{INAT_API}/observations", headers=HTTP_HEADERS, timeout=12, params={
+        r = inat_get(f"{INAT_API}/observations", headers=HTTP_HEADERS, timeout=12, params={
             **which, "sounds": "true", "quality_grade": "research", "sound_license": "cc-by,cc-by-nc,cc0",
             "per_page": 12, "order_by": "votes"})
         r.raise_for_status()
@@ -1195,45 +1370,110 @@ def _book_bird_for(taxon_name):
     """Match an iNaturalist name (maybe a subspecies, like 'Cardinalis cardinalis magnirostris') to our birds."""
     return BIRDS_BY_SCI.get(" ".join((taxon_name or "").lower().split()[:2]))
 
+SIGHTINGS_CACHE_SECONDS = 10  # the map re-checks every 10 s; everyone looking at the same area shares one answer
+
 def fetch_sightings(lat, lng, days):
-    """Recent wild-bird sightings around a point: map pins + the most-seen species. Cached 10 minutes."""
+    """Recent wild-bird sightings around a point: map pins + the most-seen species. Cached for 10 seconds."""
     key = (round(lat, 2), round(lng, 2), days)
     hit = _sightings_cache.get(key)
-    if hit and time.time() - hit[0] < 600:
+    if hit and time.time() - hit[0] < SIGHTINGS_CACHE_SECONDS:
         return hit[1]
     d1 = (datetime.date.today() - datetime.timedelta(days=days)).isoformat()
     area = {"iconic_taxa": "Aves", "lat": lat, "lng": lng, "radius": SIGHTING_RADIUS_KM, "d1": d1,
             "verifiable": "true", "captive": "false"}
     with ThreadPoolExecutor(2) as ex:
-        obs_job = ex.submit(requests.get, f"{INAT_API}/observations", headers=HTTP_HEADERS, timeout=15,
+        obs_job = ex.submit(inat_get, f"{INAT_API}/observations", headers=HTTP_HEADERS, timeout=15,
                             params={**area, "per_page": 200, "order_by": "observed_on", "photos": "true", "geo": "true"})
-        top_job = ex.submit(requests.get, f"{INAT_API}/observations/species_counts", headers=HTTP_HEADERS, timeout=15,
+        top_job = ex.submit(inat_get, f"{INAT_API}/observations/species_counts", headers=HTTP_HEADERS, timeout=15,
                             params={**area, "per_page": 8})
         obs_resp, top_resp = obs_job.result(), top_job.result()
     obs_resp.raise_for_status()
     top_resp.raise_for_status()
-    sightings = []
-    for o in obs_resp.json().get("results", []):
-        taxon, geo = o.get("taxon") or {}, o.get("geojson") or {}
-        if o.get("obscured") or geo.get("type") != "Point":
-            continue  # skip blurred locations (rare birds / private nests) so every pin is accurate
-        book = _book_bird_for(taxon.get("name"))
-        photo = (o.get("photos") or [{}])[0]
-        sightings.append({
-            "name": taxon.get("preferred_common_name") or taxon.get("name") or "Unknown bird",
-            "date": o.get("observed_on"), "lng": geo["coordinates"][0], "lat": geo["coordinates"][1],
-            "photo": photo.get("url"), "credit": photo.get("attribution", ""), "link": o.get("uri"),
-            "bird_id": book["id"] if book else None,
-        })
+    # (blurred locations of rare birds / private nests are skipped, so every pin is accurate)
+    sightings = [s for s in map(_sighting_from, obs_resp.json().get("results", [])) if s]
     top = []
     for t in top_resp.json().get("results", []):
         book = _book_bird_for(t["taxon"].get("name"))
         top.append({"name": t["taxon"].get("preferred_common_name") or t["taxon"].get("name"),
                     "count": t["count"], "bird_id": book["id"] if book else None})
-    data = {"total": obs_resp.json().get("total_results", 0), "sightings": sightings, "top": top,
-            "center": [lat, lng], "days": days, "radius_km": SIGHTING_RADIUS_KM}
+    # The newest 200 can miss Bird Book birds seen earlier in the period, so add each one's latest sighting too
+    shown = {s["bird_id"] for s in sightings if s["bird_id"]}
+    extras = [s for bid, s in book_extras(area, key).items() if bid not in shown]
+    data = {"total": obs_resp.json().get("total_results", 0), "sightings": sightings + extras, "extra_count": len(extras),
+            "top": top, "center": [lat, lng], "days": days, "radius_km": SIGHTING_RADIUS_KM}
     _sightings_cache[key] = (time.time(), data)
     return data
+
+# ---- One pin for every Bird Book bird seen in the area (not only the newest 200 sightings) ----
+# Collected slowly in a background thread (one request every couple of seconds, so iNaturalist isn't flooded)
+# and kept for 10 minutes; the map's 10-second refresh picks them up as soon as they're ready.
+BOOK_EXTRAS_SECONDS = 600
+_book_extras = {}          # area key -> (time, {bird_id: sighting})
+_book_extras_busy = set()
+_taxon_ids = {}
+
+def book_taxon_id(bird):
+    """iNaturalist's number for a Bird Book bird (needed to search many birds in one request)."""
+    if bird["id"] not in _taxon_ids:
+        sci = bird["inat"].lower()
+        hit = next((s for s in north_texas_species() if s["sci"].lower() == sci), None)
+        if hit:
+            _taxon_ids[bird["id"]] = hit["taxon_id"]
+        else:
+            r = inat_get(f"{INAT_API}/taxa", headers=HTTP_HEADERS, timeout=10, params={"q": bird["inat"], "rank": "species", "per_page": 1})
+            r.raise_for_status()
+            _taxon_ids[bird["id"]] = r.json()["results"][0]["id"]
+    return _taxon_ids[bird["id"]]
+
+def _sighting_from(o):
+    taxon, geo = o.get("taxon") or {}, o.get("geojson") or {}
+    if o.get("obscured") or geo.get("type") != "Point":
+        return None
+    book = _book_bird_for(taxon.get("name"))
+    photo = (o.get("photos") or [{}])[0]
+    return {"name": taxon.get("preferred_common_name") or taxon.get("name") or "Unknown bird",
+            "date": o.get("observed_on"), "lng": geo["coordinates"][0], "lat": geo["coordinates"][1],
+            "photo": photo.get("url"), "credit": photo.get("attribution", ""), "link": o.get("uri"),
+            "bird_id": book["id"] if book else None}
+
+def _collect_book_extras(area, key):
+    try:
+        ids = {}
+        for b in TEXAS_BIRDS:
+            try:
+                ids[book_taxon_id(b)] = b
+            except Exception as e:
+                log.warning("No taxon id for %s: %s", b["name"], e)
+        # which Bird Book birds were seen here at all? (one request)
+        r = inat_get(f"{INAT_API}/observations/species_counts", headers=HTTP_HEADERS, timeout=20,
+                         params={**area, "taxon_id": ",".join(map(str, ids)), "per_page": 200})
+        r.raise_for_status()
+        found = {}
+        for x in r.json().get("results", []):
+            bird = ids.get(x["taxon"]["id"])
+            if not bird:
+                continue
+            time.sleep(BACKGROUND_PAUSE)  # be gentle with iNaturalist
+            o = inat_get(f"{INAT_API}/observations", headers=HTTP_HEADERS, timeout=15, params={
+                **area, "taxon_id": x["taxon"]["id"], "per_page": 5, "order_by": "observed_on", "photos": "true", "geo": "true"})
+            if o.ok:
+                s = next(filter(None, (_sighting_from(obs) for obs in o.json().get("results", []))), None)
+                if s:
+                    s["bird_id"] = bird["id"]
+                    found[bird["id"]] = s
+        _book_extras[key] = (time.time(), found)
+        log.info("Map extras for %s: %d Bird Book birds.", key, len(found))
+    except Exception as e:
+        log.warning("Map extras failed for %s: %s", key, e)
+    finally:
+        _book_extras_busy.discard(key)
+
+def book_extras(area, key):
+    hit = _book_extras.get(key)
+    if (not hit or time.time() - hit[0] > BOOK_EXTRAS_SECONDS) and key not in _book_extras_busy:
+        _book_extras_busy.add(key)
+        threading.Thread(target=_collect_book_extras, args=(area, key), daemon=True).start()
+    return hit[1] if hit else {}
 
 # ---- Every bird species of North Texas (for Bird of the Day) ----
 NORTH_TEXAS_RADIUS_KM = 150   # around Dallas–Fort Worth
@@ -1245,7 +1485,7 @@ def north_texas_species():
     research-grade iNaturalist sightings near DFW. About 320 birds. Cached for a day."""
     if _nt_species["list"] and time.time() - _nt_species["time"] < 86400:
         return _nt_species["list"]
-    r = requests.get(f"{INAT_API}/observations/species_counts", headers=HTTP_HEADERS, timeout=20, params={
+    r = inat_get(f"{INAT_API}/observations/species_counts", headers=HTTP_HEADERS, timeout=20, params={
         "iconic_taxa": "Aves", "lat": DFW_CENTER[0], "lng": DFW_CENTER[1], "radius": NORTH_TEXAS_RADIUS_KM,
         "quality_grade": "research", "captive": "false", "per_page": 500})
     r.raise_for_status()
@@ -1361,8 +1601,27 @@ def video_ok(video_id):
             return True  # can't check right now; show it and check again later
     return _video_ok[video_id]
 
+BACKGROUND_PAUSE = 1.5  # background jobs wait this long between iNaturalist calls, leaving room for the map
+
+def warm_seasons():
+    """Load every bird's month-by-month sightings (for the "most seen this month" order), gently, one by one.
+    Birds that fail (e.g. iNaturalist was busy) are tried again on the next pass."""
+    for _ in range(4):
+        missing = [b for b in TEXAS_BIRDS if b["id"] not in _season_cache]
+        for b in missing:
+            time.sleep(BACKGROUND_PAUSE)
+            try:
+                fetch_season(b)
+            except Exception as e:
+                log.warning("Season fetch failed for %s: %s", b["name"], e)
+        if all(b["id"] in _season_cache for b in TEXAS_BIRDS):
+            break
+        time.sleep(30)
+    log.info("Season data ready for %d of %d birds.", sum(1 for b in TEXAS_BIRDS if b["id"] in _season_cache), len(TEXAS_BIRDS))
+
 def warm_caches():
     """Runs once in the background at startup so the first visitor doesn't wait."""
+    threading.Thread(target=warm_seasons, daemon=True).start()
     try:
         north_texas_species()
     except Exception as e:
@@ -1750,6 +2009,7 @@ button { font-family:inherit; }
                         <button class="chip" data-habitat="open">🌾 Fields & Sky</button>
                         <button class="chip" data-habitat="night">🌙 Night</button>
                     </div>
+                    <p class="small" id="month-note" style="margin:12px 0 0;"></p>
                     <div class="book-container" id="bird-grid"></div>
                 </div>
             </section>
@@ -1792,7 +2052,7 @@ button { font-family:inherit; }
             <section id="tab-quiz" class="tab-content">
                 <div class="box">
                     <h2 class="tab-title">🎯 Bird Quiz</h2>
-                    <p class="muted">10 questions. Can you name the bird? Best score so far: <b id="quiz-best">0</b>/10</p>
+                    <p class="muted">Can you name the bird? Photos and Cartoons have 10 questions; Sounds has 8 real recordings. Get 8/8 in Sounds five times to earn the 👂 <b>Owl Ears</b> badge! Best score so far: <b id="quiz-best">0</b></p>
                     <div class="quiz-modes">
                         <button class="big-btn" onclick="startQuiz('photo')">📸 Real Photos</button>
                         <button class="big-btn warm" onclick="startQuiz('cartoon')">🎨 Cartoons</button>
@@ -1857,6 +2117,7 @@ button { font-family:inherit; }
                 <div class="box">
                     <h2 class="tab-title">✅ North Texas Bird Log & Checklist</h2>
                     <p class="muted">Check off every bird as you spot them outdoors! <b id="checklist-count">0</b> / <span class="bird-total">32</span> spotted.</p>
+                    <p class="small" id="month-note-checklist" style="margin:0;"></p>
                     <div class="progress-bar-outer"><div class="progress-bar-inner" id="checklist-progress-bar" style="width:0%;"></div></div>
                     <div class="checklist-grid" id="checklist-container"></div>
                 </div>
@@ -1902,13 +2163,14 @@ let allBirds=[], birdById={}, dailyBird=null, dailyPick={};
 let mode=store("chirpquest_mode", "demo");
 const MODE_NOTES={demo:"Demo: badges & Bird of the Day reset every time you refresh",
                   normal:"Normal: your progress is saved · new Bird of the Day every day"};
-const PROGRESS=["checked","quiz_best","photo_ids","puzzles","art"];
+const PROGRESS=["checked","quiz_best","photo_ids","puzzles","art","owl_ears"];
 const pkey=name=>(mode==="demo" ? "chirpquest_demo_" : "chirpquest_")+name;  // separate saves per mode
-let checkedSet, quizBest, photoIds, puzzlesSolved, artSet;  // artSet = Bird Book birds drawn well (Master Artist)
+let checkedSet, quizBest, photoIds, puzzlesSolved, artSet, owlEars;  // artSet = Bird Book birds drawn well (Master Artist)
+                                                                     // owlEars = perfect 8/8 Sound quizzes
 function loadProgress(){
     checkedSet=new Set(store(pkey("checked"), []));
     quizBest=store(pkey("quiz_best"), 0); photoIds=store(pkey("photo_ids"), 0); puzzlesSolved=store(pkey("puzzles"), 0);
-    artSet=new Set(store(pkey("art"), []));
+    artSet=new Set(store(pkey("art"), [])); owlEars=store(pkey("owl_ears"), 0);
 }
 function clearDemoProgress(){
     PROGRESS.forEach(n=>{ try{ localStorage.removeItem("chirpquest_demo_"+n); }catch(e){} });
@@ -1928,7 +2190,7 @@ function setMode(m){
     if(m==="demo") clearDemoProgress();
     loadProgress(); renderModeSwitch(); showDailyBird();
     // show the other mode's progress everywhere
-    if(allBirds.length){ renderChecklist(); allBirds.forEach(b=>$("card-"+b.id)?.classList.toggle("spotted",checkedSet.has(b.id))); }
+    if(allBirds.length){ renderChecklist(); sortListsByMonth(); allBirds.forEach(b=>$("card-"+b.id)?.classList.toggle("spotted",checkedSet.has(b.id))); }
     $("quiz-best").textContent=quizBest; $("puzzle-solved-count").textContent=puzzlesSolved; updateArtCount();
     if($("tab-prizes").classList.contains("active")) renderBadges();
 }
@@ -2164,14 +2426,28 @@ function initMap(){
         },()=>{ $("map-status").textContent="Location not shared — showing Dallas–Fort Worth."; });
     });
     loadSightings();
+    // Check for new sightings every 10 seconds, but only while the Welcome page is on screen
+    setInterval(()=>{ if(!document.hidden && $("tab-welcome").classList.contains("active")) loadSightings(true); }, MAP_REFRESH_MS);
 }
-async function loadSightings(){
-    $("map-status").textContent="loading sightings…";
+const MAP_REFRESH_MS=10000;
+let sightingsKey="";
+async function loadSightings(quiet){
+    if(!quiet) $("map-status").textContent="loading sightings…";
     try{
         const r=await fetch(`/api/sightings?lat=${mapState.lat}&lng=${mapState.lng}&days=${mapState.days}`);
         if(!r.ok) throw new Error(r.status);
-        lastSightings=await r.json(); drawSightings();
-    }catch(e){ $("map-status").textContent="Couldn't load sightings right now."; }
+        const d=await r.json(), key=d.total+"|"+d.sightings.map(s=>s.link).join(",");
+        // Only redraw when something changed, and never while someone is reading a pin's popup
+        if(quiet && (key===sightingsKey || birdMap.getContainer().querySelector(".leaflet-popup"))){ showMapUpdated(); return; }
+        sightingsKey=key; lastSightings=d; drawSightings();
+    }catch(e){ if(!quiet) $("map-status").textContent="Couldn't load sightings right now."; }
+}
+function showMapUpdated(){
+    const d=lastSightings; if(!d) return;
+    const when={1:"today",7:"this week",30:"this month"}[d.days];
+    const shown=d.sightings.filter(s=>!mapState.bookOnly||s.bird_id).length - (d.extra_count||0);
+    const extra=d.extra_count ? ` + ${d.extra_count} more Bird Book birds` : "";
+    $("map-status").textContent=`${d.total.toLocaleString()} bird sightings ${when} within ${d.radius_km} km · showing ${shown} newest${extra} · updated ${new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit", second:"2-digit"})}`;
 }
 // Map pins: a teal pin with the bird's cartoon face for Bird Book birds, a smaller gray "?" pin for every other bird.
 // Each kind of pin is drawn once as an image and reused.
@@ -2191,8 +2467,14 @@ function birdPinIcon(book){
     }
     return pinIcons[key];
 }
+let birdListReloaded=false;
 function drawSightings(){
     const d=lastSightings; if(!d) return;
+    // A Bird Book bird this page doesn't know yet (birds were added while it was open)? Reload the bird list once, then redraw.
+    if(!birdListReloaded && d.sightings.some(s=>s.bird_id && !birdById[s.bird_id])){
+        birdListReloaded=true;
+        fetch("/api/birds").then(r=>r.json()).then(list=>{ list.forEach(b=>{ if(!birdById[b.id]){ birdById[b.id]=b; allBirds.push(b); } }); drawSightings(); }).catch(()=>{});
+    }
     mapLayer.clearLayers();
     if(rangeCircle) rangeCircle.remove();
     rangeCircle=L.circle(d.center,{radius:d.radius_km*1000,color:"#14b8a6",weight:1.5,fillOpacity:0.04,dashArray:"6 6"}).addTo(birdMap);
@@ -2205,8 +2487,7 @@ function drawSightings(){
             <a href="${esc(s.link)}" target="_blank" rel="noopener">See it on iNaturalist ↗</a></div>`);
         mapLayer.addLayer(marker);
     });
-    const when={1:"today",7:"this week",30:"this month"}[d.days];
-    $("map-status").textContent=`${d.total.toLocaleString()} bird sightings ${when} within ${d.radius_km} km · showing ${shown.length} newest`;
+    showMapUpdated();
     const max=Math.max(1,...d.top.map(t=>t.count));
     $("top-list").innerHTML=d.top.map((t,i)=>`<li class="${t.bird_id?"book":""}">${i+1}. ${t.bird_id?esc(birdById[t.bird_id].emoji)+" ":""}${esc(t.name)} <b style="float:right;">${t.count}</b>
         <div class="top-bar" style="width:${Math.round(t.count/max*100)}%;"></div></li>`).join("") || "<li>No sightings yet — be the first!</li>";
@@ -2298,6 +2579,30 @@ async function loadSeason(bird){
         const names=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         box.innerHTML=`📅 Easiest to spot in Texas: <b>${names[best]}</b><svg viewBox="0 0 194 44">${bars}</svg>`;
     }catch(e){ box.textContent="📅 season chart unavailable"; }
+}
+
+// ---------- "most seen this month" order for the Bird Book and the checklist ----------
+// The server ranks the birds by how much people see them in Texas this month, so the order changes by itself each month.
+let monthOrder=null;
+function sortListsByMonth(){
+    if(!monthOrder) return;
+    const rank=id=>{ const i=monthOrder.indexOf(id); return i<0 ? 9999 : i; };  // birds still loading go last
+    for(const [boxId, prefix] of [["bird-grid","card-"], ["checklist-container","label-"]]){
+        const box=$(boxId);
+        [...box.children].sort((a,b)=>rank(a.id.slice(prefix.length))-rank(b.id.slice(prefix.length))).forEach(el=>box.appendChild(el));
+    }
+}
+async function applyMonthOrder(){
+    try{
+        const d=await (await fetch("/api/this_month")).json();
+        if(d.order.length){
+            monthOrder=d.order; sortListsByMonth();
+            const top=d.order.slice(0,3).map(id=>birdById[id]?.name).filter(Boolean).join(", ");
+            const note=`📅 Sorted by what people see most in Texas in ${d.month} (the order updates every month). Top right now: ${top}.`;
+            $("month-note").textContent=note; $("month-note-checklist").textContent=note;
+        }
+        if(!d.complete) setTimeout(applyMonthOrder, 15000);  // some birds' data is still loading
+    }catch(e){}
 }
 
 // ---------- checklist ----------
@@ -2431,7 +2736,8 @@ async function identifyPhoto(){
 let quiz=null;
 function startQuiz(mode){
     if(allBirds.length<4) return;
-    quiz={mode, n:0, total:10, score:0, streak:0, order:shuffle(allBirds).slice(0,10)};
+    const total = mode==="sound" ? 8 : 10;  // the Sound quiz is 8 questions (8/8 = a step toward Owl Ears)
+    quiz={mode, n:0, total, score:0, streak:0, order:shuffle(allBirds).slice(0,total)};
     nextQuestion();
 }
 async function nextQuestion(){
@@ -2463,10 +2769,19 @@ function answerQuestion(id){
 function finishQuiz(){
     const s=quiz.score, stage=$("quiz-stage");
     const newBest=s>quizBest; if(newBest){ quizBest=s; save(pkey("quiz_best"),s); $("quiz-best").textContent=s; }
-    const msg=s===10?"PERFECT! You're a bird genius! 🏆":s>=8?"Amazing birding skills! 🧠":s>=5?"Nice work — keep practicing! 🐤":"Every expert starts somewhere. Try the Bird Book, then play again! 📖";
-    stage.innerHTML=`<p style="font-size:3em;margin:10px 0;">${s>=8?"🏆":s>=5?"🎉":"🐣"}</p><h2 style="color:#0f766e;">You scored ${s} / ${quiz.total}</h2><p>${msg}</p>
-        ${newBest?"<p><b>🌟 New best score!</b></p>":""}<button class="big-btn" onclick="startQuiz('${quiz.mode}')">Play again</button>`;
-    if(s>=8) fireConfetti(stage);
+    const perfect=s===quiz.total, part=s/quiz.total;
+    let owl="";
+    if(quiz.mode==="sound" && perfect){
+        owlEars+=1; save(pkey("owl_ears"),owlEars);
+        owl = owlEars===5 ? "<p><b>👂 You earned the OWL EARS badge — you can name birds just by listening!</b></p>"
+            : `<p><b>👂 Perfect Sound quiz! ${Math.min(owlEars,5)}/5 toward the Owl Ears badge.</b></p>`;
+    }else if(quiz.mode==="sound"){
+        owl="<p class='small'>👂 Get all 8 right to count toward the Owl Ears badge.</p>";
+    }
+    const msg=perfect?"PERFECT! You're a bird genius! 🏆":part>=0.8?"Amazing birding skills! 🧠":part>=0.5?"Nice work — keep practicing! 🐤":"Every expert starts somewhere. Try the Bird Book, then play again! 📖";
+    stage.innerHTML=`<p style="font-size:3em;margin:10px 0;">${part>=0.8?"🏆":part>=0.5?"🎉":"🐣"}</p><h2 style="color:#0f766e;">You scored ${s} / ${quiz.total}</h2><p>${msg}</p>
+        ${owl}${newBest?"<p><b>🌟 New best score!</b></p>":""}<button class="big-btn" onclick="startQuiz('${quiz.mode}')">Play again</button>`;
+    if(part>=0.8) fireConfetti(stage);
 }
 
 // ---------- mystery bird puzzle ----------
@@ -2628,8 +2943,9 @@ async function renderBadges(){
     let badges=[]; try{ badges=await (await fetch("/api/prizes")).json(); }catch(e){ return; }
     const grid=$("badge-grid"); grid.innerHTML="";
     badges.forEach(b=>{
-        const have={quiz:quizBest, photoid:photoIds, puzzle:puzzlesSolved, art:artSet.size}[b.type] ?? checkedSet.size;
-        const unit={quiz:"best quiz score", photoid:"photos identified", puzzle:"puzzles solved", art:"birds drawn"}[b.type] || "birds spotted";
+        const have={quiz:quizBest, photoid:photoIds, puzzle:puzzlesSolved, art:artSet.size, owlears:owlEars}[b.type] ?? checkedSet.size;
+        const unit={quiz:"best quiz score", photoid:"photos identified", puzzle:"puzzles solved", art:"birds drawn",
+                    owlears:"perfect 8/8 Sound quizzes"}[b.type] || "birds spotted";
         const unlocked=have>=b.goal, card=document.createElement("div");
         card.className="badge-card"+(unlocked?" unlocked":""); card.style.setProperty("--badge-color",b.color);
         card.innerHTML=`<span class="badge-emoji">${esc(b.emoji)}</span><div class="badge-name">${esc(b.name)}</div><div class="badge-progress">${Math.min(have,b.goal)} / ${b.goal} ${unit}</div>`;
@@ -2650,7 +2966,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
         allBirds.forEach(b=>birdById[b.id]=b);
         document.querySelectorAll(".bird-total").forEach(el=>el.textContent=allBirds.length); $("bird-count").textContent=allBirds.length;
         showDailyBird();
-        renderBook(); renderChecklist(); initDrawTab();
+        renderBook(); renderChecklist(); initDrawTab(); applyMonthOrder();
     }catch(e){ console.error("Error loading birds:",e); }
     initMap();  // after birds load, so pins can show Bird Book emojis
     const startTab=location.hash.slice(1);
@@ -2767,6 +3083,15 @@ def get_season():
         log.warning("Season fetch failed for %s: %s", bird["name"], e)
         return jsonify({"error": "season data unavailable"}), 502
 
+@app.route("/api/this_month")
+def get_this_month():
+    """Bird Book birds ordered by how much people see them in Texas THIS month (it changes every month by itself)."""
+    m = datetime.date.today().month - 1
+    ready = [b for b in TEXAS_BIRDS if b["id"] in _season_cache]
+    ready.sort(key=lambda b: -_season_cache[b["id"]][m])
+    return jsonify({"month": datetime.date.today().strftime("%B"), "order": [b["id"] for b in ready],
+                    "complete": len(ready) == len(TEXAS_BIRDS)})
+
 @app.route("/api/sightings")
 def get_sightings():
     try:
@@ -2780,6 +3105,9 @@ def get_sightings():
         return jsonify(fetch_sightings(lat, lng, days))
     except Exception as e:
         log.warning("Sightings fetch failed: %s", e)
+        stale = _sightings_cache.get((round(lat, 2), round(lng, 2), days))
+        if stale:  # iNaturalist busy? keep showing the last good pins instead of an error
+            return jsonify(stale[1])
         return jsonify({"error": "sightings unavailable"}), 502
 
 @app.route("/api/quiz_photo")
@@ -2952,6 +3280,11 @@ def identify_photo():
                         "fun_fact": str(result.get("fun_fact", "")), "bird_id": book["id"] if book else None})
     name = str(result.get("name", "")).strip()
     book, local = _match_book_bird(name), _match_north_texas(name)
+    if book and not local:  # e.g. iNaturalist says "Western Cattle-Egret": match by scientific name instead
+        try:
+            local = next((s for s in north_texas_species() if s["sci"].lower() == book["inat"].lower()), None)
+        except Exception:
+            pass
     out = {"kind": kind, "name": name, "fun_fact": str(result.get("fun_fact", "")),
            "bird_id": book["id"] if book else None, "north_texas_count": local["count"] if local else None}
     if kind == "drawing":

@@ -9,6 +9,8 @@ venv/
 .venv/
 __pycache__/
 *.pyc
+# ChirpQuest's saved iNaturalist season data (re-downloaded automatically)
+season_cache.json
 .ipynb_checkpoints/
 
 # ================= Arduino build output =================

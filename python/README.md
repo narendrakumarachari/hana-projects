@@ -80,7 +80,7 @@ Every time after that, run `venv\Scripts\activate` first, then run programs with
 ### 04_ChirpQuest: bird-guide web app ⭐
 | File | What it is | Old name |
 |---|---|---|
-| [chirpquest.py](04_ChirpQuest/chirpquest.py) | **Current version.** Kids' guide to 73 North Texas birds: cartoon art, live sightings map, Wikipedia facts, "Pip the Cockatiel" AI chat and Photo ID (Google Gemini), a quiz, real photos, a checklist, videos and badges | `Chirpquestbrd.py` |
+| [chirpquest.py](04_ChirpQuest/chirpquest.py) | **Current version.** Kids' guide to 95 North Texas birds: cartoon art, live sightings map, Wikipedia facts, "Pip the Cockatiel" AI chat and Photo ID (Google Gemini), a quiz, real photos, a checklist, videos and badges | `Chirpquestbrd.py` |
 | [old_versions/chirpquest_v2_demo.py](04_ChirpQuest/old_versions/chirpquest_v2_demo.py) | Previous version (Sep 5, evening) | `demo chirpquest.py` |
 | [old_versions/chirpquest_v1.py](04_ChirpQuest/old_versions/chirpquest_v1.py) | First version (Aug 27) | `app.py` |
 

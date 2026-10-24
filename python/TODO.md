@@ -27,7 +27,7 @@ From the code review on **2026-09-26**. Details are in each folder's `README.md`
 
 ## 🟢 Ideas
 - [ ] One `settings` file (or `.env`) for the COM port and ESP32 IP, used by all the companion programs.
-- [ ] ChirpQuest: split into `templates/` and `static/`, (73 birds and real bird-call recordings are done).
+- [ ] ChirpQuest: split into `templates/` and `static/`, (95 birds and real bird-call recordings are done).
 - [ ] PetCareAgent: store the animal data in JSON, add appointment booking.
 - [ ] RoseLibrary: save checked-out books to a file.
 - [ ] `python-cpp.agent.md`: move it to `.github/agents/` if you want your AI assistant to pick it up.
