@@ -10,7 +10,7 @@ From the code review on **2026-09-26**. Details are in each folder's `README.md`
 - [x] Added `requirements.txt`, `.gitignore`, `.env.example` and READMEs
 
 ## 🔴 Important
-- [ ] **ChirpQuest**: chat text is inserted as raw HTML. Switch to `textContent` (see `04_ChirpQuest/README.md`).
+- [x] **ChirpQuest**: chat text is inserted as raw HTML. Switch to `textContent` (see `04_ChirpQuest/README.md`).
 - [ ] **Gemini keys**: three different keys were written in old files. In Google AI Studio (<https://aistudio.google.com/apikey>), delete the ones you no longer use, and keep only the one in `.env`.
 - [x] Board code for `web_led_brightness_slider.py` found in the class chat → `arduino/LED_Brightness_WebSlider`.
 - [ ] **Missing Arduino sketches**: find and save the board-side code for `serial_clock_sender.py`, `serial_sensor_reader.py` and `web_tft_animation_noticeboard.py`.
@@ -27,7 +27,7 @@ From the code review on **2026-09-26**. Details are in each folder's `README.md`
 
 ## 🟢 Ideas
 - [ ] One `settings` file (or `.env`) for the COM port and ESP32 IP, used by all the companion programs.
-- [ ] ChirpQuest: split into `templates/` and `static/`, add more birds and real bird-call recordings.
+- [ ] ChirpQuest: split into `templates/` and `static/`, and add real bird-call recordings (55 birds are done).
 - [ ] PetCareAgent: store the animal data in JSON, add appointment booking.
 - [ ] RoseLibrary: save checked-out books to a file.
 - [ ] `python-cpp.agent.md`: move it to `.github/agents/` if you want your AI assistant to pick it up.
