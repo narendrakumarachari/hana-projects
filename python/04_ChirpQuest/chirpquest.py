@@ -2,17 +2,22 @@
 # (cartoon birds, live iNaturalist sightings map, Wikipedia facts, Gemini chat + Photo ID, quiz, videos)
 
 import base64
+import contextlib
 import datetime
+import hashlib
 import json
 import os
 import random
 import re
+import secrets
+import sqlite3
 import threading
 import time
 import logging
 from concurrent.futures import ThreadPoolExecutor
 import requests
-from flask import Flask, Response, jsonify, request
+from flask import Flask, Response, jsonify, request, session
+from werkzeug.security import check_password_hash, generate_password_hash
 
 # Load GEMINI_API_KEY from the .env file next to this script (never uploaded).
 try:
@@ -56,10 +61,16 @@ PIP_SYSTEM_PROMPT = (
     "Answer questions about North Texas birds (and birds in general) like a warm, patient expert talking to a curious kid under 10. "
     "Always give a complete, natural 2-4 sentence answer — never trail off or stop mid-thought. "
     "If you don't know something, say you're still learning instead of guessing. "
-    "Add one or two bird emojis naturally, not on every sentence."
+    "Add one or two bird emojis naturally, not on every sentence. "
+    "ChirpQuest has these tabs: Welcome, Ask Pip (chatting with you), Bird Book, Photo ID, Bird Quiz, Bird Puzzle, Draw Birds, "
+    "Checklist, Showtime (videos) and Prizes (badges). The Welcome page also has cards (not tabs) for Bird Facts, Bird of the Day, "
+    "Bird Sounds, Birding Weather and a live bird map. "
+    "When the kid asks you to introduce yourself, say hi, say you're Pip the cockatiel, ChirpQuest's guide to North Texas birds, "
+    "and suggest two or three fun things to try."
 )
 
-def call_gemini(user_message, retries=None, transient_retries=2, model_index=0):
+def call_gemini(user_message, retries=None, transient_retries=2, model_index=0, system=None):
+    """system: Pip's instructions for this chat (see pip_instructions); defaults to PIP_SYSTEM_PROMPT."""
     if retries is None:
         retries = len(GEMINI_API_KEYS)
     key = get_current_gemini_key()
@@ -72,7 +83,7 @@ def call_gemini(user_message, retries=None, transient_retries=2, model_index=0):
     url = GEMINI_URL_TEMPLATE.format(model=model)
     payload = {
         "contents": [{"parts": [{"text": user_message}]}],
-        "systemInstruction": {"parts": [{"text": PIP_SYSTEM_PROMPT}]},
+        "systemInstruction": {"parts": [{"text": system or PIP_SYSTEM_PROMPT}]},
         "generationConfig": {
             "maxOutputTokens": 2048,
             "temperature": 0.8,
@@ -92,12 +103,12 @@ def call_gemini(user_message, retries=None, transient_retries=2, model_index=0):
             log.warning("Gemini error %s — rotating key and retrying.", resp.status_code)
             rotate_gemini_key()
             return call_gemini(user_message, retries=retries - 1, transient_retries=transient_retries,
-                               model_index=model_index)
+                               model_index=model_index, system=system)
 
         if resp.status_code in (404, 500, 502, 503, 504) and has_next_model:
             log.warning("Gemini model %s returned %s — trying the next model.", model, resp.status_code)
             return call_gemini(user_message, retries=retries, transient_retries=transient_retries,
-                               model_index=model_index + 1)
+                               model_index=model_index + 1, system=system)
 
         if resp.status_code in (500, 502, 503, 504) and transient_retries > 0:
             log.warning(
@@ -106,7 +117,7 @@ def call_gemini(user_message, retries=None, transient_retries=2, model_index=0):
             )
             time.sleep(1.5)
             return call_gemini(user_message, retries=retries, transient_retries=transient_retries - 1,
-                               model_index=model_index)
+                               model_index=model_index, system=system)
 
         resp.raise_for_status()
         data = resp.json()
@@ -139,11 +150,11 @@ def call_gemini(user_message, retries=None, transient_retries=2, model_index=0):
         if isinstance(e, requests.exceptions.Timeout) and has_next_model:
             log.warning("Gemini model %s timed out — trying the next model.", model)
             return call_gemini(user_message, retries=retries, transient_retries=transient_retries,
-                               model_index=model_index + 1)
+                               model_index=model_index + 1, system=system)
         if transient_retries > 0:
             log.warning("Gemini network error (%s) — retrying (%d attempt(s) left).", e, transient_retries)
             return call_gemini(user_message, retries=retries, transient_retries=transient_retries - 1,
-                               model_index=model_index)
+                               model_index=model_index, system=system)
         log.error("Gemini request failed after retries: %s", e)
         return generate_bot_reply_fallback(user_message)
     except requests.exceptions.RequestException as e:
@@ -1480,18 +1491,35 @@ NORTH_TEXAS_RADIUS_KM = 150   # around Dallas–Fort Worth
 MIN_SIGHTINGS = 25            # skips rare strays that only showed up once or twice
 _nt_species = {"time": 0, "list": []}
 
+# Escaped pets and farm birds get logged as "wild" on iNaturalist too (budgies, chickens, peafowl, farm geese,
+# Muscovy Ducks...). So a bird iNaturalist calls introduced in Texas only counts if it's on this list of
+# birds that really live wild around DFW. Any new escaped pet is left out automatically.
+WILD_INTRODUCED_OK = {
+    "Passer domesticus",     # House Sparrow
+    "Sturnus vulgaris",      # European Starling
+    "Columba livia",         # Rock Pigeon
+    "Streptopelia decaocto", # Eurasian Collared-Dove
+    "Anas platyrhynchos",    # Mallard (native; iNaturalist also counts park ducks)
+    "Myiopsitta monachus",   # Monk Parakeet (real wild colonies in Dallas)
+}
+
 def north_texas_species():
-    """Every wild bird species (native or not, like the European Starling) with at least MIN_SIGHTINGS
-    research-grade iNaturalist sightings near DFW. About 320 birds. Cached for a day."""
+    """Every wild bird species (native, or introduced and truly wild like the European Starling) with at least
+    MIN_SIGHTINGS research-grade iNaturalist sightings near DFW. About 300 birds. Cached for a day."""
     if _nt_species["list"] and time.time() - _nt_species["time"] < 86400:
         return _nt_species["list"]
-    r = inat_get(f"{INAT_API}/observations/species_counts", headers=HTTP_HEADERS, timeout=20, params={
-        "iconic_taxa": "Aves", "lat": DFW_CENTER[0], "lng": DFW_CENTER[1], "radius": NORTH_TEXAS_RADIUS_KM,
-        "quality_grade": "research", "captive": "false", "per_page": 500})
+    area = {"iconic_taxa": "Aves", "lat": DFW_CENTER[0], "lng": DFW_CENTER[1], "radius": NORTH_TEXAS_RADIUS_KM,
+            "quality_grade": "research", "captive": "false", "per_page": 500}
+    r = inat_get(f"{INAT_API}/observations/species_counts", headers=HTTP_HEADERS, timeout=20, params=area)
     r.raise_for_status()
+    intro = inat_get(f"{INAT_API}/observations/species_counts", headers=HTTP_HEADERS, timeout=20,
+                     params={**area, "place_id": TEXAS_PLACE_ID, "introduced": "true"})
+    intro.raise_for_status()
+    not_wild = {x["taxon"]["id"] for x in intro.json()["results"] if x["taxon"]["name"] not in WILD_INTRODUCED_OK}
     species = [{"taxon_id": x["taxon"]["id"], "name": x["taxon"].get("preferred_common_name") or x["taxon"]["name"],
                 "sci": x["taxon"]["name"], "count": x["count"], "wiki": x["taxon"].get("wikipedia_url")}
-               for x in r.json()["results"] if x["count"] >= MIN_SIGHTINGS and x["taxon"].get("rank") == "species"]
+               for x in r.json()["results"] if x["count"] >= MIN_SIGHTINGS and x["taxon"].get("rank") == "species"
+               and x["taxon"]["id"] not in not_wild]
     species.sort(key=lambda s: s["taxon_id"])  # fixed order, so the same date always picks the same bird
     _nt_species.update(time=time.time(), list=species)
     log.info("North Texas bird list: %d species.", len(species))
@@ -1778,6 +1806,11 @@ button { font-family:inherit; }
 .check-item:hover { background:#f0fdf4; border-color:#14b8a6; color:#0f766e; }
 .check-item input { width:20px; height:20px; accent-color:#0f766e; cursor:pointer; }
 .check-item.checked { background:#dcfce7; border-color:#22c55e; }
+.check-item.counter { cursor:default; justify-content:space-between; }
+.check-name { min-width:0; }
+.seen-count { display:block; font-size:0.75em; font-weight:normal; color:#64748b; margin-top:2px; }
+.check-item.checked .seen-count { color:#15803d; font-weight:bold; }
+.check-item.counter .mini-btn { flex-shrink:0; }
 .progress-bar-outer { background:#e2e8f0; border-radius:10px; height:14px; margin-top:20px; overflow:hidden; }
 .progress-bar-inner { background:linear-gradient(90deg,#14b8a6,#22c55e,#14b8a6); background-size:200% 100%; height:100%; border-radius:10px; animation:shine 2.5s linear infinite; transition:width 0.6s ease; }
 
@@ -1797,6 +1830,37 @@ button { font-family:inherit; }
 .chat-send-btn:disabled, .big-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 .big-btn.alt { background:#0ea5e9; } .big-btn.alt:hover { background:#0284c7; }
 .big-btn.warm { background:#f59e0b; } .big-btn.warm:hover { background:#d97706; }
+.big-btn.danger { background:#dc2626; } .big-btn.danger:hover { background:#b91c1c; }
+
+/* ACCOUNTS (login window) + bottom message */
+.modal-back { position:fixed; inset:0; background:rgba(15,23,42,0.45); display:flex; align-items:center; justify-content:center; padding:16px; z-index:100; }
+.modal-back[hidden] { display:none; }
+.modal-card { position:relative; background:#fff; border:3px solid #99f6e4; border-radius:24px; padding:24px 26px; width:min(380px,100%); box-sizing:border-box; max-height:calc(100vh - 32px); overflow:auto; box-shadow:0 20px 40px rgba(0,0,0,0.25); animation:popIn 0.25s ease-out; }
+.modal-card h2 { color:#0f766e; margin:0 26px 6px 0; font-size:1.25em; overflow-wrap:anywhere; }
+.modal-x { position:absolute; top:12px; right:14px; border:none; background:none; font-size:1.1em; color:#64748b; cursor:pointer; }
+.acct-form label { display:block; font-weight:bold; font-size:0.85em; color:#334155; margin:12px 0 4px; }
+.acct-form input { width:100%; box-sizing:border-box; padding:9px 12px; border:2px solid #cbd5e1; border-radius:12px; font-size:0.95em; font-family:inherit; }
+.acct-form input:focus { outline:none; border-color:#14b8a6; box-shadow:0 0 0 3px rgba(20,184,166,0.2); }
+.acct-error { color:#b91c1c; font-weight:bold; font-size:0.85em; min-height:1.2em; margin:10px 0 0; }
+.acct-actions { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+.acct-actions .big-btn { padding:11px 18px; }
+.modal-card:has(.acct-list) { width:min(520px,100%); }
+.times-up { z-index:90; background:rgba(15,23,42,0.85); }  /* under the account window, so a parent can still open it */
+.time-chip { font-size:0.72em; font-weight:bold; color:#0f766e; background:#f0fdfa; border:2px solid #99f6e4; border-radius:999px; padding:3px 10px; }
+.time-chip.low { color:#b45309; background:#fffbeb; border-color:#fcd34d; }
+.time-chip[hidden] { display:none; }
+.acct-list { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+.acct-row { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:14px; padding:10px 12px; }
+.acct-row-info { min-width:0; overflow-wrap:anywhere; }
+.acct-row-info .small { display:block; }
+.acct-row-btns { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+.mini-btn.danger { color:#b91c1c; border-color:#fecaca; background:#fef2f2; }
+.mini-btn.danger:hover { background:#fee2e2; }
+.mini-input { padding:5px 9px; border:2px solid #cbd5e1; border-radius:10px; font-family:inherit; font-size:0.8em; width:150px; }
+.link-btn { background:none; border:none; color:#0f766e; text-decoration:underline; font-size:0.85em; cursor:pointer; padding:2px; }
+#cq-toast { position:fixed; left:50%; bottom:16px; transform:translate(-50%,10px); max-width:calc(100vw - 32px); box-sizing:border-box; display:flex; align-items:center; gap:10px; background:#0f172a; color:#e2e8f0; font-size:0.85em; padding:8px 10px 8px 14px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.25); opacity:0; pointer-events:none; transition:opacity 0.3s, transform 0.3s; z-index:60; }
+#cq-toast.show { opacity:0.97; transform:translate(-50%,0); pointer-events:auto; }
+#cq-toast button { background:#fbbf24; color:#0f172a; border:none; border-radius:8px; padding:4px 10px; font-weight:bold; cursor:pointer; white-space:nowrap; }
 .chat-suggest { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
 
 .sound-btn { background:#0ea5e9; color:#fff; border:none; padding:9px 16px; border-radius:12px; font-weight:bold; cursor:pointer; margin-top:10px; transition:background 0.2s,transform 0.1s; }
@@ -1878,6 +1942,25 @@ button { font-family:inherit; }
 </head>
 <body>
 <div id="now-playing" role="status"></div>
+<div id="cq-toast" role="status"></div>
+<div id="times-up" class="modal-back times-up" hidden>
+    <div class="modal-card" role="alertdialog" aria-labelledby="times-up-title" style="text-align:center;">
+        <p style="font-size:3em;margin:0;">⏰</p>
+        <h2 id="times-up-title" style="margin:6px 0;">Time's up for today!</h2>
+        <p id="times-up-text"></p>
+        <div class="acct-actions">
+            <button class="big-btn" type="button" onclick="checkTime()">🔄 Check again</button>
+            <button class="link-btn" type="button" onclick="openAccount('parent')">👪 Manage Accounts (parents only)</button>
+        </div>
+    </div>
+</div>
+<div id="account-modal" class="modal-back" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="account-title">
+        <button class="modal-x" type="button" onclick="closeAccount()" aria-label="Close">✕</button>
+        <h2 id="account-title"></h2>
+        <div id="account-body"></div>
+    </div>
+</div>
 <div class="bg-emoji" style="top:8%;left:4%;">🍃</div>
 <div class="bg-emoji" style="top:70%;left:90%;animation-delay:1.2s;">🍃</div>
 <div class="bg-emoji" style="top:40%;left:96%;animation-delay:2.4s;">☁️</div>
@@ -1906,19 +1989,21 @@ button { font-family:inherit; }
         <div class="content-container">
             <div class="mode-bar">
                 <span class="small" id="mode-note"></span>
+                <span class="time-chip" id="time-left" hidden></span>
+                <button class="mini-btn" id="account-btn" type="button">👤 Log in</button>
                 <div class="mode-switch" role="group" aria-label="Website mode">
-                    <button data-mode="demo" title="Badges & Bird of the Day reset every time you refresh">🎬 Demo</button>
-                    <button data-mode="normal" title="Progress is saved; Bird of the Day changes daily">💾 Normal</button>
+                    <button data-mode="demo" title="No account needed. Badges & Bird of the Day reset every time you refresh">🎬 Demo</button>
+                    <button data-mode="normal" title="Log in to save your progress; Bird of the Day changes daily">💾 Normal</button>
                 </div>
             </div>
             <!-- WELCOME -->
             <section id="tab-welcome" class="tab-content active">
                 <div class="box">
                     <div class="mascot-banner" id="banner">
-                        <div class="mascot-display" id="mascot-container" title="Click Pip!"></div>
+                        <div class="mascot-display" id="mascot-container" title="Click Pip to say hi!"></div>
                         <div style="min-width:0;">
                             <h2 id="banner-title" style="margin:0 0 5px 0;color:#0f766e;">Meet Pip the Cockatiel!</h2>
-                            <p id="banner-text" style="margin:0;color:#334155;font-size:0.95em;">Your official ChirpQuest guide. Ask Pip anything in the Ask Pip tab, or snap a bird photo in Photo ID! (Psst… click Pip.)</p>
+                            <p id="banner-text" style="margin:0;color:#334155;font-size:0.95em;">Your official ChirpQuest guide. Ask Pip anything in the Ask Pip tab, or snap a bird photo in Photo ID! (Psst… click Pip to say hi.)</p>
                             <p id="banner-next" class="small" style="margin:6px 0 0;"></p>
                         </div>
                         <div class="banner-photo" id="banner-photo"></div>
@@ -2116,7 +2201,7 @@ button { font-family:inherit; }
             <section id="tab-checklist" class="tab-content">
                 <div class="box">
                     <h2 class="tab-title">✅ North Texas Bird Log & Checklist</h2>
-                    <p class="muted">Check off every bird as you spot them outdoors! <b id="checklist-count">0</b> / <span class="bird-total">32</span> spotted.</p>
+                    <p class="muted"><span id="checklist-help"></span> <b id="checklist-count">0</b> / <span class="bird-total">32</span> different birds spotted<span id="checklist-sightings"></span>.</p>
                     <p class="small" id="month-note-checklist" style="margin:0;"></p>
                     <div class="progress-bar-outer"><div class="progress-bar-inner" id="checklist-progress-bar" style="width:0%;"></div></div>
                     <div class="checklist-grid" id="checklist-container"></div>
@@ -2157,42 +2242,284 @@ let artCounter=0;
 function birdArt(bird){ return bird.svg.replaceAll("__UID__", "u"+(++artCounter)); }  // unique clip-path ids per drawing
 
 let allBirds=[], birdById={}, dailyBird=null, dailyPick={};
-// 🎬 Demo mode: every page refresh is a fresh start — badges, checklist, quiz, Photo ID and puzzle progress
-//    reset and a random Bird of the Day is picked. Demo progress is kept apart, so it never touches Normal progress.
-// 💾 Normal mode: progress is saved (until there are accounts), and Bird of the Day changes once a day.
+// 🎬 Demo mode: no account needed. Every page refresh is a fresh start — badges, checklist, quiz, Photo ID and
+//    puzzle progress reset and a random Bird of the Day is picked. Nothing is saved anywhere.
+// 💾 Normal mode: log in with a username + password. Progress is saved to your account (on the ChirpQuest
+//    server), each "I saw one!" tap is one more sighting, and Bird of the Day changes once a day.
 let mode=store("chirpquest_mode", "demo");
-const MODE_NOTES={demo:"Demo: badges & Bird of the Day reset every time you refresh",
-                  normal:"Normal: your progress is saved · new Bird of the Day every day"};
-const PROGRESS=["checked","quiz_best","photo_ids","puzzles","art","owl_ears"];
-const pkey=name=>(mode==="demo" ? "chirpquest_demo_" : "chirpquest_")+name;  // separate saves per mode
-let checkedSet, quizBest, photoIds, puzzlesSolved, artSet, owlEars;  // artSet = Bird Book birds drawn well (Master Artist)
-                                                                     // owlEars = perfect 8/8 Sound quizzes
-function loadProgress(){
-    checkedSet=new Set(store(pkey("checked"), []));
-    quizBest=store(pkey("quiz_best"), 0); photoIds=store(pkey("photo_ids"), 0); puzzlesSolved=store(pkey("puzzles"), 0);
-    artSet=new Set(store(pkey("art"), [])); owlEars=store(pkey("owl_ears"), 0);
+let account=null;  // {username} while logged in
+const pkey=name=>(mode==="normal"&&account ? "user-"+account.username : "demo")+"-"+name;  // e.g. which badges already got confetti
+let checkedSet, seenCounts, quizBest, photoIds, puzzlesSolved, artSet, owlEars;
+// checkedSet = Bird Book birds spotted at least once · seenCounts = {bird id: times seen} (Normal only)
+// artSet = Bird Book birds drawn well (Master Artist) · owlEars = perfect 8/8 Sound quizzes
+function blankProgress(){
+    checkedSet=new Set(); seenCounts={}; quizBest=0; photoIds=0; puzzlesSolved=0; artSet=new Set(); owlEars=0;
+}
+async function loadProgress(){
+    blankProgress();
+    if(mode!=="normal") return;
+    try{
+        const d=await (await fetch("/api/progress")).json();
+        if(d.error) return;
+        seenCounts=d.seen; checkedSet=new Set(Object.keys(d.seen));
+        quizBest=d.quiz_best; photoIds=d.photo_ids; puzzlesSolved=d.puzzles; artSet=new Set(d.art); owlEars=d.owl_ears;
+    }catch(e){}
+}
+function saveProgress(){  // Demo progress only lives in this page; Normal progress goes to your account
+    if(mode!=="normal") return;
+    postJSON("/api/progress",{quiz_best:quizBest, photo_ids:photoIds, puzzles:puzzlesSolved, owl_ears:owlEars, art:[...artSet]});
+}
+async function postJSON(url, body){  // returns the server's answer, or {error}
+    try{
+        const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});
+        return await r.json();
+    }catch(e){ return {error:"Couldn't reach ChirpQuest. Is the website still running?"}; }
 }
 function clearDemoProgress(){
-    PROGRESS.forEach(n=>{ try{ localStorage.removeItem("chirpquest_demo_"+n); }catch(e){} });
     try{ sessionStorage.clear(); }catch(e){}
 }
-function startProgress(){
+async function startProgress(){
     clearDemoProgress();  // runs on every page load, so a refresh restarts the demo
-    loadProgress();
+    try{ account=(await (await fetch("/api/account")).json()).user; }catch(e){ account=null; }
+    if(mode==="normal" && !account){ mode="demo"; save("chirpquest_mode","demo"); }  // logged out → back to Demo
+    await loadProgress();
 }
 function renderModeSwitch(){
     document.querySelectorAll(".mode-switch button").forEach(b=>b.classList.toggle("on", b.dataset.mode===mode));
-    $("mode-note").textContent=MODE_NOTES[mode];
+    $("mode-note").textContent = mode==="normal"
+        ? `Normal: saved to ${account.username}'s account · new Bird of the Day every day`
+        : "Demo: badges & Bird of the Day reset every time you refresh";
+    $("account-btn").textContent = account ? "👤 "+account.username : "👤 Log in";
+    checkTime();  // ⏱️ time left today (and "Time's up" if it's used up)
 }
-function setMode(m){
+async function setMode(m){
     if(m===mode) return;
+    if(m==="normal" && !account){ openAccount("login"); return; }  // Normal mode needs an account
     mode=m; save("chirpquest_mode", m);
     if(m==="demo") clearDemoProgress();
-    loadProgress(); renderModeSwitch(); showDailyBird();
-    // show the other mode's progress everywhere
-    if(allBirds.length){ renderChecklist(); sortListsByMonth(); allBirds.forEach(b=>$("card-"+b.id)?.classList.toggle("spotted",checkedSet.has(b.id))); }
+    await loadProgress(); renderModeSwitch(); showDailyBird(); refreshProgressUI(); applyMonthOrder();
+}
+function refreshProgressUI(){  // show the current mode's (or account's) progress everywhere
+    if(allBirds.length){ renderChecklist(); allBirds.forEach(b=>$("card-"+b.id)?.classList.toggle("spotted",checkedSet.has(b.id))); }
     $("quiz-best").textContent=quizBest; $("puzzle-solved-count").textContent=puzzlesSolved; updateArtCount();
     if($("tab-prizes").classList.contains("active")) renderBadges();
+}
+
+// ---------- accounts (💾 Normal mode needs one; 🎬 Demo never does) ----------
+const field=(id,label,type,auto,extra="")=>`<label for="${id}">${label}</label><input id="${id}" type="${type}" autocomplete="${auto}" required ${extra}>`;
+const USER_FIELD='minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" autocapitalize="off" spellcheck="false"';
+const PASS_FIELD='minlength="6" maxlength="72"';
+const formEnd=(button, extra="")=>`<p class="acct-error" id="acct-error" role="alert"></p>
+    <div class="acct-actions"><button class="big-btn${extra}" type="submit">${button}</button>`;
+const backToMenu=`<button class="link-btn" type="button" onclick="openAccount('menu')">⬅ Back</button></div>`;
+const parentLink=`<button class="link-btn" type="button" onclick="openAccount('parent')">👪 Manage Accounts (parents only)</button>`;
+const plural=(n, word)=>`${n} ${word}${n===1?"":"s"}`;
+let parentAccounts=[], accountView=null;
+const ACCOUNT_VIEWS={
+    login:{title:()=>"💾 Log in for Normal mode", html:()=>`
+        <p class="small">Normal mode saves your sightings and badges to your account. 🎬 Demo mode works without one.</p>
+        <form class="acct-form" data-action="login">
+            ${field("acct-user","Username","text","username",'maxlength="20" autocapitalize="off" spellcheck="false"')}
+            ${field("acct-pass","Password","password","current-password",'maxlength="72"')}
+            ${formEnd("Log in")}
+            <button class="link-btn" type="button" onclick="openAccount('signup')">New here? Make an account</button>
+            ${parentLink}</div>
+        </form>`},
+    signup:{title:()=>"🐣 Make a ChirpQuest account", html:()=>`
+        <p class="small">🛡️ Don't use your real full name, and pick a password you don't use anywhere else.</p>
+        <form class="acct-form" data-action="signup">
+            ${field("acct-user","Username (3–20 letters, numbers or _)","text","username",USER_FIELD)}
+            ${field("acct-pass","Password (6 or more characters)","password","new-password",PASS_FIELD)}
+            ${field("acct-pass2","Type the password again","password","new-password",PASS_FIELD)}
+            ${formEnd("Make my account")}
+            <button class="link-btn" type="button" onclick="openAccount('login')">I already have an account</button></div>
+        </form>`},
+    menu:{title:()=>"👤 "+account.username, html:()=>`
+        <p class="small">You're logged in. Everything you do in 💾 Normal mode is saved to this account.</p>
+        <div class="acct-actions">
+            <button class="big-btn alt" onclick="openAccount('rename')">✏️ Change username</button>
+            <button class="big-btn alt" onclick="openAccount('password')">🔑 Change password</button>
+            <button class="big-btn alt" onclick="logOut()">👋 Log out</button>
+            ${parentLink}
+        </div>`},
+    rename:{title:()=>"✏️ Change username", html:()=>`
+        <form class="acct-form" data-action="rename">
+            ${field("acct-user","New username (3–20 letters, numbers or _)","text","username",USER_FIELD)}
+            ${field("acct-pass","Your password","password","current-password",'maxlength="72"')}
+            ${formEnd("Change username")}${backToMenu}
+        </form>`},
+    password:{title:()=>"🔑 Change password", html:()=>`
+        <form class="acct-form" data-action="password">
+            ${field("acct-pass","Current password","password","current-password",'maxlength="72"')}
+            ${field("acct-new","New password (6 or more characters)","password","new-password",PASS_FIELD)}
+            ${field("acct-pass2","Type the new password again","password","new-password",PASS_FIELD)}
+            ${formEnd("Change password")}${backToMenu}
+        </form>`},
+    // 👪 Manage Accounts: the parent password is PARENT_PASSWORD in the .env file. Only parents can delete accounts.
+    parent:{title:()=>"👪 Manage Accounts", html:()=>`
+        <p class="small">For parents only. See every ChirpQuest account, give a new password to a kid who forgot theirs, or delete an account.</p>
+        <form class="acct-form" data-action="parent">
+            ${field("acct-pass","Parent password","password","current-password",'maxlength="200"')}
+            ${formEnd("Unlock")}
+            <button class="link-btn" type="button" onclick="openAccount(account ? 'menu' : 'login')">⬅ Back</button></div>
+        </form>`},
+    manage:{title:()=>"👪 Manage Accounts", html:()=>`
+        <p class="small">${plural(parentAccounts.length,"account")}. This page locks again when you close it, or after 15 minutes.
+            Time limits are per day: type the minutes (30 is the shortest), or pick Unlimited.</p>
+        <div class="acct-list">${parentAccounts.map(a=>`
+            <div class="acct-row" data-user="${esc(a.username)}">
+                <div class="acct-row-info"><b>${esc(a.username)}</b>
+                    <span class="small">Made ${esc(a.created.slice(0,10))} · ${plural(a.birds,"bird")} · ${plural(a.sightings,"sighting")}</span>
+                    <span class="small">⏱️ ${a.daily_minutes ? `${a.daily_minutes} min a day` : "Unlimited time"} · ${a.used_today} min played today</span></div>
+                <div class="acct-row-btns"><button class="mini-btn" type="button" data-act="time">⏱️ Time limit</button>
+                    <button class="mini-btn" type="button" data-act="reset">🔑 New password</button>
+                    <button class="mini-btn danger" type="button" data-act="delete">🗑️ Delete</button></div>
+            </div>`).join("") || "<p class='muted'>No accounts yet.</p>"}</div>
+        <p class="acct-error" id="acct-error" role="alert"></p>
+        <div class="acct-actions"><button class="big-btn alt" type="button" onclick="closeAccount()">🔒 Lock and close</button></div>`},
+};
+const KID_VIEWS=["menu","rename","password"];
+function openAccount(view){
+    if(!account && KID_VIEWS.includes(view)) view="login";
+    if(account && ["login","signup"].includes(view)) view="menu";
+    accountView=view;
+    $("account-title").textContent=ACCOUNT_VIEWS[view].title();
+    $("account-body").innerHTML=ACCOUNT_VIEWS[view].html();
+    $("account-modal").hidden=false;
+    setTimeout(()=>$("account-body").querySelector("input, button")?.focus(), 50);
+}
+function closeAccount(){
+    if(accountView==="manage"){ postJSON("/api/parent/lock").then(()=>checkTime()); parentAccounts=[]; }  // closing Manage Accounts locks it
+    accountView=null; $("account-modal").hidden=true; $("account-body").innerHTML="";  // also wipes typed passwords
+}
+// Manage Accounts buttons: ⏱️ Time limit, 🔑 New password and 🗑️ Delete (each asks once more before doing anything)
+$("account-body").addEventListener("click", async e=>{
+    const btn=e.target.closest("[data-act]"); if(!btn) return;
+    const row=btn.closest(".acct-row"), user=row.dataset.user, btns=row.querySelector(".acct-row-btns"), act=btn.dataset.act;
+    if(act==="cancel") return openAccount("manage");
+    if(act==="time"){
+        const now=parentAccounts.find(a=>a.username===user)?.daily_minutes;
+        btns.innerHTML=`<input class="mini-input" type="number" min="30" max="1440" step="1" placeholder="Minutes a day (30+)" value="${now||""}" aria-label="Minutes a day for ${esc(user)}">
+            <button class="mini-btn" type="button" data-act="time-save">Save</button>
+            <button class="mini-btn" type="button" data-act="time-unlimited">Unlimited</button>
+            <button class="mini-btn" type="button" data-act="cancel">Cancel</button>`;
+        btns.querySelector("input").focus();
+        return;
+    }
+    if(act==="delete"){
+        btns.innerHTML=`<span class="small"><b>Delete ${esc(user)} and all their progress forever?</b></span>
+            <button class="mini-btn danger" type="button" data-act="delete-yes">Yes, delete</button><button class="mini-btn" type="button" data-act="cancel">Cancel</button>`;
+        return;
+    }
+    if(act==="reset"){
+        btns.innerHTML=`<input class="mini-input" type="password" autocomplete="new-password" placeholder="New password (6+)" maxlength="72" aria-label="New password for ${esc(user)}">
+            <button class="mini-btn" type="button" data-act="reset-save">Save</button><button class="mini-btn" type="button" data-act="cancel">Cancel</button>`;
+        btns.querySelector("input").focus();
+        return;
+    }
+    const typed=row.querySelector("input")?.value.trim() ?? "";
+    if(act==="time-save" && !typed) return $("acct-error").textContent="Type the minutes, or pick Unlimited.";
+    const calls={
+        "delete-yes":    ["/api/parent/delete",         {username:user}],
+        "reset-save":    ["/api/parent/reset_password", {username:user, new_password:typed}],
+        "time-save":     ["/api/parent/time_limit",     {username:user, minutes:Number(typed)}],
+        "time-unlimited":["/api/parent/time_limit",     {username:user, minutes:null}],
+    };
+    if(!calls[act]) return;
+    btn.disabled=true;
+    const d=await postJSON(...calls[act]);
+    btn.disabled=false;
+    if(d.error){
+        if(d.error.startsWith("Parents only")) openAccount("parent");  // 15 minutes are up
+        $("acct-error").textContent=d.error; return;
+    }
+    parentAccounts=d.accounts;
+    if((act==="delete-yes" || act==="reset-save") && account && account.username.toLowerCase()===user.toLowerCase()){
+        account=null;  // that kid was logged in on this computer
+        if(mode==="normal") await setMode("demo"); else renderModeSwitch();
+    }
+    openAccount("manage");
+    showToast({
+        "delete-yes":`🗑️ Deleted ${user}.`,
+        "reset-save":`🔑 New password saved for ${user}.`,
+        "time-save":`⏱️ ${user} can play ${d.minutes} minutes a day${Number(typed)<30 ? " (30 minutes is the shortest, so it was rounded up)" : ""}.`,
+        "time-unlimited":`⏱️ ${user} has unlimited time.`,
+    }[act]);
+});
+
+// ---------- ⏱️ daily play time (parents set it in Manage Accounts) ----------
+// While someone is logged in and the page is showing, each minute counts toward their daily limit.
+// When time's up, this computer shows "Time's up" for the rest of the day, in 🎬 Demo mode too.
+const TIMES_UP_KEY="chirpquest_times_up";
+const todayStr=()=>new Date().toLocaleDateString("en-CA");  // like 2026-10-25
+let warnedLow=false;
+async function checkTime(tick=false){
+    let d=null;
+    if(account){
+        try{ d=await (await fetch("/api/playtime",{method:tick?"POST":"GET"})).json(); }catch(e){ return; }
+        if(d.error) d=null;
+    }
+    const flag=store(TIMES_UP_KEY,null);
+    if(d ? d.times_up : flag?.date===todayStr()) showTimesUp(); else hideTimesUp();
+    const chip=$("time-left"), showChip=!!(d && d.limit!==null && !d.times_up);
+    chip.hidden=!showChip;
+    if(!showChip) return;
+    chip.textContent=`⏱️ ${d.left} min left today`; chip.classList.toggle("low", d.left<=5);
+    if(d.left<=5 && !warnedLow){ warnedLow=true; showToast(`⏰ Only ${plural(d.left,"minute")} left today!`); }
+}
+function showTimesUp(){
+    save(TIMES_UP_KEY,{date:todayStr()});
+    $("times-up-text").textContent=`${account ? account.username+", you've" : "You've"} used all of today's ChirpQuest time. Come back tomorrow, the birds will be waiting! 🐦`;
+    $("times-up").hidden=false;
+}
+function hideTimesUp(){
+    try{ localStorage.removeItem(TIMES_UP_KEY); }catch(e){}
+    $("times-up").hidden=true;
+}
+setInterval(()=>{ if(account && document.visibilityState==="visible") checkTime(true); }, 60000);
+async function logOut(){
+    await postJSON("/api/account/logout"); account=null; closeAccount();
+    if(mode==="normal") await setMode("demo"); else renderModeSwitch();
+    showToast("👋 Logged out. You're in 🎬 Demo mode.");
+}
+const ACCOUNT_CALLS={
+    login:   v=>["/api/account/login",  {username:v("acct-user"), password:v("acct-pass")}],
+    signup:  v=>["/api/account/signup", {username:v("acct-user"), password:v("acct-pass")}],
+    rename:  v=>["/api/account/change", {password:v("acct-pass"), new_username:v("acct-user")}],
+    password:v=>["/api/account/change", {password:v("acct-pass"), new_password:v("acct-new")}],
+    parent:  v=>["/api/parent/login",   {password:v("acct-pass")}],
+};
+$("account-body").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const form=e.target, action=form.dataset.action, v=id=>$(id)?.value ?? "", btn=form.querySelector("[type=submit]");
+    const say=msg=>{ $("acct-error").textContent=msg; };
+    if($("acct-pass2") && v("acct-pass2")!==v(action==="password" ? "acct-new" : "acct-pass")) return say("The two passwords don't match.");
+    btn.disabled=true;
+    const d=await postJSON(...ACCOUNT_CALLS[action](v));
+    btn.disabled=false;
+    if(d.error) return say(d.error);
+    if(action==="parent"){ parentAccounts=d.accounts; hideTimesUp(); return openAccount("manage"); }  // a parent is here
+    account=d.user; closeAccount();
+    if(action==="login" || action==="signup"){
+        await setMode("normal");
+        showToast(action==="signup" ? `🐣 Welcome, ${account.username}! You're in 💾 Normal mode.` : `👋 Hi, ${account.username}! Your progress is loaded.`);
+    }else{
+        renderModeSwitch();
+        showToast(action==="rename" ? `✏️ You're now ${account.username}.` : "🔑 Password changed.");
+    }
+});
+$("account-btn").addEventListener("click",()=>openAccount(account ? "menu" : "login"));
+$("account-modal").addEventListener("click",e=>{ if(e.target.id==="account-modal") closeAccount(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !$("account-modal").hidden) closeAccount(); });
+
+// small message at the bottom of the screen, with an optional Undo button
+let cqToastTimer=null;
+function showToast(text, undo){
+    const t=$("cq-toast");
+    t.innerHTML=`<span>${esc(text)}</span>${undo?'<button type="button">↩️ Undo</button>':""}`;
+    if(undo) t.querySelector("button").addEventListener("click",()=>{ t.classList.remove("show"); undo(); });
+    t.classList.add("show"); clearTimeout(cqToastTimer);
+    cqToastTimer=setTimeout(()=>t.classList.remove("show"), undo ? 8000 : 4000);
 }
 // Bird of the Day: any of ~320 North Texas birds (not only the Bird Book). Normal = same bird all day,
 // Demo = new on every refresh. Each mode's pick is remembered while the page is open.
@@ -2220,7 +2547,7 @@ function askAboutDailyBird(){
     openTab("chat"); askPip(`Tell me about the ${b.name}! Where can I see one in North Texas?`);
 }
 document.querySelectorAll(".mode-switch button").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));
-loadProgress();
+blankProgress();
 
 // ---------- tabs ----------
 document.querySelectorAll(".nav-btn").forEach(btn => btn.addEventListener("click", () => openTab(btn.dataset.tab)));
@@ -2232,6 +2559,7 @@ function openTab(name){
     if(name==="chat") setTimeout(()=>$("user-input")?.focus(),100);
     if(name==="prizes") renderBadges();
     if(name==="puzzle" && !pz) newPuzzle();
+    if((name==="book" || name==="checklist") && mode==="normal") applyMonthOrder();  // your new sightings can move birds up
     if(name==="welcome" && birdMap) setTimeout(()=>birdMap.invalidateSize(),50);
 }
 
@@ -2348,7 +2676,7 @@ function drawSpectrogram(){
     }
     if(performance.now()<specUntil) requestAnimationFrame(drawSpectrogram); else specRunning=false;
 }
-function pipWhistle(){ playSynthCall({call:{notes:[[1800,3200,.12,.04],[3200,2400,.12,.04],[2000,3600,.2,0]]}}); }
+function meetPip(){ openTab("chat"); askPip("Hi Pip! Can you introduce yourself?"); }  // clicking Pip on the Welcome page
 
 // ---------- facts ----------
 async function loadFacts(){
@@ -2504,7 +2832,7 @@ async function sendChatMessage(){
     typing.innerHTML='<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
     c.appendChild(typing); c.scrollTop=c.scrollHeight;
     try{
-        const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text})});
+        const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text, mode})});  // Normal mode: Pip can see your progress
         const data=await r.json(); typing.remove(); addChatMsg(data.reply,"bot-msg");
     }catch(e){ typing.remove(); addChatMsg("Chirp! Something ruffled my feathers. Try again?","bot-msg"); }
     finally{ btn.disabled=false; input.focus(); }
@@ -2594,11 +2922,13 @@ function sortListsByMonth(){
 }
 async function applyMonthOrder(){
     try{
-        const d=await (await fetch("/api/this_month")).json();
+        const d=await (await fetch("/api/this_month?mode="+mode)).json();  // Normal: your own sightings count too
         if(d.order.length){
             monthOrder=d.order; sortListsByMonth();
             const top=d.order.slice(0,3).map(id=>birdById[id]?.name).filter(Boolean).join(", ");
-            const note=`📅 Sorted by what people see most in Texas in ${d.month} (the order updates every month). Top right now: ${top}.`;
+            const note = d.personal
+                ? `📅 Sorted by what people see most in Texas in ${d.month}, plus the birds YOU saw most in ${d.month}. Top right now: ${top}.`
+                : `📅 Sorted by what people see most in Texas in ${d.month} (the order updates every month). Top right now: ${top}.`;
             $("month-note").textContent=note; $("month-note-checklist").textContent=note;
         }
         if(!d.complete) setTimeout(applyMonthOrder, 15000);  // some birds' data is still loading
@@ -2606,26 +2936,64 @@ async function applyMonthOrder(){
 }
 
 // ---------- checklist ----------
+// 🎬 Demo: tick and untick freely (nothing is saved). 💾 Normal: every "I saw one!" tap is one more sighting,
+// saved to your account, so you can log the same bird (hello, Rock Pigeons!) again and again.
+function seenText(id){ const n=seenCounts[id]||0; return n ? `Seen ${n}×` : "Not seen yet"; }
 function renderChecklist(){
-    const cl=$("checklist-container"); cl.innerHTML="";
+    const cl=$("checklist-container"), normal=mode==="normal"; cl.innerHTML="";
+    $("checklist-help").innerHTML = normal
+        ? "Saw a bird outdoors? Tap <b>👀 I saw one!</b> Every tap is one more sighting, so you can log the same bird again and again."
+        : "Check off every bird as you spot them outdoors! 🎬 In Demo mode you can tick and untick freely. It all resets when you refresh.";
     allBirds.forEach(bird=>{
         const on=checkedSet.has(bird.id);
-        cl.insertAdjacentHTML("beforeend",`<label class="check-item ${on?"checked":""}" id="label-${bird.id}">
-            <input type="checkbox" id="check-${bird.id}" ${on?"checked":""} onchange="setSpotted('${bird.id}', this.checked)">
-            <span>${esc(bird.emoji)} ${esc(bird.name)}</span></label>`);
+        cl.insertAdjacentHTML("beforeend", normal
+            ? `<div class="check-item counter ${on?"checked":""}" id="label-${bird.id}">
+                <span class="check-name">${esc(bird.emoji)} ${esc(bird.name)}<span class="seen-count" id="seen-${bird.id}">${seenText(bird.id)}</span></span>
+                <button class="mini-btn" onclick="addSighting('${bird.id}')">👀 I saw one!</button></div>`
+            : `<label class="check-item ${on?"checked":""}" id="label-${bird.id}">
+                <input type="checkbox" id="check-${bird.id}" ${on?"checked":""} onchange="setSpotted('${bird.id}', this.checked)">
+                <span>${esc(bird.emoji)} ${esc(bird.name)}</span></label>`);
     });
+    sortListsByMonth();
     updateChecklistProgress();
 }
-function setSpotted(id, on){
+function setSpotted(id, on){  // 🎬 Demo only
     if(on) checkedSet.add(id); else checkedSet.delete(id);
-    save(pkey("checked"),[...checkedSet]);
-    $("check-"+id).checked=on; $("label-"+id).classList.toggle("checked",on); $("card-"+id)?.classList.toggle("spotted",on);
+    if($("check-"+id)) $("check-"+id).checked=on;
+    showSpotted(id, on);
+}
+function showSpotted(id, on){
+    $("label-"+id)?.classList.toggle("checked",on); $("card-"+id)?.classList.toggle("spotted",on);
     updateChecklistProgress();
+}
+async function addSighting(id){  // 💾 Normal only: one more sighting, saved to your account
+    const d=await postJSON("/api/sighting",{bird_id:id});
+    if(d.error){ showToast("⚠️ "+d.error); return checkTime(); }  // maybe time's up
+    setSeen(id, d.seen);
+    const b=birdById[id];
+    showToast(`👀 ${b.emoji} ${b.name}: seen ${d.seen}×${d.seen===1?". A new bird for you! 🎉":""}`, ()=>undoSighting(id));
+}
+async function undoSighting(id){  // for a wrong tap (works for 2 minutes)
+    const d=await postJSON("/api/sighting/undo",{bird_id:id});
+    if(d.error) return showToast("⚠️ "+d.error);
+    setSeen(id, d.seen);
+    showToast(`↩️ Took back one ${birdById[id].name} sighting.`);
+}
+function setSeen(id, n){
+    if(n){ seenCounts[id]=n; checkedSet.add(id); } else { delete seenCounts[id]; checkedSet.delete(id); }
+    if($("seen-"+id)) $("seen-"+id).textContent=seenText(id);
+    showSpotted(id, n>0);
+}
+function spotButton(book){  // Photo ID's "I saw this bird" button
+    if(mode==="normal") return `<button class="mini-btn" onclick="addSighting('${book.id}');this.outerHTML='👀 Sighting added to your checklist!'">👀 I saw one! Add a sighting</button>`;
+    return checkedSet.has(book.id) ? "✅ Already spotted."
+        : `<button class="mini-btn" onclick="setSpotted('${book.id}',true);this.outerHTML='✅ Added to your checklist!'">✅ Mark as spotted</button>`;
 }
 function updateChecklistProgress(){
-    const total=allBirds.length||1;
+    const total=allBirds.length||1, sightings=Object.values(seenCounts).reduce((a,n)=>a+n,0);
     $("checklist-progress-bar").style.width=Math.round(checkedSet.size/total*100)+"%";
     $("checklist-count").textContent=checkedSet.size;
+    $("checklist-sightings").textContent = mode==="normal" ? ` · ${sightings} sighting${sightings===1?"":"s"} in all` : "";
 }
 
 // ---------- photo ID (Gemini vision) ----------
@@ -2711,7 +3079,7 @@ async function identifyPhoto(){
             let art="";
             if(sample) art="<p class='small'>That was a sample — draw your own bird to earn Master Artist! ✏️</p>";
             else if(d.counts_for_art && artSet.has(book.id)) art=`<p>🎨 You already drew a ${esc(book.name)} — draw a <b>different</b> bird to earn more!</p>`;
-            else if(d.counts_for_art){ artSet.add(book.id); save(pkey("art"),[...artSet]); updateArtCount();
+            else if(d.counts_for_art){ artSet.add(book.id); saveProgress(); updateArtCount();
                 art=`<p><b>🎨 +1 for Master Artist!</b> (${Math.min(artSet.size,10)}/10 different birds)${artSet.size===10?" 🏆 You're a Master Artist!":""}</p>`; fireConfetti(box); }
             else if(book) art=`<p>🎯 Score ${d.likeness_needed}+ to count toward Master Artist — try the tip above!</p>`;
             else art="<p class='small'>Draw a Bird Book bird to count toward Master Artist.</p>";
@@ -2721,12 +3089,12 @@ async function identifyPhoto(){
             return;
         }
         if(!d.is_bird){ box.innerHTML=`<h3>🤔 Hmm, no bird?</h3><p>${esc(d.fun_fact)}</p><p class="small">Is it a drawing? Pick "✏️ My drawing" above.</p>`; return; }
-        if(!sample){ photoIds+=1; save(pkey("photo_ids"),photoIds); }
+        if(!sample){ photoIds+=1; saveProgress(); }
         const conf=Math.max(0,Math.min(100,Number(d.confidence)||0));
         box.innerHTML=`<h3>${book?esc(book.emoji)+" ":"🐦 "}It looks like a ${esc(d.name)}!</h3>${meter(conf,`Pip is ${conf}% sure`)}
             <p><b>🔎 Clues:</b> ${esc(d.clues)}</p><p><b>💡 Fun fact:</b> ${esc(d.fun_fact)}</p>
             <p>${d.north_texas_count?`📍 Lives in North Texas — seen ${d.north_texas_count.toLocaleString()} times near DFW.`:"🧳 Not on the North Texas list — a rare visitor, or a bird from somewhere else!"} ${askBtn(d.name)}</p>
-            ${book?`<p>This bird is in your Bird Book! ${checkedSet.has(book.id)?"✅ Already spotted.":`<button class="mini-btn" onclick="setSpotted('${book.id}',true);this.outerHTML='✅ Added to your checklist!'">✅ Mark as spotted</button>`}</p>`:""}
+            ${book?`<p>This bird is in your Bird Book! ${spotButton(book)}</p>`:""}
             <p class="small">AI can make mistakes — check the Bird Book to compare field marks!</p>`;
     }catch(e){ box.innerHTML="<h3>Oops!</h3><p>Pip couldn't reach the AI. Try again!</p>"; }
     finally{ btn.disabled=false; }
@@ -2768,16 +3136,17 @@ function answerQuestion(id){
 }
 function finishQuiz(){
     const s=quiz.score, stage=$("quiz-stage");
-    const newBest=s>quizBest; if(newBest){ quizBest=s; save(pkey("quiz_best"),s); $("quiz-best").textContent=s; }
+    const newBest=s>quizBest; if(newBest){ quizBest=s; $("quiz-best").textContent=s; }
     const perfect=s===quiz.total, part=s/quiz.total;
     let owl="";
     if(quiz.mode==="sound" && perfect){
-        owlEars+=1; save(pkey("owl_ears"),owlEars);
+        owlEars+=1;
         owl = owlEars===5 ? "<p><b>👂 You earned the OWL EARS badge — you can name birds just by listening!</b></p>"
             : `<p><b>👂 Perfect Sound quiz! ${Math.min(owlEars,5)}/5 toward the Owl Ears badge.</b></p>`;
     }else if(quiz.mode==="sound"){
         owl="<p class='small'>👂 Get all 8 right to count toward the Owl Ears badge.</p>";
     }
+    if(newBest || (quiz.mode==="sound" && perfect)) saveProgress();
     const msg=perfect?"PERFECT! You're a bird genius! 🏆":part>=0.8?"Amazing birding skills! 🧠":part>=0.5?"Nice work — keep practicing! 🐤":"Every expert starts somewhere. Try the Bird Book, then play again! 📖";
     stage.innerHTML=`<p style="font-size:3em;margin:10px 0;">${part>=0.8?"🏆":part>=0.5?"🎉":"🐣"}</p><h2 style="color:#0f766e;">You scored ${s} / ${quiz.total}</h2><p>${msg}</p>
         ${owl}${newBest?"<p><b>🌟 New best score!</b></p>":""}<button class="big-btn" onclick="startQuiz('${quiz.mode}')">Play again</button>`;
@@ -2858,7 +3227,7 @@ $("puzzle-board").addEventListener("click",e=>{
 function peekPuzzle(on){ if(pz&&!pz.solved){ pz.peek=on; drawPuzzle(); } }
 function solvePuzzle(){
     pz.solved=true; pz.end=Date.now(); clearInterval(pzTimer);
-    puzzlesSolved+=1; save(pkey("puzzles"),puzzlesSolved); $("puzzle-solved-count").textContent=puzzlesSolved;
+    puzzlesSolved+=1; saveProgress(); $("puzzle-solved-count").textContent=puzzlesSolved;
     const b=pz.bird;
     $("puzzle-title").textContent=`🎉 It's a ${b.name}! ${b.emoji}`;
     $("puzzle-message").innerHTML=`You rebuilt it in <b>${pz.moves}</b> swaps! <br>💡 ${esc(b.marks[0])}.
@@ -2950,16 +3319,16 @@ async function renderBadges(){
         card.className="badge-card"+(unlocked?" unlocked":""); card.style.setProperty("--badge-color",b.color);
         card.innerHTML=`<span class="badge-emoji">${esc(b.emoji)}</span><div class="badge-name">${esc(b.name)}</div><div class="badge-progress">${Math.min(have,b.goal)} / ${b.goal} ${unit}</div>`;
         grid.appendChild(card);
-        let celebrated=false; try{ celebrated=!!sessionStorage.getItem("celebrated-"+b.id); sessionStorage.setItem("celebrated-"+b.id,"1"); }catch(e){}
+        let celebrated=false; try{ celebrated=!!sessionStorage.getItem(pkey("celebrated-"+b.id)); sessionStorage.setItem(pkey("celebrated-"+b.id),"1"); }catch(e){}
         if(unlocked && !celebrated) setTimeout(()=>fireConfetti(card),150);
     });
 }
 
 // ---------- start ----------
 document.addEventListener("DOMContentLoaded", async ()=>{
-    startProgress(); renderModeSwitch();
+    await startProgress(); renderModeSwitch();
     $("quiz-best").textContent=quizBest; $("puzzle-solved-count").textContent=puzzlesSolved;
-    try{ const m=await (await fetch("/api/mascot")).json(); $("mascot-container").innerHTML=m.svg; $("mascot-container").addEventListener("click",pipWhistle); }catch(e){}
+    try{ const m=await (await fetch("/api/mascot")).json(); $("mascot-container").innerHTML=m.svg; $("mascot-container").addEventListener("click",meetPip); }catch(e){}
     loadFacts(); loadVideos(); loadWeather(32.78,-96.97); loadHoliday();
     try{
         allBirds=await (await fetch("/api/birds")).json();
@@ -2992,7 +3361,253 @@ LOGO_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role
 WEB_PAGE = WEB_PAGE.replace("__LOGO__", LOGO_SVG)
 
 # ==========================================
-# 6. ROUTES
+# 6. ACCOUNTS (💾 Normal mode) + what Pip knows
+# ==========================================
+# 🎬 Demo needs no account and saves nothing. 💾 Normal needs a username + password, and saves
+# sightings, quiz scores, puzzles, drawings and badges to that account.
+# Everything lives in chirpquest_accounts.db next to this file (git-ignored, never uploaded).
+# Passwords are never saved — only a salted scrypt hash, so nobody (not even us) can read them.
+ACCOUNTS_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chirpquest_accounts.db")
+USERNAME_RULE = re.compile(r"^[A-Za-z0-9_]{3,20}$")
+PASSWORD_MIN, PASSWORD_MAX = 6, 72
+LOGIN_TRIES, LOGIN_WINDOW = 5, 300  # 5 wrong passwords in 5 minutes → that username has to wait
+UNDO_SECONDS = 120                   # a sighting can be taken back for 2 minutes (oops, wrong bird!)
+PROGRESS_COUNTERS = ("quiz_best", "photo_ids", "puzzles", "owl_ears")
+DUMMY_HASH = generate_password_hash("not-a-real-password")  # so a wrong username takes as long as a wrong password
+
+@contextlib.contextmanager
+def db():
+    con = sqlite3.connect(ACCOUNTS_DB, timeout=10)
+    con.row_factory = sqlite3.Row
+    con.execute("PRAGMA foreign_keys = ON")  # deleting an account deletes its progress too
+    try:
+        with con:  # commit if everything worked, undo if anything failed
+            yield con
+    finally:
+        con.close()
+
+def init_accounts_db():
+    """Creates the tables, and returns the secret key that signs login cookies (made once, then reused)."""
+    with db() as con:
+        con.executescript("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY, username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                pw_hash TEXT NOT NULL, created TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS progress (
+                user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, data TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS sightings (
+                id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                bird_id TEXT NOT NULL, seen_at REAL NOT NULL);
+            CREATE INDEX IF NOT EXISTS sightings_by_user ON sightings(user_id, bird_id);
+            CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS playtime (
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, day TEXT NOT NULL,
+                seconds INTEGER NOT NULL DEFAULT 0, last_tick REAL NOT NULL DEFAULT 0, PRIMARY KEY (user_id, day));
+        """)
+        if "daily_minutes" not in [r["name"] for r in con.execute("PRAGMA table_info(users)")]:
+            con.execute("ALTER TABLE users ADD COLUMN daily_minutes INTEGER")  # NULL = Unlimited
+        row = con.execute("SELECT value FROM settings WHERE key = 'secret_key'").fetchone()
+        if row:
+            return row["value"]
+        key = secrets.token_hex(32)
+        con.execute("INSERT INTO settings VALUES ('secret_key', ?)", (key,))
+        return key
+
+app.secret_key = init_accounts_db()
+# Login cookie: JavaScript can't read it, other websites can't send it, and it lasts 30 days.
+app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax",
+                  PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=30))
+
+def _session_tag(pw_hash):  # changes when the password changes, which logs out every other browser
+    return hashlib.sha256(pw_hash.encode()).hexdigest()[:16]
+
+def _log_in(user):
+    session.clear()
+    session.permanent = True
+    session["uid"], session["tag"] = user["id"], _session_tag(user["pw_hash"])
+
+def current_user():
+    uid = session.get("uid")
+    if not uid:
+        return None
+    with db() as con:
+        user = con.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
+    if not user or session.get("tag") != _session_tag(user["pw_hash"]):
+        session.clear()  # the account was deleted, or its password changed somewhere else
+        return None
+    return user
+
+def _json_body():
+    """Account requests must be JSON. A sneaky form on another website can't send JSON here."""
+    return request.get_json(silent=True) if request.is_json else None
+
+def _err(message, status=400):
+    return jsonify({"error": message}), status
+
+_login_fails = {}  # username → times of recent wrong passwords
+_login_lock = threading.Lock()
+
+def _too_many_tries(username):
+    now = time.time()
+    with _login_lock:
+        if len(_login_fails) > 1000:  # forget old tries, so the list can't grow forever
+            for name in [n for n, times in _login_fails.items() if now - max(times, default=0) > LOGIN_WINDOW]:
+                del _login_fails[name]
+        recent = [t for t in _login_fails.get(username.lower(), []) if now - t < LOGIN_WINDOW]
+        _login_fails[username.lower()] = recent
+        return len(recent) >= LOGIN_TRIES
+
+def _password_ok(user, password, username):
+    """Checks a password, counting wrong ones so nobody can guess forever."""
+    ok = check_password_hash(user["pw_hash"] if user else DUMMY_HASH, password) and user is not None
+    if not ok:
+        with _login_lock:
+            _login_fails.setdefault(username.lower(), []).append(time.time())
+    return ok
+
+def _check_new_username(name):
+    if not USERNAME_RULE.match(name):
+        return "Usernames are 3–20 letters, numbers or _ (no spaces)."
+    return None
+
+def _check_new_password(password):
+    if not PASSWORD_MIN <= len(password) <= PASSWORD_MAX:
+        return f"Passwords need {PASSWORD_MIN} to {PASSWORD_MAX} characters."
+    return None
+
+# ---- 👪 Manage Accounts (parents only) ----
+# The parent password lives ONLY in the .env file as PARENT_PASSWORD=..., so nobody can set or change it
+# from the website. Only Manage Accounts can delete accounts (or reset a forgotten password).
+PARENT_MINUTES = 15  # parent access locks again by itself after 15 minutes
+
+def _parent_password():
+    return os.environ.get("PARENT_PASSWORD", "")
+
+def _parent_ok():
+    pw = _parent_password()
+    return bool(pw) and session.get("parent") == _session_tag(pw) and session.get("parent_until", 0) > time.time()
+
+def account_list():
+    with db() as con:
+        rows = con.execute("""SELECT u.username, u.created, u.daily_minutes,
+                                     COUNT(s.id) AS sightings, COUNT(DISTINCT s.bird_id) AS birds,
+                                     (SELECT seconds FROM playtime p WHERE p.user_id = u.id AND p.day = ?) AS seconds_today
+                              FROM users u LEFT JOIN sightings s ON s.user_id = u.id
+                              GROUP BY u.id ORDER BY u.username COLLATE NOCASE""", (_today(),)).fetchall()
+    return [{**dict(r), "used_today": (r["seconds_today"] or 0) // 60} for r in rows]
+
+# ---- ⏱️ Daily play time (parents set it in Manage Accounts) ----
+# Each account can have a daily limit: Unlimited, or 30 minutes up to 24 hours. Shorter than 30 rounds up to 30.
+# While a 💾 Normal page is open and visible, it checks in once a minute and that minute counts.
+PLAY_MIN_MINUTES, PLAY_MAX_MINUTES = 30, 24 * 60
+TICK_SECONDS = 60
+
+def _today():
+    return datetime.date.today().isoformat()
+
+def clean_limit(minutes):
+    """None/"" = Unlimited; otherwise whole minutes from 30 to 24 hours (too small rounds up to 30)."""
+    if minutes in (None, "", "unlimited"):
+        return None
+    return max(PLAY_MIN_MINUTES, min(PLAY_MAX_MINUTES, round(float(minutes))))
+
+def playtime_status(user, tick=False):
+    """How much the kid played today. tick=True adds one minute (at most once a minute, even with two tabs open)."""
+    limit, now = user["daily_minutes"], time.time()
+    with db() as con:
+        row = con.execute("SELECT seconds, last_tick FROM playtime WHERE user_id = ? AND day = ?", (user["id"], _today())).fetchone()
+        seconds, last_tick = (row["seconds"], row["last_tick"]) if row else (0, 0)
+        if tick and now - last_tick >= TICK_SECONDS - 10 and (limit is None or seconds < limit * 60):
+            seconds += TICK_SECONDS
+            con.execute("INSERT OR REPLACE INTO playtime (user_id, day, seconds, last_tick) VALUES (?, ?, ?, ?)",
+                        (user["id"], _today(), seconds, now))
+    used = seconds // 60
+    return {"limit": limit, "used": used, "left": None if limit is None else max(0, limit - used),
+            "times_up": limit is not None and used >= limit}
+
+def _times_up(user):
+    return bool(user) and playtime_status(user)["times_up"]
+
+TIMES_UP = "⏰ Time's up for today! Come back tomorrow, the birds will be waiting. 🐦"
+
+def load_progress(user_id):
+    with db() as con:
+        row = con.execute("SELECT data FROM progress WHERE user_id = ?", (user_id,)).fetchone()
+        seen = con.execute("SELECT bird_id, COUNT(*) AS n FROM sightings WHERE user_id = ? GROUP BY bird_id",
+                           (user_id,)).fetchall()
+    data = json.loads(row["data"]) if row else {}
+    progress = {k: int(data.get(k, 0)) for k in PROGRESS_COUNTERS}
+    progress["art"] = [b for b in data.get("art", []) if b in BIRDS_BY_ID]
+    progress["seen"] = {r["bird_id"]: r["n"] for r in seen if r["bird_id"] in BIRDS_BY_ID}
+    return progress
+
+# Bird Book / Checklist order in 💾 Normal mode: the Texas season comes first, and the kid's own sightings
+# this month add up to half a point on top. So the very common birds stay near the top, but among birds
+# the season can't tell apart (most of the list), the ones YOU keep seeing move up. A bird that's common in
+# Texas this month but never shows up near you slowly gets passed by birds you really see.
+KID_SIGHTING_WEIGHT = 0.5
+
+def kid_month_counts(user, month):
+    """{bird id: times this kid logged it in this month of the year (any year)}."""
+    if not user:
+        return {}
+    with db() as con:
+        rows = con.execute("""SELECT bird_id, COUNT(*) AS n FROM sightings
+                              WHERE user_id = ? AND CAST(strftime('%m', seen_at, 'unixepoch', 'localtime') AS INTEGER) = ?
+                              GROUP BY bird_id""", (user["id"], month)).fetchall()
+    return {r["bird_id"]: r["n"] for r in rows}
+
+def _seen_count(con, user_id, bird_id):
+    return con.execute("SELECT COUNT(*) FROM sightings WHERE user_id = ? AND bird_id = ?",
+                       (user_id, bird_id)).fetchone()[0]
+
+# ---- What Pip knows about the Bird Book (and, in 💾 Normal mode, about your progress) ----
+HABITAT_LABELS = {"backyard": "Backyard", "water": "Water", "open": "Fields & Sky", "night": "Night"}
+
+def _book_for_pip():
+    groups = {}
+    for b in TEXAS_BIRDS:
+        groups.setdefault(HABITAT_LABELS.get(b["habitat"], b["habitat"].title()), []).append(b["name"])
+    lines = [f"- {label} ({len(names)}): " + ", ".join(names) for label, names in groups.items()]
+    return (f"\n\nTHE CHIRPQUEST BIRD BOOK has exactly {len(TEXAS_BIRDS)} birds, by habitat:\n" + "\n".join(lines) +
+            "\nOnly these birds are in the Bird Book. When the kid asks whether a bird is in the Bird Book, check this list "
+            "(some birds have two common names, like Rock Pigeon = Rock Dove; count those as the same bird). "
+            "If a bird isn't on the list, say kindly that it isn't in the Bird Book yet, still answer the question, "
+            "and if it helps, name a similar bird that IS in the book. Never say a bird is in the Bird Book unless it's on the list. "
+            "'My Bird Book' or 'your book' means this same ChirpQuest Bird Book, so questions about it (how many birds, "
+            "is a bird in it, which birds live in water) can always be answered, in any mode.")
+
+BOOK_FOR_PIP = _book_for_pip()
+
+def _badges_for_pip(progress):
+    have = {"spotted": len(progress["seen"]), "quiz": progress["quiz_best"], "photoid": progress["photo_ids"],
+            "puzzle": progress["puzzles"], "art": len(progress["art"]), "owlears": progress["owl_ears"]}
+    unit = {"spotted": "different birds spotted", "quiz": "best quiz score", "photoid": "photos identified",
+            "puzzle": "puzzles solved", "art": "different birds drawn", "owlears": "perfect 8/8 Sound quizzes"}
+    return "; ".join(f"{b['name']} {'✅ earned' if have[b['type']] >= b['goal'] else 'not yet'} "
+                     f"({min(have[b['type']], b['goal'])}/{b['goal']} {unit[b['type']]})" for b in PRIZE_BADGES)
+
+def pip_instructions(user=None):
+    """Pip's instructions for one chat message. user = the logged-in account in 💾 Normal mode, else None."""
+    text = PIP_SYSTEM_PROMPT + BOOK_FOR_PIP
+    if not user:
+        return text + ("\n\nThe kid is in 🎬 Demo mode, so you can't see which birds they've spotted or which badges they have. "
+                       "Only if they ask about THEIR OWN sightings or badges, tell them to switch to 💾 Normal mode and log in, "
+                       "and then you can help. Questions about the Bird Book itself, answer normally.")
+    progress = load_progress(user["id"])
+    seen = sorted(progress["seen"].items(), key=lambda kv: -kv[1])
+    seen_text = ", ".join(f"{BIRDS_BY_ID[b]['name']} ({n}×)" for b, n in seen) or "none yet"
+    not_seen = ", ".join(b["name"] for b in TEXAS_BIRDS if b["id"] not in progress["seen"]) or "none — they've seen every bird!"
+    return text + (
+        "\n\nTHE KID'S PROGRESS (💾 Normal mode, saved to their account):"
+        f"\n- Bird Book birds they've seen, with how many times: {seen_text}"
+        f"\n- Bird Book birds they haven't seen yet: {not_seen}"
+        f"\n- Badges: {_badges_for_pip(progress)}"
+        "\nUse this only when it helps answer the question (like 'Which birds haven't I seen yet?' or 'How close am I to a badge?'). "
+        "When suggesting birds to look for, pick a few not-yet-seen ones that are easy to find, unless they ask for the whole list.")
+
+# ==========================================
+# 7. ROUTES
 # ==========================================
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # Photo ID uploads (already shrunk in the browser)
 
@@ -3085,12 +3700,19 @@ def get_season():
 
 @app.route("/api/this_month")
 def get_this_month():
-    """Bird Book birds ordered by how much people see them in Texas THIS month (it changes every month by itself)."""
-    m = datetime.date.today().month - 1
+    """Bird Book birds ordered by how much people see them in Texas THIS month (it changes every month by itself).
+    💾 Normal mode also counts the kid's own sightings this month (see KID_SIGHTING_WEIGHT)."""
+    today = datetime.date.today()
+    m = today.month - 1
     ready = [b for b in TEXAS_BIRDS if b["id"] in _season_cache]
-    ready.sort(key=lambda b: -_season_cache[b["id"]][m])
-    return jsonify({"month": datetime.date.today().strftime("%B"), "order": [b["id"] for b in ready],
-                    "complete": len(ready) == len(TEXAS_BIRDS)})
+    top = max([_season_cache[b["id"]][m] for b in ready] + [0]) or 1
+    mine = kid_month_counts(current_user(), today.month) if request.args.get("mode") == "normal" else {}
+    kid_top = max(mine.values(), default=0) or 1
+    def score(b):  # season: 0..1 (1 = the most-seen bird in Texas this month) + kid: 0..KID_SIGHTING_WEIGHT
+        return _season_cache[b["id"]][m] / top + KID_SIGHTING_WEIGHT * mine.get(b["id"], 0) / kid_top
+    ready.sort(key=lambda b: -score(b))
+    return jsonify({"month": today.strftime("%B"), "order": [b["id"] for b in ready],
+                    "personal": bool(mine), "complete": len(ready) == len(TEXAS_BIRDS)})
 
 @app.route("/api/sightings")
 def get_sightings():
@@ -3297,17 +3919,242 @@ def identify_photo():
                    clues=str(result.get("clues", "")))
     return jsonify(out)
 
+# ---- accounts (💾 Normal mode) ----
+@app.route("/api/account")
+def get_account():
+    user = current_user()
+    return jsonify({"user": {"username": user["username"]} if user else None})
+
+@app.route("/api/account/signup", methods=["POST"])
+def signup():
+    data = _json_body()
+    if data is None:
+        return _err("Bad request.")
+    username, password = str(data.get("username", "")).strip(), str(data.get("password", ""))
+    problem = _check_new_username(username) or _check_new_password(password)
+    if problem:
+        return _err(problem)
+    try:
+        with db() as con:
+            cur = con.execute("INSERT INTO users (username, pw_hash, created) VALUES (?, ?, ?)",
+                              (username, generate_password_hash(password), datetime.datetime.now().isoformat(timespec="seconds")))
+            user = con.execute("SELECT * FROM users WHERE id = ?", (cur.lastrowid,)).fetchone()
+    except sqlite3.IntegrityError:
+        return _err("That username is taken. Try another one!")
+    _log_in(user)
+    log.info("New account: %s", username)
+    return jsonify({"user": {"username": user["username"]}})
+
+@app.route("/api/account/login", methods=["POST"])
+def login():
+    data = _json_body()
+    if data is None:
+        return _err("Bad request.")
+    username, password = str(data.get("username", "")).strip(), str(data.get("password", ""))
+    if _too_many_tries(username):
+        return _err("Too many wrong tries. Wait a few minutes, then try again.", 429)
+    with db() as con:
+        user = con.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+    if not _password_ok(user, password, username):
+        return _err("That username and password don't match.", 401)
+    _log_in(user)
+    return jsonify({"user": {"username": user["username"]}})
+
+@app.route("/api/account/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return jsonify({"ok": True})
+
+@app.route("/api/account/change", methods=["POST"])
+def change_account():
+    """A new username and/or a new password. Needs the current password."""
+    user, data = current_user(), _json_body()
+    if not user:
+        return _err("Please log in first.", 401)
+    if data is None:
+        return _err("Bad request.")
+    if _too_many_tries(user["username"]):
+        return _err("Too many wrong tries. Wait a few minutes, then try again.", 429)
+    if not _password_ok(user, str(data.get("password", "")), user["username"]):
+        return _err("Your current password isn't right.", 401)
+    new_name = str(data.get("new_username") or user["username"]).strip()
+    new_password = data.get("new_password")
+    problem = _check_new_username(new_name) or (_check_new_password(str(new_password)) if new_password is not None else None)
+    if problem:
+        return _err(problem)
+    pw_hash = generate_password_hash(str(new_password)) if new_password is not None else user["pw_hash"]
+    try:
+        with db() as con:
+            con.execute("UPDATE users SET username = ?, pw_hash = ? WHERE id = ?", (new_name, pw_hash, user["id"]))
+            user = con.execute("SELECT * FROM users WHERE id = ?", (user["id"],)).fetchone()
+    except sqlite3.IntegrityError:
+        return _err("That username is taken. Try another one!")
+    _log_in(user)  # stay logged in here; other browsers get logged out if the password changed
+    return jsonify({"user": {"username": user["username"]}})
+
+# ---- 👪 Manage Accounts (parents only; the parent password is PARENT_PASSWORD in .env) ----
+@app.route("/api/parent/login", methods=["POST"])
+def parent_login():
+    data = _json_body()
+    if data is None:
+        return _err("Bad request.")
+    pw = _parent_password()
+    if not pw:
+        return _err("A parent needs to set this up first: add a line PARENT_PASSWORD=your-password to the .env file, "
+                    "then restart ChirpQuest.", 503)
+    if _too_many_tries("👪parent"):
+        return _err("Too many wrong tries. Wait a few minutes, then try again.", 429)
+    if not secrets.compare_digest(str(data.get("password", "")).encode(), pw.encode()):
+        with _login_lock:
+            _login_fails.setdefault("👪parent", []).append(time.time())
+        return _err("That's not the parent password.", 401)
+    session.permanent = True
+    session["parent"], session["parent_until"] = _session_tag(pw), time.time() + PARENT_MINUTES * 60
+    return jsonify({"accounts": account_list(), "minutes": PARENT_MINUTES})
+
+@app.route("/api/parent/lock", methods=["POST"])
+def parent_lock():
+    session.pop("parent", None)
+    session.pop("parent_until", None)
+    return jsonify({"ok": True})
+
+@app.route("/api/parent/accounts")
+def parent_accounts():
+    if not _parent_ok():
+        return _err("Parents only. Enter the parent password again.", 403)
+    return jsonify({"accounts": account_list()})
+
+@app.route("/api/parent/delete", methods=["POST"])
+def parent_delete():
+    data = _json_body()
+    if not _parent_ok():
+        return _err("Parents only. Enter the parent password again.", 403)
+    username = str((data or {}).get("username", ""))
+    with db() as con:
+        gone = con.execute("DELETE FROM users WHERE username = ?", (username,)).rowcount  # progress + sightings go with it
+    if not gone:
+        return _err("That account doesn't exist.", 404)
+    log.info("Parent deleted account: %s", username)
+    return jsonify({"accounts": account_list()})
+
+@app.route("/api/parent/time_limit", methods=["POST"])
+def parent_time_limit():
+    """minutes: a number (under 30 rounds up to 30), or null for Unlimited."""
+    data = _json_body()
+    if not _parent_ok():
+        return _err("Parents only. Enter the parent password again.", 403)
+    try:
+        limit = clean_limit((data or {}).get("minutes"))
+    except (TypeError, ValueError, OverflowError):
+        return _err("Type a number of minutes, or pick Unlimited.")
+    with db() as con:
+        changed = con.execute("UPDATE users SET daily_minutes = ? WHERE username = ?",
+                              (limit, str((data or {}).get("username", "")))).rowcount
+    if not changed:
+        return _err("That account doesn't exist.", 404)
+    return jsonify({"accounts": account_list(), "minutes": limit})
+
+@app.route("/api/parent/reset_password", methods=["POST"])
+def parent_reset_password():
+    """For a kid who forgot their password. Logs that account out everywhere."""
+    data = _json_body()
+    if not _parent_ok():
+        return _err("Parents only. Enter the parent password again.", 403)
+    username, new_password = str((data or {}).get("username", "")), str((data or {}).get("new_password", ""))
+    problem = _check_new_password(new_password)
+    if problem:
+        return _err(problem)
+    with db() as con:
+        changed = con.execute("UPDATE users SET pw_hash = ? WHERE username = ?",
+                              (generate_password_hash(new_password), username)).rowcount
+    if not changed:
+        return _err("That account doesn't exist.", 404)
+    with _login_lock:
+        _login_fails.pop(username.lower(), None)  # let them log in right away
+    return jsonify({"accounts": account_list()})
+
+# ---- ⏱️ play time (💾 Normal mode) ----
+@app.route("/api/playtime", methods=["GET", "POST"])
+def playtime():
+    """GET = how much time is left today. POST = the page is open and visible: count one more minute."""
+    user = current_user()
+    if not user:
+        return _err("Please log in first.", 401)
+    return jsonify(playtime_status(user, tick=request.method == "POST"))
+
+# ---- progress (💾 Normal mode only; 🎬 Demo progress never leaves the page) ----
+@app.route("/api/progress", methods=["GET", "POST"])
+def progress():
+    user = current_user()
+    if not user:
+        return _err("Please log in first.", 401)
+    if request.method == "GET":
+        return jsonify(load_progress(user["id"]))
+    data = _json_body()
+    if data is None:
+        return _err("Bad request.")
+    if _times_up(user):
+        return _err(TIMES_UP, 403)
+    old = load_progress(user["id"])
+    new = {}
+    for k in PROGRESS_COUNTERS:  # scores only go up, so an old browser tab can't undo a badge
+        try:
+            new[k] = max(old[k], min(int(data.get(k, 0)), 1_000_000))
+        except (TypeError, ValueError):
+            new[k] = old[k]
+    art = data.get("art") if isinstance(data.get("art"), list) else []
+    new["art"] = sorted(set(old["art"]) | {b for b in art if b in BIRDS_BY_ID})
+    with db() as con:
+        con.execute("INSERT OR REPLACE INTO progress (user_id, data) VALUES (?, ?)", (user["id"], json.dumps(new)))
+    return jsonify({**new, "seen": old["seen"]})
+
+@app.route("/api/sighting", methods=["POST"])
+def add_sighting():
+    """💾 Normal mode: every tap is one more sighting, so you can log the same bird again and again."""
+    user, data = current_user(), _json_body()
+    if not user:
+        return _err("Please log in first.", 401)
+    if _times_up(user):
+        return _err(TIMES_UP, 403)
+    bird_id = str((data or {}).get("bird_id", ""))
+    if bird_id not in BIRDS_BY_ID:
+        return _err("That bird isn't in the Bird Book.")
+    with db() as con:
+        con.execute("INSERT INTO sightings (user_id, bird_id, seen_at) VALUES (?, ?, ?)", (user["id"], bird_id, time.time()))
+        seen = _seen_count(con, user["id"], bird_id)
+    return jsonify({"bird_id": bird_id, "seen": seen})
+
+@app.route("/api/sighting/undo", methods=["POST"])
+def undo_sighting():
+    """Takes back the newest sighting of a bird, but only within UNDO_SECONDS (for a wrong tap)."""
+    user, data = current_user(), _json_body()
+    if not user:
+        return _err("Please log in first.", 401)
+    bird_id = str((data or {}).get("bird_id", ""))
+    with db() as con:
+        row = con.execute("SELECT id, seen_at FROM sightings WHERE user_id = ? AND bird_id = ? ORDER BY seen_at DESC LIMIT 1",
+                          (user["id"], bird_id)).fetchone()
+        if not row or time.time() - row["seen_at"] > UNDO_SECONDS:
+            return _err("Too late to undo that one.")
+        con.execute("DELETE FROM sightings WHERE id = ?", (row["id"],))
+        seen = _seen_count(con, user["id"], bird_id)
+    return jsonify({"bird_id": bird_id, "seen": seen})
+
 @app.route("/api/chat", methods=["POST"])
 def chat():
     data = request.get_json() or {}
-    user_message = data.get("message", "")
+    user_message = str(data.get("message", ""))[:1000]
     log.info("Chat request: %r", user_message)
-    reply = call_gemini(user_message)
+    # Pip always knows the Bird Book; in 💾 Normal mode Pip also knows your sightings and badges.
+    user = current_user() if data.get("mode") == "normal" else None
+    if _times_up(user):
+        return jsonify({"reply": TIMES_UP, "times_up": True})
+    reply = call_gemini(user_message, system=pip_instructions(user))
     log.info("Chat reply: %r", reply)
     return jsonify({"reply": reply})
 
 # ==========================================
-# 7. RUNNER
+# 8. RUNNER
 # ==========================================
 if __name__ == "__main__":
     log.info("Starting ChirpQuest on http://127.0.0.1:5000")

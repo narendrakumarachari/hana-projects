@@ -3,6 +3,8 @@
 arduino_secrets.h
 # Python: API keys (python/04_ChirpQuest/.env.example is the template)
 .env
+# ChirpQuest accounts: usernames, password hashes and saved progress
+chirpquest_accounts.db*
 
 # ================= Python environment & caches =================
 venv/

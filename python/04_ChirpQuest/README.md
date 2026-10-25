@@ -23,17 +23,24 @@ GEMINI_API_KEY=your-key-here
 - `.env` is git-ignored, so it never reaches GitHub.
 - **No key?** The app still runs. Pip answers from a small built-in list (cardinal, owl, blue jay, hummingbird, hello).
 
+### 👪 Parent password
+**👪 Manage Accounts** (parents only) uses a password that lives only in the same `.env` file:
+```
+PARENT_PASSWORD=pick-a-parent-password
+```
+Nobody can set or change it from the website, so a kid (or anyone on a shared ngrok link) can't take it over. Without it, Manage Accounts says a parent needs to set it up. Restart ChirpQuest after changing `.env`.
+
 ## Features (the tabs in the app)
 | Tab | What it does | How |
 |---|---|---|
-| 🏠 Welcome | Pip mascot (click it to hear a whistle). **Bird Facts** are pulled live from Wikipedia and rewritten for kids by Gemini, each with a link to Cornell's *All About Birds*. **Bird of the Day**: a random bird from *all* ~320 wild species seen around North Texas (not just the Bird Book, and introduced birds like the European Starling count too), with a real photo, its sighting count, and an "Ask Pip about it" button. **Bird Sounds**: real recordings with a scrolling spectrogram, like Merlin's. **Birding Weather**: a 0–100 "birding score" plus sunrise and sunset. **Live Bird Map** of real bird sightings within 50 km over the last day, week or month (Bird Book birds get a teal map pin with their cartoon face; other birds get a smaller gray **?** pin; tap any pin for the photo). While the Welcome page is open, the map checks for new sightings **every 10 seconds** (it only redraws when something changed, and never while a pin's popup is open). Besides the newest 200 sightings, every Bird Book bird seen in the chosen time gets at least one pin (its latest sighting), collected slowly in the background and refreshed every 10 minutes, with a "Most-seen birds" chart and a 📍 Near me button | `/api/facts` (Wikipedia → Gemini, cached 12 h), `/api/bird_of_the_day?mode=` (iNaturalist species with ≥ 25 sightings within 150 km of DFW, cached 1 day), `/api/sightings` (iNaturalist, cached 10 s), Open-Meteo weather (browser), Leaflet + OpenStreetMap map |
-| 💬 Ask Pip | Chat with Pip: kid-friendly, 2–4 sentence answers, plus quick-question buttons | `/api/chat` → Gemini (see the models below) |
+| 🏠 Welcome | Pip mascot (click it to hear a whistle). **Bird Facts** are pulled live from Wikipedia and rewritten for kids by Gemini, each with a link to Cornell's *All About Birds*. **Bird of the Day**: a random bird from *all* ~300 wild species seen around North Texas (not just the Bird Book). Introduced birds count only if they really live wild here (House Sparrow, European Starling, Rock Pigeon, Eurasian Collared-Dove, Mallard, Monk Parakeet: `WILD_INTRODUCED_OK`), so escaped pets and farm birds like budgies, chickens, peafowl and Muscovy Ducks are left out, with a real photo, its sighting count, and an "Ask Pip about it" button. **Bird Sounds**: real recordings with a scrolling spectrogram, like Merlin's. **Birding Weather**: a 0–100 "birding score" plus sunrise and sunset. **Live Bird Map** of real bird sightings within 50 km over the last day, week or month (Bird Book birds get a teal map pin with their cartoon face; other birds get a smaller gray **?** pin; tap any pin for the photo). While the Welcome page is open, the map checks for new sightings **every 10 seconds** (it only redraws when something changed, and never while a pin's popup is open). Besides the newest 200 sightings, every Bird Book bird seen in the chosen time gets at least one pin (its latest sighting), collected slowly in the background and refreshed every 10 minutes, with a "Most-seen birds" chart and a 📍 Near me button | `/api/facts` (Wikipedia → Gemini, cached 12 h), `/api/bird_of_the_day?mode=` (iNaturalist species with ≥ 25 sightings within 150 km of DFW, cached 1 day), `/api/sightings` (iNaturalist, cached 10 s), Open-Meteo weather (browser), Leaflet + OpenStreetMap map |
+| 💬 Ask Pip | Chat with Pip: kid-friendly, 2–4 sentence answers, plus quick-question buttons. Pip knows exactly which 95 birds are in the Bird Book (and says so kindly when a bird isn't). In 💾 Normal mode Pip also knows your sightings and badges, so you can ask "Which birds haven't I seen yet?" | `/api/chat` → Gemini (see the models below); Pip's instructions come from `pip_instructions()` |
 | 📖 Bird Book | **95 species** (only 4 non-native ones, all very common: European Starling, House Sparrow, Rock Pigeon and Eurasian Collared-Dove), each with a **cartoon drawing made by code**. Tap it to see a real Creative-Commons photo. Each card also has 2 field marks, a 🔊 call, a 📅 chart of when the bird is easiest to spot in Texas, a ✏️ Draw it button, and an All About Birds link. Search box plus habitat filters (🏡 Backyard, 💧 Water, 🌾 Fields & Sky, 🌙 Night). The birds people see most in Texas **this month** come first (the Checklist uses the same order), and the order changes by itself every month (`/api/this_month`) | `/api/birds`, `/api/photo`, `/api/season` (iNaturalist sightings by month ÷ all Texas bird sightings, so busy months don't skew it) |
 | 📷 Photo ID | First pick **📷 A real bird**, **✏️ My drawing** or **❓ Something else**, then upload a picture (or try a sample). *Real bird:* Pip names **any** bird (not only Bird Book birds; it gets the ~320 North Texas species as a hint), says how sure it is and what clues it used, says whether the bird lives in North Texas, and offers to tick it off the checklist. *Drawing:* Pip says which species it looks like, gives a 0–100 looks-like score, what you got right and one tip. *Something else:* Pip describes the picture, and still spots any bird in it. Sample photos and drawings don't count toward badges | `/api/identify` (`kind` = bird / drawing / other) → Gemini vision (JSON answer); `/api/sample_photo` |
 | 🎯 Bird Quiz | 3 modes: 📸 real photos (10 questions), 🎨 cartoons (10), 🔊 sounds (8 real recordings). Shows score, streak and best score. Every perfect 8/8 Sound quiz counts toward the 👂 Owl Ears badge | `/api/quiz_photo` (CC-licensed Texas photos) |
 | ✏️ Draw Birds | Beginner step-by-step drawing guide for any Bird Book bird, made from its cartoon: 1 body → 2 head → 3 tail & wing → 4 eye & beak → 5 legs → 6 colors & markings. Each step is a pencil sketch with the new part in **blue**, and the last one is in full color. "Check my drawing" jumps to Photo ID | browser only (each part of a cartoon is tagged `data-step`) |
 | 🧩 Bird Puzzle | A mystery bird picture (real photo or cartoon) is cut into 3×3, 4×4 or 5×5 scrambled tiles. Tap two tiles to swap them; tiles in the right spot get a ✅. "Hold to peek" shows the whole picture. When it's solved, the bird is revealed. Counts swaps and time | browser `<canvas>`; photos from `/api/quiz_photo` |
-| ✅ Checklist | Tick off birds you've spotted, with a progress bar. Saved in the browser's `localStorage` | browser only |
+| ✅ Checklist | 🎬 Demo: tick off birds you've spotted. 💾 Normal: tap **👀 I saw one!** for every sighting (counts like "Seen 3×"), saved to your account. Progress bar plus "different birds spotted" and "sightings in all" | `/api/sighting`, `/api/sighting/undo` (Normal only) |
 | 📺 Showtime | **1 live bird cam + 6 random clips**, picked from 29 Cornell Lab / Nat Geo Kids videos and a new mix on every refresh. Deleted or non-embeddable videos are hidden automatically | `/api/videos` (YouTube oEmbed check) |
 | 🏆 Prizes | 10 badges, easiest first: Hatchling Spotter (1 bird) · **Photo Detective** (1 Photo ID) · Fledgling Birder (5 birds) · **Puzzle Pro** (5 puzzles) · **👂 Owl Ears** (5 perfect 8/8 Sound quizzes) · **Quiz Whiz** (a best score of 8+) · **🎨 Master Artist** (10 *different* Bird Book birds drawn with a looks-like score of 60+) · Flock Leader (15) · Master Birder (30) · ChirpQuest Legend (all 95) | `/api/prizes` |
 
@@ -43,13 +50,28 @@ Tabs have their own links, for example `http://127.0.0.1:5000/#quiz`.
 
 | | 🎬 Demo (for showing people) | 💾 Normal |
 |---|---|---|
-| Checklist, quiz, Photo ID and puzzle progress, so the badges | Reset every time you **refresh** the page | Saved (never reset) |
+| Account | Not needed | **Username + password** (👤 button at the top right) |
+| Checklist, quiz, Photo ID and puzzle progress, so the badges | Kept only in the open page: reset every time you **refresh** | Saved to your account on the ChirpQuest server |
+| ✅ Checklist | Tick and untick boxes freely | **👀 I saw one!** Every tap is one more sighting ("Seen 3×"), so you can log the same bird again and again. A wrong tap can be undone for 2 minutes |
+| Bird Book & Checklist order | Most seen in Texas this month | Same, **plus the birds you saw most this month** (see below) |
+| 💬 Pip knows | The Bird Book (which 95 birds are in it) | The Bird Book **and** your sightings and badges ("Which birds haven't I seen yet?") |
 | Bird of the Day (random, any North Texas bird) | A new random bird on every refresh | A random bird that stays the same all day (the date is the random seed) |
+| ⏱️ Daily time limit | None | Whatever a parent set in Manage Accounts |
 | Live bird sightings, facts, videos | Live in both modes | Live in both modes |
 
-How it works: Demo and Normal keep **separate saves** in the browser's `localStorage` (`chirpquest_demo_*` vs `chirpquest_*`). The demo save is wiped on every page load, so showing the demo to people never touches the real Normal progress. Switching modes swaps which save is shown. Starting Normal mode over will come with a future account system.
+**Accounts** (`/api/account/*`): sign up, log in, log out, change username, change password. Usernames are 3–20 letters, numbers or `_`; passwords are 6+ characters. Passwords are stored only as salted hashes (Werkzeug's scrypt), 5 wrong passwords in 5 minutes make that username wait, and changing a password logs that account out everywhere else. Everything is saved in `chirpquest_accounts.db` (SQLite, next to `chirpquest.py`, git-ignored). Kids can't delete accounts; only a parent can.
 
-**Pip** is drawn in the same cartoon style as the Bird Book birds: a gray cockatiel with a swaying yellow crest (a triangle with a straight front edge and a notched back edge), a yellow face, orange cheeks and a white wing patch. Click Pip to hear a whistle.
+**👪 Manage Accounts** (parents only; the link is in the 👤 window): unlock it with the parent password from `.env`. It lists every account (birds, sightings, minutes played today) and lets a parent:
+- set a **⏱️ daily time limit**: type the minutes (anything under 30 becomes 30, the most is 24 hours), or pick **Unlimited**;
+- give a new password to a kid who forgot theirs;
+- delete an account and all of its progress (it asks once more first).
+It locks again when you close it, or after 15 minutes.
+
+**⏱️ Time limits:** while someone is logged in and the page is showing, each minute counts toward today's limit (`/api/playtime`; two open tabs still count only once). The top bar shows "⏱️ 25 min left today", with a warning at 5 minutes. When time's up, a "Time's up for today" screen covers the page, **in Demo mode too on that computer**, until tomorrow or until a parent gives more time (then press 🔄 Check again). Sightings, saving progress and Pip are blocked on the server too. (Someone who never logs in can still use Demo mode; there's no way to time a person without an account.)
+
+**Order in 💾 Normal mode:** each bird gets its Texas season score for this month (0 to 1; 1 = the most-seen bird in Texas) plus up to **0.5** for how often *you* logged it in this month (`KID_SIGHTING_WEIGHT`). So the very common birds stay on top, but in the rest of the list, where season scores are close together, the birds you really see move up. A bird that's common in Texas this month but never shows up near you slowly gets passed by birds you do see. Example from testing: a Cattle Egret ranked #61 by season, logged 6 times, moved to #7. The order updates when you open the Bird Book or Checklist.
+
+**Pip** is drawn in the same cartoon style as the Bird Book birds: a gray cockatiel with a swaying yellow crest (a triangle with a straight front edge and a notched back edge), a yellow face, orange cheeks and a white wing patch. Click Pip on the Welcome page to jump to 💬 Ask Pip, where Pip introduces himself and suggests things to try.
 
 **🎉 Bird holidays:** on a bird holiday, Pip's banner on the Welcome page changes to "Happy *holiday*!" with a fun message, confetti, and a real photo of a matching bird from iNaturalist (a curated, Creative-Commons photo with the photographer's credit). On other days the banner shows how many days until the next bird holiday. Preview any day by adding `?date=` to the address, for example `http://127.0.0.1:5000/?date=2027-05-31`.
 
@@ -115,7 +137,7 @@ All three share the same `.env`.
 
 ### ✅ Before we start next time
 1. Get the latest code: `git pull` (or clone the repo again).
-2. Make sure `04_ChirpQuest/.env` exists and has a working `GEMINI_API_KEY`. Test the key first; if it's broken, get a new one at <https://aistudio.google.com/apikey> and change it **only in `.env`**, never in the code.
+2. Make sure `04_ChirpQuest/.env` exists and has a working `GEMINI_API_KEY`. Test the key first; if it's broken, get a new one at <https://aistudio.google.com/apikey> and change it **only in `.env`**, never in the code. The same file holds `PARENT_PASSWORD` for 👪 Manage Accounts.
 3. Run it: `python 04_ChirpQuest\chirpquest.py` and open <http://127.0.0.1:5000>.
 
 ### 🎯 Next up (planned Oct 24, 2026)
@@ -144,14 +166,5 @@ All three share the same `.env`.
 
 ### 💭 Maybe later
 - **3. Demo tour** *(probably not)*: in 🎬 Demo mode, every refresh shows a short "how to use ChirpQuest" walkthrough with Pip pointing at each part, plus a Skip button.
-- **Accounts:** so each person has their own saved progress, and Normal mode can be started over.
 - **Season data by place:** the season charts and the "most seen this month" order use all of Texas right now. They could use North Texas only, or wherever 📍 Near me is.
 - **Code cleanup:** split the HTML/CSS/JS out of `chirpquest.py` into `templates/` and `static/` files.
-
-### ✔️ Done
-- [x] Chat text is escaped (`textContent`), and the raw Gemini log line is at debug level.
-- [x] 95 birds with cartoons, real recorded calls, facts, season charts and drawing guides.
-- [x] New logo: the **Pip Badge**, also the browser-tab icon. The map-pin idea became the map's bird-face pins. Runner-up: "Lone Star Lookout".
-- [x] Live map that checks every 10 seconds, with a pin for every Bird Book bird seen.
-- [x] The birds seen most this month are listed first.
-- [x] Badges: Owl Ears, Master Artist, Puzzle Pro and more.
