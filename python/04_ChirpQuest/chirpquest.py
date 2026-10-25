@@ -1950,7 +1950,7 @@ button { font-family:inherit; }
         <p id="times-up-text"></p>
         <div class="acct-actions">
             <button class="big-btn" type="button" onclick="checkTime()">🔄 Check again</button>
-            <button class="link-btn" type="button" onclick="openAccount('parent')">👪 Manage Accounts (parents only)</button>
+            <button class="link-btn" type="button" onclick="openParent()">👪 Manage Accounts (parents only)</button>
         </div>
     </div>
 </div>
@@ -2312,7 +2312,7 @@ const PASS_FIELD='minlength="6" maxlength="72"';
 const formEnd=(button, extra="")=>`<p class="acct-error" id="acct-error" role="alert"></p>
     <div class="acct-actions"><button class="big-btn${extra}" type="submit">${button}</button>`;
 const backToMenu=`<button class="link-btn" type="button" onclick="openAccount('menu')">⬅ Back</button></div>`;
-const parentLink=`<button class="link-btn" type="button" onclick="openAccount('parent')">👪 Manage Accounts (parents only)</button>`;
+const parentLink=`<button class="link-btn" type="button" onclick="openParent()">👪 Manage Accounts (parents only)</button>`;
 const plural=(n, word)=>`${n} ${word}${n===1?"":"s"}`;
 let parentAccounts=[], accountView=null;
 const ACCOUNT_VIEWS={
@@ -2355,7 +2355,28 @@ const ACCOUNT_VIEWS={
             ${field("acct-pass2","Type the new password again","password","new-password",PASS_FIELD)}
             ${formEnd("Change password")}${backToMenu}
         </form>`},
-    // 👪 Manage Accounts: the parent password is PARENT_PASSWORD in the .env file. Only parents can delete accounts.
+    // 👪 Manage Accounts: a parent makes the parent password here the first time (only on the computer running
+    // ChirpQuest). Only parents can delete accounts.
+    parentsetup:{title:()=>"👪 Make a parent password", html:()=>`
+        <p class="small">There's no parent password yet. <b>A parent</b> should make it, and keep it secret. It unlocks Manage Accounts:
+            time limits, new passwords for kids, and deleting accounts.</p>
+        <form class="acct-form" data-action="parentsetup">
+            ${field("acct-pass","Parent password (6 or more characters)","password","new-password",PASS_FIELD)}
+            ${field("acct-pass2","Type it again","password","new-password",PASS_FIELD)}
+            ${formEnd("Make parent password")}
+            <button class="link-btn" type="button" onclick="openAccount(account ? 'menu' : 'login')">⬅ Back</button></div>
+        </form>`},
+    parentnotset:{title:()=>"👪 Manage Accounts", html:()=>`
+        <p>There's no parent password yet. A parent can make one in Manage Accounts on <b>the computer that runs ChirpQuest</b>.</p>
+        <div class="acct-actions"><button class="link-btn" type="button" onclick="openAccount(account ? 'menu' : 'login')">⬅ Back</button></div>`},
+    parentpw:{title:()=>"🔑 Change parent password", html:()=>`
+        <form class="acct-form" data-action="parentpw">
+            ${field("acct-pass","Current parent password","password","current-password",'maxlength="200"')}
+            ${field("acct-new","New parent password (6 or more characters)","password","new-password",PASS_FIELD)}
+            ${field("acct-pass2","Type the new one again","password","new-password",PASS_FIELD)}
+            ${formEnd("Change parent password")}
+            <button class="link-btn" type="button" onclick="openAccount('manage')">⬅ Back</button></div>
+        </form>`},
     parent:{title:()=>"👪 Manage Accounts", html:()=>`
         <p class="small">For parents only. See every ChirpQuest account, give a new password to a kid who forgot theirs, or delete an account.</p>
         <form class="acct-form" data-action="parent">
@@ -2376,8 +2397,14 @@ const ACCOUNT_VIEWS={
                     <button class="mini-btn danger" type="button" data-act="delete">🗑️ Delete</button></div>
             </div>`).join("") || "<p class='muted'>No accounts yet.</p>"}</div>
         <p class="acct-error" id="acct-error" role="alert"></p>
-        <div class="acct-actions"><button class="big-btn alt" type="button" onclick="closeAccount()">🔒 Lock and close</button></div>`},
+        <div class="acct-actions"><button class="big-btn alt" type="button" onclick="closeAccount()">🔒 Lock and close</button>
+            <button class="link-btn" type="button" onclick="openAccount('parentpw')">🔑 Change parent password</button></div>`},
 };
+async function openParent(){  // asks for the parent password, or lets a parent make one the first time
+    let s={set:true};
+    try{ s=await (await fetch("/api/parent/status")).json(); }catch(e){}
+    openAccount(s.set ? "parent" : s.can_set_here ? "parentsetup" : "parentnotset");
+}
 const KID_VIEWS=["menu","rename","password"];
 function openAccount(view){
     if(!account && KID_VIEWS.includes(view)) view="login";
@@ -2389,7 +2416,7 @@ function openAccount(view){
     setTimeout(()=>$("account-body").querySelector("input, button")?.focus(), 50);
 }
 function closeAccount(){
-    if(accountView==="manage"){ postJSON("/api/parent/lock").then(()=>checkTime()); parentAccounts=[]; }  // closing Manage Accounts locks it
+    if(accountView==="manage" || accountView==="parentpw"){ postJSON("/api/parent/lock").then(()=>checkTime()); parentAccounts=[]; }  // closing Manage Accounts locks it
     accountView=null; $("account-modal").hidden=true; $("account-body").innerHTML="";  // also wipes typed passwords
 }
 // Manage Accounts buttons: ⏱️ Time limit, 🔑 New password and 🗑️ Delete (each asks once more before doing anything)
@@ -2430,7 +2457,7 @@ $("account-body").addEventListener("click", async e=>{
     const d=await postJSON(...calls[act]);
     btn.disabled=false;
     if(d.error){
-        if(d.error.startsWith("Parents only")) openAccount("parent");  // 15 minutes are up
+        if(d.error.startsWith("Parents only")) await openParent();  // 15 minutes are up
         $("acct-error").textContent=d.error; return;
     }
     parentAccounts=d.accounts;
@@ -2488,17 +2515,24 @@ const ACCOUNT_CALLS={
     rename:  v=>["/api/account/change", {password:v("acct-pass"), new_username:v("acct-user")}],
     password:v=>["/api/account/change", {password:v("acct-pass"), new_password:v("acct-new")}],
     parent:  v=>["/api/parent/login",   {password:v("acct-pass")}],
+    parentsetup:v=>["/api/parent/setup", {password:v("acct-pass")}],
+    parentpw:   v=>["/api/parent/change_password", {password:v("acct-pass"), new_password:v("acct-new")}],
 };
 $("account-body").addEventListener("submit", async e=>{
     e.preventDefault();
     const form=e.target, action=form.dataset.action, v=id=>$(id)?.value ?? "", btn=form.querySelector("[type=submit]");
     const say=msg=>{ $("acct-error").textContent=msg; };
-    if($("acct-pass2") && v("acct-pass2")!==v(action==="password" ? "acct-new" : "acct-pass")) return say("The two passwords don't match.");
+    if($("acct-pass2") && v("acct-pass2")!==v($("acct-new") ? "acct-new" : "acct-pass")) return say("The two passwords don't match.");
     btn.disabled=true;
     const d=await postJSON(...ACCOUNT_CALLS[action](v));
     btn.disabled=false;
     if(d.error) return say(d.error);
-    if(action==="parent"){ parentAccounts=d.accounts; hideTimesUp(); return openAccount("manage"); }  // a parent is here
+    if(action==="parent" || action==="parentsetup" || action==="parentpw"){  // a parent is here
+        parentAccounts=d.accounts; hideTimesUp(); openAccount("manage");
+        if(action==="parentsetup") showToast("👪 Parent password made. Keep it secret!");
+        if(action==="parentpw") showToast("🔑 Parent password changed.");
+        return;
+    }
     account=d.user; closeAccount();
     if(action==="login" || action==="signup"){
         await setMode("normal");
@@ -3476,16 +3510,41 @@ def _check_new_password(password):
     return None
 
 # ---- 👪 Manage Accounts (parents only) ----
-# The parent password lives ONLY in the .env file as PARENT_PASSWORD=..., so nobody can set or change it
-# from the website. Only Manage Accounts can delete accounts (or reset a forgotten password).
+# A parent makes the parent password in ChirpQuest the first time they open Manage Accounts. That only works
+# when there's no parent password yet, and only on the computer running ChirpQuest (never through an ngrok
+# link), so nobody else can grab it first. After that, changing it needs the current parent password.
+# PARENT_PASSWORD=... in the .env file also works, as a backup if the parent password is forgotten.
+# Only Manage Accounts can delete accounts (or reset a kid's forgotten password).
 PARENT_MINUTES = 15  # parent access locks again by itself after 15 minutes
 
-def _parent_password():
-    return os.environ.get("PARENT_PASSWORD", "")
+def _parent_hash():
+    with db() as con:
+        row = con.execute("SELECT value FROM settings WHERE key = 'parent_pw_hash'").fetchone()
+    return row["value"] if row else ""
+
+def _parent_is_set():
+    return bool(os.environ.get("PARENT_PASSWORD") or _parent_hash())
+
+def _parent_password_ok(password):
+    env = os.environ.get("PARENT_PASSWORD", "")
+    by_env = bool(env) and secrets.compare_digest(password.encode(), env.encode())
+    stored = _parent_hash()
+    return by_env or (bool(stored) and check_password_hash(stored, password))
+
+def _parent_tag():  # changes when the parent password changes, which locks Manage Accounts everywhere else
+    return _session_tag(os.environ.get("PARENT_PASSWORD", "") + "|" + _parent_hash())
+
+def _on_this_computer():
+    """True only for the browser on the computer running ChirpQuest (not someone using an ngrok link)."""
+    return (request.remote_addr in ("127.0.0.1", "::1") and request.host.split(":")[0] in ("127.0.0.1", "localhost")
+            and not request.headers.get("X-Forwarded-For"))
+
+def _parent_unlock():
+    session.permanent = True
+    session["parent"], session["parent_until"] = _parent_tag(), time.time() + PARENT_MINUTES * 60
 
 def _parent_ok():
-    pw = _parent_password()
-    return bool(pw) and session.get("parent") == _session_tag(pw) and session.get("parent_until", 0) > time.time()
+    return _parent_is_set() and session.get("parent") == _parent_tag() and session.get("parent_until", 0) > time.time()
 
 def account_list():
     with db() as con:
@@ -3992,24 +4051,65 @@ def change_account():
     _log_in(user)  # stay logged in here; other browsers get logged out if the password changed
     return jsonify({"user": {"username": user["username"]}})
 
-# ---- 👪 Manage Accounts (parents only; the parent password is PARENT_PASSWORD in .env) ----
+# ---- 👪 Manage Accounts (parents only) ----
+@app.route("/api/parent/status")
+def parent_status():
+    return jsonify({"set": _parent_is_set(), "can_set_here": _on_this_computer()})
+
+@app.route("/api/parent/setup", methods=["POST"])
+def parent_setup():
+    """Makes the parent password: only when there isn't one yet, and only on the computer running ChirpQuest."""
+    data = _json_body()
+    if data is None:
+        return _err("Bad request.")
+    if _parent_is_set():
+        return _err("There's already a parent password. Use it to open Manage Accounts.", 409)
+    if not _on_this_computer():
+        return _err("The parent password can only be made on the computer that runs ChirpQuest.", 403)
+    password = str(data.get("password", ""))
+    problem = _check_new_password(password)
+    if problem:
+        return _err(problem)
+    with db() as con:
+        con.execute("INSERT OR REPLACE INTO settings VALUES ('parent_pw_hash', ?)", (generate_password_hash(password),))
+    log.info("Parent password was made.")
+    _parent_unlock()
+    return jsonify({"accounts": account_list(), "minutes": PARENT_MINUTES})
+
+@app.route("/api/parent/change_password", methods=["POST"])
+def parent_change_password():
+    data = _json_body()
+    if not _parent_ok():
+        return _err("Parents only. Enter the parent password again.", 403)
+    if _too_many_tries("👪parent"):
+        return _err("Too many wrong tries. Wait a few minutes, then try again.", 429)
+    if not _parent_password_ok(str((data or {}).get("password", ""))):
+        with _login_lock:
+            _login_fails.setdefault("👪parent", []).append(time.time())
+        return _err("Your current parent password isn't right.", 401)
+    new_password = str((data or {}).get("new_password", ""))
+    problem = _check_new_password(new_password)
+    if problem:
+        return _err(problem)
+    with db() as con:
+        con.execute("INSERT OR REPLACE INTO settings VALUES ('parent_pw_hash', ?)", (generate_password_hash(new_password),))
+    _parent_unlock()  # stay unlocked here; every other browser gets locked
+    return jsonify({"accounts": account_list()})
+
 @app.route("/api/parent/login", methods=["POST"])
 def parent_login():
     data = _json_body()
     if data is None:
         return _err("Bad request.")
-    pw = _parent_password()
-    if not pw:
-        return _err("A parent needs to set this up first: add a line PARENT_PASSWORD=your-password to the .env file, "
-                    "then restart ChirpQuest.", 503)
+    if not _parent_is_set():
+        return _err("There's no parent password yet. A parent can make one in Manage Accounts on the computer that runs ChirpQuest.", 503)
     if _too_many_tries("👪parent"):
         return _err("Too many wrong tries. Wait a few minutes, then try again.", 429)
-    if not secrets.compare_digest(str(data.get("password", "")).encode(), pw.encode()):
+    if not _parent_password_ok(str(data.get("password", ""))):
         with _login_lock:
             _login_fails.setdefault("👪parent", []).append(time.time())
         return _err("That's not the parent password.", 401)
-    session.permanent = True
-    session["parent"], session["parent_until"] = _session_tag(pw), time.time() + PARENT_MINUTES * 60
+    _parent_unlock()
     return jsonify({"accounts": account_list(), "minutes": PARENT_MINUTES})
 
 @app.route("/api/parent/lock", methods=["POST"])

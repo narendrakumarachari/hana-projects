@@ -24,11 +24,12 @@ GEMINI_API_KEY=your-key-here
 - **No key?** The app still runs. Pip answers from a small built-in list (cardinal, owl, blue jay, hummingbird, hello).
 
 ### 👪 Parent password
-**👪 Manage Accounts** (parents only) uses a password that lives only in the same `.env` file:
-```
-PARENT_PASSWORD=pick-a-parent-password
-```
-Nobody can set or change it from the website, so a kid (or anyone on a shared ngrok link) can't take it over. Without it, Manage Accounts says a parent needs to set it up. Restart ChirpQuest after changing `.env`.
+**👪 Manage Accounts** (parents only) is locked with a parent password. The first time someone opens Manage Accounts, ChirpQuest asks a parent to **make** one, right on the website. Rules that keep it safe:
+- It can only be made when there isn't one yet, and only on **the computer running ChirpQuest** (never through a shared ngrok link), so a stranger can't grab it first.
+- Changing it (🔑 Change parent password, inside Manage Accounts) needs the current one.
+- It's stored as a salted hash in `chirpquest_accounts.db`, never as the password itself.
+
+**Forgot it?** Add a line `PARENT_PASSWORD=a-new-password` to `.env` and restart ChirpQuest. That password always works too, so you can get back in and change the parent password.
 
 ## Features (the tabs in the app)
 | Tab | What it does | How |
@@ -61,7 +62,7 @@ Tabs have their own links, for example `http://127.0.0.1:5000/#quiz`.
 
 **Accounts** (`/api/account/*`): sign up, log in, log out, change username, change password. Usernames are 3–20 letters, numbers or `_`; passwords are 6+ characters. Passwords are stored only as salted hashes (Werkzeug's scrypt), 5 wrong passwords in 5 minutes make that username wait, and changing a password logs that account out everywhere else. Everything is saved in `chirpquest_accounts.db` (SQLite, next to `chirpquest.py`, git-ignored). Kids can't delete accounts; only a parent can.
 
-**👪 Manage Accounts** (parents only; the link is in the 👤 window): unlock it with the parent password from `.env`. It lists every account (birds, sightings, minutes played today) and lets a parent:
+**👪 Manage Accounts** (parents only; the link is in the 👤 window): unlock it with the parent password (see 👪 Parent password above). It lists every account (birds, sightings, minutes played today) and lets a parent:
 - set a **⏱️ daily time limit**: type the minutes (anything under 30 becomes 30, the most is 24 hours), or pick **Unlimited**;
 - give a new password to a kid who forgot theirs;
 - delete an account and all of its progress (it asks once more first).
@@ -137,8 +138,7 @@ All three share the same `.env`.
 
 ### ✅ Before we start next time
 1. Get the latest code: `git pull` (or clone the repo again).
-2. Make sure `04_ChirpQuest/.env` exists and has a working `GEMINI_API_KEY`. Test the key first; if it's broken, get a new one at <https://aistudio.google.com/apikey> and change it **only in `.env`**, never in the code. The same file holds `PARENT_PASSWORD` for 👪 Manage Accounts.
-3. Run it: `python 04_ChirpQuest\chirpquest.py` and open <http://127.0.0.1:5000>.
+2. Make sure `04_ChirpQuest/.env` exists and has a working `GEMINI_API_KEY`. Test the key first; if it's broken, get a new one at <https://aistudio.google.com/apikey> and change it **only in `.env`**, never in the code.3. Run it: `python 04_ChirpQuest\chirpquest.py` and open <http://127.0.0.1:5000>.
 
 ### 🎯 Next up (planned Oct 24, 2026)
 
@@ -163,6 +163,15 @@ All three share the same `.env`.
   - "Ask Pip" follow-up questions
   - trusted links: All About Birds, Audubon, Wikipedia, iNaturalist
 - **Maybe:** a "My Research Notebook" where kids save facts and notes, then print them as a one-page report for school.
+
+**3. 👨‍👩‍👧 Family accounts** *(added Oct 25, 2026)*
+- **The problem:** there's only one parent password for the whole website, and it belongs to whoever runs ChirpQuest. When we share it through ngrok, other families can make kid accounts, but they can't set time limits for their own kids.
+- **The idea:** a parent makes a **family** (family name + its own parent password), then adds their kids' accounts to it. Each family's parent only sees and manages *their own* kids: time limits, new passwords, deleting accounts.
+- The website owner's parent password stays the "front office" key that can see every family.
+- **To figure out first:**
+  - How a kid joins a family: the parent makes the kid account, or the kid types a family code when signing up.
+  - Keep it kid-safe: no emails or real names needed.
+  - What happens to a family's kids if the family is deleted.
 
 ### 💭 Maybe later
 - **3. Demo tour** *(probably not)*: in 🎬 Demo mode, every refresh shows a short "how to use ChirpQuest" walkthrough with Pip pointing at each part, plus a Skip button.
