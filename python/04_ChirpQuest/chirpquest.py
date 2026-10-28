@@ -1102,6 +1102,7 @@ PRIZE_BADGES = [
     {"id": "master_birder", "name": "Master Birder", "goal": 30, "emoji": "🦅", "color": "#f59e0b", "type": "spotted"},
     {"id": "chirp_legend", "name": "ChirpQuest Legend", "goal": len(TEXAS_BIRDS), "emoji": "🏆", "color": "#a855f7", "type": "spotted"},
 ]
+BADGES_BY_ID = {b["id"]: b for b in PRIZE_BADGES}
 
 # ==========================================
 # 4. LIVE DATA: iNaturalist (photos, sightings, seasons), Wikipedia (facts), YouTube (video checks)
@@ -1846,6 +1847,16 @@ button { font-family:inherit; }
 .acct-actions .big-btn { padding:11px 18px; }
 .modal-card:has(.acct-list) { width:min(520px,100%); }
 .times-up { z-index:90; background:rgba(15,23,42,0.85); }  /* under the account window, so a parent can still open it */
+.lock-message { font-size:1.1em; font-weight:bold; color:#0f766e; background:#f0fdfa; border:2px solid #99f6e4; border-radius:14px; padding:12px; overflow-wrap:anywhere; white-space:pre-wrap; }
+.nav-btn.blocked { opacity:0.45; }
+.nav-btn.blocked::after { content:" 🔒"; }
+.acct-row-tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:3px; }
+.acct-tag { font-size:0.68em; font-weight:bold; border-radius:999px; padding:1px 8px; background:#fef3c7; color:#92400e; }
+.acct-editor { flex-basis:100%; background:#fff; border:2px dashed #99f6e4; border-radius:12px; padding:10px; display:flex; flex-direction:column; gap:6px; }
+.acct-editor .checks { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:4px 10px; font-size:0.8em; }
+.acct-editor .checks label { display:flex; align-items:center; gap:6px; }
+.acct-editor textarea { font-family:inherit; font-size:0.85em; border:2px solid #cbd5e1; border-radius:10px; padding:6px 9px; resize:vertical; }
+.acct-editor .row { display:flex; flex-wrap:wrap; gap:6px; }
 .time-chip { font-size:0.72em; font-weight:bold; color:#0f766e; background:#f0fdfa; border:2px solid #99f6e4; border-radius:999px; padding:3px 10px; }
 .time-chip.low { color:#b45309; background:#fffbeb; border-color:#fcd34d; }
 .time-chip[hidden] { display:none; }
@@ -1950,6 +1961,18 @@ button { font-family:inherit; }
         <p id="times-up-text"></p>
         <div class="acct-actions">
             <button class="big-btn" type="button" onclick="checkTime()">🔄 Check again</button>
+            <button class="link-btn" type="button" onclick="openParent()">👪 Manage Accounts (parents only)</button>
+        </div>
+    </div>
+</div>
+<div id="screen-lock" class="modal-back times-up" hidden>
+    <div class="modal-card" role="alertdialog" aria-labelledby="lock-title" style="text-align:center;">
+        <p style="font-size:3em;margin:0;">🔒</p>
+        <h2 id="lock-title" style="margin:6px 0;">ChirpQuest is paused</h2>
+        <p class="small">A message from your grown-up:</p>
+        <p id="lock-text" class="lock-message"></p>
+        <div class="acct-actions">
+            <button class="big-btn" type="button" onclick="checkRules()">🔄 Check again</button>
             <button class="link-btn" type="button" onclick="openParent()">👪 Manage Accounts (parents only)</button>
         </div>
     </div>
@@ -2291,6 +2314,7 @@ function renderModeSwitch(){
         : "Demo: badges & Bird of the Day reset every time you refresh";
     $("account-btn").textContent = account ? "👤 "+account.username : "👤 Log in";
     checkTime();  // ⏱️ time left today (and "Time's up" if it's used up)
+    checkRules();  // 👪 sections turned off, screen lock, badges taken away
 }
 async function setMode(m){
     if(m===mode) return;
@@ -2386,13 +2410,22 @@ const ACCOUNT_VIEWS={
         </form>`},
     manage:{title:()=>"👪 Manage Accounts", html:()=>`
         <p class="small">${plural(parentAccounts.length,"account")}. This page locks again when you close it, or after 15 minutes.
-            Time limits are per day: type the minutes (30 is the shortest), or pick Unlimited.</p>
+            Time limits are per day: type the minutes (30 is the shortest), or pick Unlimited.
+            🚫 Sections turns parts of ChirpQuest off for one kid, 🏅 Badges takes away (or gives back) a badge,
+            and 🔒 Lock screen pauses their ChirpQuest with a message from you.</p>
         <div class="acct-list">${parentAccounts.map(a=>`
             <div class="acct-row" data-user="${esc(a.username)}">
                 <div class="acct-row-info"><b>${esc(a.username)}</b>
                     <span class="small">Made ${esc(a.created.slice(0,10))} · ${plural(a.birds,"bird")} · ${plural(a.sightings,"sighting")}</span>
-                    <span class="small">⏱️ ${a.daily_minutes ? `${a.daily_minutes} min a day` : "Unlimited time"} · ${a.used_today} min played today</span></div>
+                    <span class="small">⏱️ ${a.daily_minutes ? `${a.daily_minutes} min a day` : "Unlimited time"} · ${a.used_today} min played today</span>
+                    <span class="acct-row-tags">${a.controls.lock ? '<span class="acct-tag">🔒 Screen locked</span>' : ""}
+                        ${a.controls.blocked_tabs.length ? `<span class="acct-tag">🚫 ${plural(a.controls.blocked_tabs.length,"section")} off</span>` : ""}
+                        ${a.controls.revoked_badges.length ? `<span class="acct-tag">🏅 ${plural(a.controls.revoked_badges.length,"badge")} taken away</span>` : ""}</span></div>
                 <div class="acct-row-btns"><button class="mini-btn" type="button" data-act="time">⏱️ Time limit</button>
+                    <button class="mini-btn" type="button" data-act="sections">🚫 Sections</button>
+                    <button class="mini-btn" type="button" data-act="badges">🏅 Badges</button>
+                    ${a.controls.lock ? '<button class="mini-btn" type="button" data-act="unlock">🔓 Unlock screen</button>'
+                                      : '<button class="mini-btn" type="button" data-act="lock">🔒 Lock screen</button>'}
                     <button class="mini-btn" type="button" data-act="reset">🔑 New password</button>
                     <button class="mini-btn danger" type="button" data-act="delete">🗑️ Delete</button></div>
             </div>`).join("") || "<p class='muted'>No accounts yet.</p>"}</div>
@@ -2416,14 +2449,37 @@ function openAccount(view){
     setTimeout(()=>$("account-body").querySelector("input, button")?.focus(), 50);
 }
 function closeAccount(){
-    if(accountView==="manage" || accountView==="parentpw"){ postJSON("/api/parent/lock").then(()=>checkTime()); parentAccounts=[]; }  // closing Manage Accounts locks it
+    if(accountView==="manage" || accountView==="parentpw"){  // closing Manage Accounts locks it
+        postJSON("/api/parent/lock").then(()=>{ checkTime(); checkRules(); }); parentAccounts=[];
+    }
     accountView=null; $("account-modal").hidden=true; $("account-body").innerHTML="";  // also wipes typed passwords
 }
-// Manage Accounts buttons: ⏱️ Time limit, 🔑 New password and 🗑️ Delete (each asks once more before doing anything)
+// Manage Accounts buttons: ⏱️ Time limit, 🚫 Sections, 🏅 Badges, 🔒 Lock screen, 🔑 New password and 🗑️ Delete
+// (each one asks once more, or opens a small editor, before doing anything)
+const PARENT_TABS={chat:"💬 Ask Pip", book:"📖 Bird Book", photoid:"📷 Photo ID", quiz:"🎯 Bird Quiz", puzzle:"🧩 Bird Puzzle",
+                   draw:"✏️ Draw Birds", checklist:"✅ Checklist", showtime:"📺 Showtime", prizes:"🏆 Prizes"};
+const editorEnd=act=>`<div class="row"><button class="mini-btn" type="button" data-act="${act}">Save</button>
+    <button class="mini-btn" type="button" data-act="cancel">Cancel</button></div>`;
+function openEditor(row, html){
+    row.querySelector(".acct-editor")?.remove();
+    row.insertAdjacentHTML("beforeend", `<div class="acct-editor">${html}</div>`);
+    row.querySelector(".acct-editor input, .acct-editor textarea")?.focus();
+}
 $("account-body").addEventListener("click", async e=>{
     const btn=e.target.closest("[data-act]"); if(!btn) return;
     const row=btn.closest(".acct-row"), user=row.dataset.user, btns=row.querySelector(".acct-row-btns"), act=btn.dataset.act;
+    const info=parentAccounts.find(a=>a.username===user);
     if(act==="cancel") return openAccount("manage");
+    if(act==="sections") return openEditor(row, `<b class="small">Turn off for ${esc(user)} (🏠 Welcome always stays on):</b>
+        <div class="checks">${Object.entries(PARENT_TABS).map(([id,label])=>`<label><input type="checkbox" value="${id}"
+            ${info.controls.blocked_tabs.includes(id)?"checked":""}> ${label}</label>`).join("")}</div>${editorEnd("sections-save")}`);
+    if(act==="badges") return openEditor(row, `<b class="small">Tick a badge to take it away from ${esc(user)}. It stays locked until you untick it.</b>
+        <div class="checks">${info.badges.map(b=>`<label title="${b.have}/${b.goal}"><input type="checkbox" value="${b.id}"
+            ${b.revoked?"checked":""} ${b.reached||b.revoked?"":"disabled"}> ${esc(b.emoji)} ${esc(b.name)}
+            <span class="small">${b.revoked?"🚫":b.earned?"✅":`${Math.min(b.have,b.goal)}/${b.goal}`}</span></label>`).join("")}</div>
+        <span class="small">✅ = earned · 🚫 = taken away · numbers = not earned yet (nothing to take away)</span>${editorEnd("badges-save")}`);
+    if(act==="lock") return openEditor(row, `<b class="small">Pause ${esc(user)}'s ChirpQuest and show this message:</b>
+        <textarea rows="2" maxlength="200" placeholder="Dinner time! 🍝 Come downstairs, please."></textarea>${editorEnd("lock-save")}`);
     if(act==="time"){
         const now=parentAccounts.find(a=>a.username===user)?.daily_minutes;
         btns.innerHTML=`<input class="mini-input" type="number" min="30" max="1440" step="1" placeholder="Minutes a day (30+)" value="${now||""}" aria-label="Minutes a day for ${esc(user)}">
@@ -2444,13 +2500,19 @@ $("account-body").addEventListener("click", async e=>{
         btns.querySelector("input").focus();
         return;
     }
-    const typed=row.querySelector("input")?.value.trim() ?? "";
+    const typed=row.querySelector(".acct-row-btns input")?.value.trim() ?? "";
+    const ticked=[...row.querySelectorAll(".acct-editor input:checked")].map(i=>i.value);
+    const message=row.querySelector(".acct-editor textarea")?.value.trim() ?? "";
     if(act==="time-save" && !typed) return $("acct-error").textContent="Type the minutes, or pick Unlimited.";
     const calls={
         "delete-yes":    ["/api/parent/delete",         {username:user}],
         "reset-save":    ["/api/parent/reset_password", {username:user, new_password:typed}],
         "time-save":     ["/api/parent/time_limit",     {username:user, minutes:Number(typed)}],
         "time-unlimited":["/api/parent/time_limit",     {username:user, minutes:null}],
+        "sections-save": ["/api/parent/controls",       {username:user, blocked_tabs:ticked}],
+        "badges-save":   ["/api/parent/controls",       {username:user, revoked_badges:ticked}],
+        "lock-save":     ["/api/parent/controls",       {username:user, lock:{message}}],
+        "unlock":        ["/api/parent/controls",       {username:user, lock:null}],
     };
     if(!calls[act]) return;
     btn.disabled=true;
@@ -2471,8 +2533,46 @@ $("account-body").addEventListener("click", async e=>{
         "reset-save":`🔑 New password saved for ${user}.`,
         "time-save":`⏱️ ${user} can play ${d.minutes} minutes a day${Number(typed)<30 ? " (30 minutes is the shortest, so it was rounded up)" : ""}.`,
         "time-unlimited":`⏱️ ${user} has unlimited time.`,
+        "sections-save":ticked.length ? `🚫 Turned off ${plural(ticked.length,"section")} for ${user}.` : `✅ Every section is on for ${user}.`,
+        "badges-save":ticked.length ? `🏅 ${plural(ticked.length,"badge")} taken away from ${user}.` : `🏅 All of ${user}'s badges count again.`,
+        "lock-save":`🔒 ${user}'s screen is locked.`,
+        "unlock":`🔓 ${user}'s screen is unlocked.`,
     }[act]);
+    checkRules();  // in case that kid is logged in on this computer
 });
+
+// ---------- 👪 parent rules: sections turned off, screen lock with a message, badges taken away ----------
+// They count whenever that kid is logged in. This computer remembers the sections and the lock after logging
+// out (like "Time's up"), until a parent unlocks Manage Accounts here.
+const RULES_KEY="chirpquest_parent_rules";
+let parentRules={blocked_tabs:[], revoked_badges:[], lock:null};
+async function checkRules(){
+    let rules;
+    if(account){
+        try{ rules=await (await fetch("/api/my_controls")).json(); }catch(e){ return; }
+        if(rules.error) return;
+        save(RULES_KEY,{blocked_tabs:rules.blocked_tabs, lock:rules.lock});
+    }else{
+        const kept=store(RULES_KEY,null);
+        rules={blocked_tabs:kept?.blocked_tabs||[], revoked_badges:[], lock:kept?.lock||null};
+    }
+    const badgesChanged=JSON.stringify(rules.revoked_badges)!==JSON.stringify(parentRules.revoked_badges);
+    parentRules=rules;
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("blocked", parentRules.blocked_tabs.includes(b.dataset.tab)));
+    const open=document.querySelector(".nav-btn.active")?.dataset.tab;
+    if(open && parentRules.blocked_tabs.includes(open)) openTab("welcome");
+    $("lock-text").textContent=parentRules.lock?.message || "Your grown-up paused ChirpQuest for now.";
+    $("screen-lock").hidden=!parentRules.lock;
+    if(badgesChanged && $("tab-prizes").classList.contains("active")) renderBadges();
+}
+function clearRules(){  // a parent unlocked Manage Accounts on this computer
+    try{ localStorage.removeItem(RULES_KEY); }catch(e){}
+    parentRules={blocked_tabs:[], revoked_badges:[], lock:null};
+    document.querySelectorAll(".nav-btn.blocked").forEach(b=>b.classList.remove("blocked"));
+    $("screen-lock").hidden=true;
+}
+const tabIsOff=name=>parentRules.blocked_tabs.includes(name);
+setInterval(()=>{ if(account && document.visibilityState==="visible") checkRules(); }, 10000);
 
 // ---------- ⏱️ daily play time (parents set it in Manage Accounts) ----------
 // While someone is logged in and the page is showing, each minute counts toward their daily limit.
@@ -2528,7 +2628,7 @@ $("account-body").addEventListener("submit", async e=>{
     btn.disabled=false;
     if(d.error) return say(d.error);
     if(action==="parent" || action==="parentsetup" || action==="parentpw"){  // a parent is here
-        parentAccounts=d.accounts; hideTimesUp(); openAccount("manage");
+        parentAccounts=d.accounts; hideTimesUp(); clearRules(); openAccount("manage");
         if(action==="parentsetup") showToast("👪 Parent password made. Keep it secret!");
         if(action==="parentpw") showToast("🔑 Parent password changed.");
         return;
@@ -2548,12 +2648,12 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !$("account-moda
 
 // small message at the bottom of the screen, with an optional Undo button
 let cqToastTimer=null;
-function showToast(text, undo){
+function showToast(text, undo, seconds){
     const t=$("cq-toast");
     t.innerHTML=`<span>${esc(text)}</span>${undo?'<button type="button">↩️ Undo</button>':""}`;
     if(undo) t.querySelector("button").addEventListener("click",()=>{ t.classList.remove("show"); undo(); });
     t.classList.add("show"); clearTimeout(cqToastTimer);
-    cqToastTimer=setTimeout(()=>t.classList.remove("show"), undo ? 8000 : 4000);
+    cqToastTimer=setTimeout(()=>t.classList.remove("show"), (seconds || (undo ? 8 : 4))*1000);
 }
 // Bird of the Day: any of ~320 North Texas birds (not only the Bird Book). Normal = same bird all day,
 // Demo = new on every refresh. Each mode's pick is remembered while the page is open.
@@ -2586,6 +2686,7 @@ blankProgress();
 // ---------- tabs ----------
 document.querySelectorAll(".nav-btn").forEach(btn => btn.addEventListener("click", () => openTab(btn.dataset.tab)));
 function openTab(name){
+    if(tabIsOff(name)){ showToast(`🔒 A grown-up turned off ${PARENT_TABS[name]} for you.`); return false; }
     document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
     document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
     $("tab-"+name).classList.add("active");
@@ -2857,7 +2958,7 @@ function drawSightings(){
 
 // ---------- chat (text is inserted safely, never as HTML) ----------
 function addChatMsg(text, cls){ const c=$("chat-container"), div=document.createElement("div"); div.className="chat-msg "+cls; div.textContent=text; c.appendChild(div); c.scrollTop=c.scrollHeight; return div; }
-function askPip(q){ $("user-input").value=q; sendChatMessage(); }
+function askPip(q){ if(tabIsOff("chat")) return; $("user-input").value=q; sendChatMessage(); }
 async function sendChatMessage(){
     const input=$("user-input"), btn=$("send-btn"), text=input.value.trim(); if(!text) return;
     const c=$("chat-container");
@@ -2991,10 +3092,17 @@ function renderChecklist(){
     sortListsByMonth();
     updateChecklistProgress();
 }
-function setSpotted(id, on){  // 🎬 Demo only
+async function setSpotted(id, on){  // 🎬 Demo only
+    if(on){  // 🧐 Pip checks the bird isn't too off the charts for this month
+        let c={ok:true};
+        try{ c=await (await fetch("/api/sighting_check?bird="+encodeURIComponent(id))).json(); }catch(e){}
+        if(!c.ok){ if($("check-"+id)) $("check-"+id).checked=false; showToast(c.message, null, 14); return false; }
+        if(c.note) showToast(c.note, null, 10);
+    }
     if(on) checkedSet.add(id); else checkedSet.delete(id);
     if($("check-"+id)) $("check-"+id).checked=on;
     showSpotted(id, on);
+    return true;
 }
 function showSpotted(id, on){
     $("label-"+id)?.classList.toggle("checked",on); $("card-"+id)?.classList.toggle("spotted",on);
@@ -3002,10 +3110,13 @@ function showSpotted(id, on){
 }
 async function addSighting(id){  // 💾 Normal only: one more sighting, saved to your account
     const d=await postJSON("/api/sighting",{bird_id:id});
-    if(d.error){ showToast("⚠️ "+d.error); return checkTime(); }  // maybe time's up
+    if(d.off_season){ showToast(d.error, null, 14); return false; }  // 🧐 Pip thinks that bird is too off the charts
+    if(d.error){ showToast("⚠️ "+d.error); checkTime(); return false; }  // maybe time's up
     setSeen(id, d.seen);
     const b=birdById[id];
-    showToast(`👀 ${b.emoji} ${b.name}: seen ${d.seen}×${d.seen===1?". A new bird for you! 🎉":""}`, ()=>undoSighting(id));
+    showToast(`${d.note ? d.note+" " : ""}👀 ${b.emoji} ${b.name}: seen ${d.seen}×${d.seen===1?". A new bird for you! 🎉":""}`,
+              ()=>undoSighting(id), d.note ? 12 : 8);
+    return true;
 }
 async function undoSighting(id){  // for a wrong tap (works for 2 minutes)
     const d=await postJSON("/api/sighting/undo",{bird_id:id});
@@ -3019,9 +3130,10 @@ function setSeen(id, n){
     showSpotted(id, n>0);
 }
 function spotButton(book){  // Photo ID's "I saw this bird" button
-    if(mode==="normal") return `<button class="mini-btn" onclick="addSighting('${book.id}');this.outerHTML='👀 Sighting added to your checklist!'">👀 I saw one! Add a sighting</button>`;
+    // the button only changes if the sighting really counted (Pip might say it's too off the charts)
+    if(mode==="normal") return `<button class="mini-btn" onclick="addSighting('${book.id}').then(ok=>{ if(ok) this.outerHTML='👀 Sighting added to your checklist!'; })">👀 I saw one! Add a sighting</button>`;
     return checkedSet.has(book.id) ? "✅ Already spotted."
-        : `<button class="mini-btn" onclick="setSpotted('${book.id}',true);this.outerHTML='✅ Added to your checklist!'">✅ Mark as spotted</button>`;
+        : `<button class="mini-btn" onclick="setSpotted('${book.id}',true).then(ok=>{ if(ok) this.outerHTML='✅ Added to your checklist!'; })">✅ Mark as spotted</button>`;
 }
 function updateChecklistProgress(){
     const total=allBirds.length||1, sightings=Object.values(seenCounts).reduce((a,n)=>a+n,0);
@@ -3349,9 +3461,11 @@ async function renderBadges(){
         const have={quiz:quizBest, photoid:photoIds, puzzle:puzzlesSolved, art:artSet.size, owlears:owlEars}[b.type] ?? checkedSet.size;
         const unit={quiz:"best quiz score", photoid:"photos identified", puzzle:"puzzles solved", art:"birds drawn",
                     owlears:"perfect 8/8 Sound quizzes"}[b.type] || "birds spotted";
-        const unlocked=have>=b.goal, card=document.createElement("div");
+        const takenAway=mode==="normal" && parentRules.revoked_badges.includes(b.id);  // a grown-up took it away
+        const unlocked=have>=b.goal && !takenAway, card=document.createElement("div");
         card.className="badge-card"+(unlocked?" unlocked":""); card.style.setProperty("--badge-color",b.color);
-        card.innerHTML=`<span class="badge-emoji">${esc(b.emoji)}</span><div class="badge-name">${esc(b.name)}</div><div class="badge-progress">${Math.min(have,b.goal)} / ${b.goal} ${unit}</div>`;
+        card.innerHTML=`<span class="badge-emoji">${esc(b.emoji)}</span><div class="badge-name">${esc(b.name)}</div><div class="badge-progress">${Math.min(have,b.goal)} / ${b.goal} ${unit}</div>`
+            + (takenAway ? `<div class="badge-progress">🚫 Taken away by a grown-up</div>` : "");
         grid.appendChild(card);
         let celebrated=false; try{ celebrated=!!sessionStorage.getItem(pkey("celebrated-"+b.id)); sessionStorage.setItem(pkey("celebrated-"+b.id),"1"); }catch(e){}
         if(unlocked && !celebrated) setTimeout(()=>fireConfetti(card),150);
@@ -3438,8 +3552,11 @@ def init_accounts_db():
                 user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, day TEXT NOT NULL,
                 seconds INTEGER NOT NULL DEFAULT 0, last_tick REAL NOT NULL DEFAULT 0, PRIMARY KEY (user_id, day));
         """)
-        if "daily_minutes" not in [r["name"] for r in con.execute("PRAGMA table_info(users)")]:
+        columns = [r["name"] for r in con.execute("PRAGMA table_info(users)")]
+        if "daily_minutes" not in columns:
             con.execute("ALTER TABLE users ADD COLUMN daily_minutes INTEGER")  # NULL = Unlimited
+        if "controls" not in columns:
+            con.execute("ALTER TABLE users ADD COLUMN controls TEXT")  # parent rules, see parent_controls()
         row = con.execute("SELECT value FROM settings WHERE key = 'secret_key'").fetchone()
         if row:
             return row["value"]
@@ -3548,12 +3665,52 @@ def _parent_ok():
 
 def account_list():
     with db() as con:
-        rows = con.execute("""SELECT u.username, u.created, u.daily_minutes,
+        rows = con.execute("""SELECT u.id, u.username, u.created, u.daily_minutes, u.controls,
                                      COUNT(s.id) AS sightings, COUNT(DISTINCT s.bird_id) AS birds,
                                      (SELECT seconds FROM playtime p WHERE p.user_id = u.id AND p.day = ?) AS seconds_today
                               FROM users u LEFT JOIN sightings s ON s.user_id = u.id
                               GROUP BY u.id ORDER BY u.username COLLATE NOCASE""", (_today(),)).fetchall()
-    return [{**dict(r), "used_today": (r["seconds_today"] or 0) // 60} for r in rows]
+    return [{**{k: r[k] for k in ("username", "created", "daily_minutes", "sightings", "birds")},
+             "used_today": (r["seconds_today"] or 0) // 60, "controls": parent_controls(r),
+             "badges": badge_status(load_progress(r["id"]), parent_controls(r)["revoked_badges"])} for r in rows]
+
+# ---- 👪 Parent rules for one kid: sections turned off, screen lock with a message, badges taken away ----
+# They work whenever that kid is logged in (in 🎬 Demo too), and the page remembers them after logging out,
+# like "Time's up", until a parent unlocks Manage Accounts on that computer.
+PARENT_TABS = {"chat": "💬 Ask Pip", "book": "📖 Bird Book", "photoid": "📷 Photo ID", "quiz": "🎯 Bird Quiz",
+               "puzzle": "🧩 Bird Puzzle", "draw": "✏️ Draw Birds", "checklist": "✅ Checklist",
+               "showtime": "📺 Showtime", "prizes": "🏆 Prizes"}  # 🏠 Welcome can't be turned off
+LOCK_MESSAGE_MAX = 200
+
+def parent_controls(user):
+    try:
+        saved = json.loads(user["controls"] or "{}")
+    except (TypeError, ValueError):
+        saved = {}
+    return {"blocked_tabs": [t for t in saved.get("blocked_tabs", []) if t in PARENT_TABS],
+            "revoked_badges": [b for b in saved.get("revoked_badges", []) if b in BADGES_BY_ID],
+            "lock": saved.get("lock")}  # None, or {"message": "..."}
+
+def badge_status(progress, revoked=()):
+    """Every badge for one kid: how far along they are, and whether it counts (earned and not taken away)."""
+    have = {"spotted": len(progress["seen"]), "quiz": progress["quiz_best"], "photoid": progress["photo_ids"],
+            "puzzle": progress["puzzles"], "art": len(progress["art"]), "owlears": progress["owl_ears"]}
+    return [{"id": b["id"], "name": b["name"], "emoji": b["emoji"], "goal": b["goal"], "type": b["type"],
+             "have": have[b["type"]], "reached": have[b["type"]] >= b["goal"], "revoked": b["id"] in revoked,
+             "earned": have[b["type"]] >= b["goal"] and b["id"] not in revoked} for b in PRIZE_BADGES]
+
+def stop_reason(user, tab=None):
+    """Why this kid can't do something right now (time's up, screen locked, section turned off), or None."""
+    if not user:
+        return None
+    rules = parent_controls(user)
+    if rules["lock"]:
+        return "🔒 A parent paused ChirpQuest for now."
+    if tab and tab in rules["blocked_tabs"]:
+        return f"🔒 A parent turned off {PARENT_TABS[tab]} for you."
+    if _times_up(user):
+        return TIMES_UP
+    return None
 
 # ---- ⏱️ Daily play time (parents set it in Manage Accounts) ----
 # Each account can have a daily limit: Unlimited, or 30 minutes up to 24 hours. Shorter than 30 rounds up to 30.
@@ -3616,6 +3773,68 @@ def kid_month_counts(user, month):
                               GROUP BY bird_id""", (user["id"], month)).fetchall()
     return {r["bird_id"]: r["n"] for r in rows}
 
+# ---- 🧐 Pip checks every sighting: a bird almost never seen in Texas this month gets blocked ----
+# (like a summer-only bird in January). Uses the season data from the 📅 charts. A bird is "too off the charts"
+# only if this month AND the months just before and after all have under 2% of the sightings of its best month,
+# so birds arriving or leaving (like Harris's Sparrows showing up in late October) are never blocked.
+OFF_SEASON_SHARE = 0.02
+MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+          "November", "December"]
+
+RECENT_DAYS, RECENT_NEEDED = 30, 3  # ...unless at least 3 people reported one near DFW in the last 30 days
+_recent_cache = {}  # bird id → (time checked, number of recent nearby sightings)
+
+def recent_nearby_sightings(bird_id):
+    """How many iNaturalist sightings of this bird near DFW in the last 30 days (cached 1 hour). None = couldn't check."""
+    hit = _recent_cache.get(bird_id)
+    if hit and time.time() - hit[0] < 3600:
+        return hit[1]
+    try:
+        r = inat_get(f"{INAT_API}/observations", headers=HTTP_HEADERS, timeout=15, params={
+            "taxon_name": BIRDS_BY_ID[bird_id]["inat"], "lat": DFW_CENTER[0], "lng": DFW_CENTER[1],
+            "radius": NORTH_TEXAS_RADIUS_KM, "verifiable": "true", "captive": "false", "per_page": 0,
+            "d1": (datetime.date.today() - datetime.timedelta(days=RECENT_DAYS)).isoformat()})
+        r.raise_for_status()
+        count = r.json()["total_results"]
+    except Exception as e:
+        log.warning("Recent sightings check failed for %s: %s", bird_id, e)
+        return None
+    _recent_cache[bird_id] = (time.time(), count)
+    return count
+
+def pip_sighting_check(bird_id):
+    """{"blocked": Pip's message or None, "note": a "rare find!" message or None} for a sighting right now."""
+    off = off_season_message(bird_id)
+    if not off:
+        return {"blocked": None, "note": None}
+    recent = recent_nearby_sightings(bird_id)
+    if recent is None:  # couldn't ask iNaturalist: give the kid the benefit of the doubt
+        return {"blocked": None, "note": None}
+    if recent >= RECENT_NEEDED:
+        return {"blocked": None, "note": f"🧐 Pip says: Wow, that's rare for this month! But {recent} people reported one "
+                                          f"near DFW in the last {RECENT_DAYS} days, so it counts. Great find! 🌟"}
+    return {"blocked": off, "note": None}
+
+def off_season_message(bird_id, month=None):
+    """Pip's message if this bird is "too off the charts" for this month in Texas, else None."""
+    season = _season_cache.get(bird_id)
+    if not season or max(season) <= 0:
+        return None  # no season data yet: let it through
+    m = (month or datetime.date.today().month) - 1
+    top = max(season)
+    if any(season[(m + k) % 12] >= OFF_SEASON_SHARE * top for k in (-1, 0, 1)):
+        return None
+    peak = season.index(top)
+    lo = hi = peak  # its busy months: the run around its best month with at least half as many sightings
+    while hi - lo < 11 and season[(lo - 1) % 12] >= top / 2:
+        lo -= 1
+    while hi - lo < 11 and season[(hi + 1) % 12] >= top / 2:
+        hi += 1
+    when = f"in {MONTHS[peak]}" if lo == hi else f"from {MONTHS[lo % 12]} to {MONTHS[hi % 12]}"
+    return (f"🧐 Pip says: Hmm! The {BIRDS_BY_ID[bird_id]['name']} is almost never seen in Texas in {MONTHS[m]}, "
+            f"and hardly anyone has reported one near DFW lately. It's seen most {when}. Could it have been a different bird? Try 📷 Photo ID to check. "
+            "If it really was one, that's a super rare find: ask a grown-up to help you report it on iNaturalist!")
+
 def _seen_count(con, user_id, bird_id):
     return con.execute("SELECT COUNT(*) FROM sightings WHERE user_id = ? AND bird_id = ?",
                        (user_id, bird_id)).fetchone()[0]
@@ -3638,13 +3857,12 @@ def _book_for_pip():
 
 BOOK_FOR_PIP = _book_for_pip()
 
-def _badges_for_pip(progress):
-    have = {"spotted": len(progress["seen"]), "quiz": progress["quiz_best"], "photoid": progress["photo_ids"],
-            "puzzle": progress["puzzles"], "art": len(progress["art"]), "owlears": progress["owl_ears"]}
+def _badges_for_pip(progress, revoked=()):
     unit = {"spotted": "different birds spotted", "quiz": "best quiz score", "photoid": "photos identified",
             "puzzle": "puzzles solved", "art": "different birds drawn", "owlears": "perfect 8/8 Sound quizzes"}
-    return "; ".join(f"{b['name']} {'✅ earned' if have[b['type']] >= b['goal'] else 'not yet'} "
-                     f"({min(have[b['type']], b['goal'])}/{b['goal']} {unit[b['type']]})" for b in PRIZE_BADGES)
+    state = lambda b: "🚫 taken away by a parent" if b["revoked"] else "✅ earned" if b["earned"] else "not yet"
+    return "; ".join(f"{b['name']} {state(b)} ({min(b['have'], b['goal'])}/{b['goal']} {unit[b['type']]})"
+                     for b in badge_status(progress, revoked))
 
 def pip_instructions(user=None):
     """Pip's instructions for one chat message. user = the logged-in account in 💾 Normal mode, else None."""
@@ -3661,7 +3879,8 @@ def pip_instructions(user=None):
         "\n\nTHE KID'S PROGRESS (💾 Normal mode, saved to their account):"
         f"\n- Bird Book birds they've seen, with how many times: {seen_text}"
         f"\n- Bird Book birds they haven't seen yet: {not_seen}"
-        f"\n- Badges: {_badges_for_pip(progress)}"
+        f"\n- Badges: {_badges_for_pip(progress, parent_controls(user)['revoked_badges'])}"
+        " (if a parent took a badge away, say kindly that a grown-up can give it back)"
         "\nUse this only when it helps answer the question (like 'Which birds haven't I seen yet?' or 'How close am I to a badge?'). "
         "When suggesting birds to look for, pick a few not-yet-seen ones that are easy to find, unless they ask for the whole list.")
 
@@ -3938,6 +4157,9 @@ def _match_north_texas(name):
 @app.route("/api/identify", methods=["POST"])
 def identify_photo():
     data = request.get_json(silent=True) or {}
+    stop = stop_reason(current_user(), "photoid")
+    if stop:
+        return jsonify({"error": stop}), 403
     kind = data.get("kind") if data.get("kind") in PHOTO_ID_PROMPTS else "bird"
     match = re.match(r"data:(image/(?:jpeg|png|webp|gif));base64,([A-Za-z0-9+/=]+)$", data.get("image", ""))
     if not match:
@@ -4154,6 +4376,30 @@ def parent_time_limit():
         return _err("That account doesn't exist.", 404)
     return jsonify({"accounts": account_list(), "minutes": limit})
 
+@app.route("/api/parent/controls", methods=["POST"])
+def parent_set_controls():
+    """Change one kid's parent rules. Send only what changes: blocked_tabs (list), revoked_badges (list),
+    and/or lock (null to unlock, or {"message": "..."} to lock their screen with that message)."""
+    data = _json_body()
+    if not _parent_ok():
+        return _err("Parents only. Enter the parent password again.", 403)
+    username = str((data or {}).get("username", ""))
+    with db() as con:
+        user = con.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+    if not user:
+        return _err("That account doesn't exist.", 404)
+    rules = parent_controls(user)
+    if isinstance(data.get("blocked_tabs"), list):
+        rules["blocked_tabs"] = [t for t in PARENT_TABS if t in data["blocked_tabs"]]
+    if isinstance(data.get("revoked_badges"), list):
+        rules["revoked_badges"] = [b["id"] for b in PRIZE_BADGES if b["id"] in data["revoked_badges"]]
+    if "lock" in data:
+        message = str((data["lock"] or {}).get("message", "")).strip()[:LOCK_MESSAGE_MAX] if data["lock"] else None
+        rules["lock"] = {"message": message} if data["lock"] is not None else None
+    with db() as con:
+        con.execute("UPDATE users SET controls = ? WHERE id = ?", (json.dumps(rules), user["id"]))
+    return jsonify({"accounts": account_list()})
+
 @app.route("/api/parent/reset_password", methods=["POST"])
 def parent_reset_password():
     """For a kid who forgot their password. Logs that account out everywhere."""
@@ -4172,6 +4418,21 @@ def parent_reset_password():
     with _login_lock:
         _login_fails.pop(username.lower(), None)  # let them log in right away
     return jsonify({"accounts": account_list()})
+
+@app.route("/api/sighting_check")
+def sighting_check():
+    """🎬 Demo's checklist asks this before ticking a bird (💾 Normal sightings are checked on the server)."""
+    bird_id = request.args.get("bird", "")
+    pip = pip_sighting_check(bird_id) if bird_id in BIRDS_BY_ID else {"blocked": None, "note": None}
+    return jsonify({"ok": pip["blocked"] is None, "message": pip["blocked"], "note": pip["note"]})
+
+@app.route("/api/my_controls")
+def my_controls():
+    """The parent rules for whoever is logged in here (the page checks every 10 seconds)."""
+    user = current_user()
+    if not user:
+        return _err("Please log in first.", 401)
+    return jsonify(parent_controls(user))
 
 # ---- ⏱️ play time (💾 Normal mode) ----
 @app.route("/api/playtime", methods=["GET", "POST"])
@@ -4193,8 +4454,9 @@ def progress():
     data = _json_body()
     if data is None:
         return _err("Bad request.")
-    if _times_up(user):
-        return _err(TIMES_UP, 403)
+    stop = stop_reason(user)
+    if stop:
+        return _err(stop, 403)
     old = load_progress(user["id"])
     new = {}
     for k in PROGRESS_COUNTERS:  # scores only go up, so an old browser tab can't undo a badge
@@ -4214,15 +4476,19 @@ def add_sighting():
     user, data = current_user(), _json_body()
     if not user:
         return _err("Please log in first.", 401)
-    if _times_up(user):
-        return _err(TIMES_UP, 403)
+    stop = stop_reason(user, "checklist")
+    if stop:
+        return _err(stop, 403)
     bird_id = str((data or {}).get("bird_id", ""))
     if bird_id not in BIRDS_BY_ID:
         return _err("That bird isn't in the Bird Book.")
+    pip = pip_sighting_check(bird_id)
+    if pip["blocked"]:
+        return jsonify({"error": pip["blocked"], "off_season": True}), 422
     with db() as con:
         con.execute("INSERT INTO sightings (user_id, bird_id, seen_at) VALUES (?, ?, ?)", (user["id"], bird_id, time.time()))
         seen = _seen_count(con, user["id"], bird_id)
-    return jsonify({"bird_id": bird_id, "seen": seen})
+    return jsonify({"bird_id": bird_id, "seen": seen, "note": pip["note"]})
 
 @app.route("/api/sighting/undo", methods=["POST"])
 def undo_sighting():
@@ -4246,9 +4512,11 @@ def chat():
     user_message = str(data.get("message", ""))[:1000]
     log.info("Chat request: %r", user_message)
     # Pip always knows the Bird Book; in 💾 Normal mode Pip also knows your sightings and badges.
-    user = current_user() if data.get("mode") == "normal" else None
-    if _times_up(user):
-        return jsonify({"reply": TIMES_UP, "times_up": True})
+    logged_in = current_user()
+    stop = stop_reason(logged_in, "chat")  # parent rules count whenever someone is logged in
+    if stop:
+        return jsonify({"reply": stop, "stopped": True})
+    user = logged_in if data.get("mode") == "normal" else None
     reply = call_gemini(user_message, system=pip_instructions(user))
     log.info("Chat reply: %r", reply)
     return jsonify({"reply": reply})

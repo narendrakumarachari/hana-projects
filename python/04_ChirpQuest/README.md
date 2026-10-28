@@ -64,9 +64,16 @@ Tabs have their own links, for example `http://127.0.0.1:5000/#quiz`.
 
 **👪 Manage Accounts** (parents only; the link is in the 👤 window): unlock it with the parent password (see 👪 Parent password above). It lists every account (birds, sightings, minutes played today) and lets a parent:
 - set a **⏱️ daily time limit**: type the minutes (anything under 30 becomes 30, the most is 24 hours), or pick **Unlimited**;
+- **🚫 Sections:** turn off parts of ChirpQuest for one kid (Ask Pip, Bird Book, Photo ID, Quiz, Puzzle, Draw, Checklist, Showtime, Prizes). They show a 🔒 in the menu and won't open, and the server blocks them too. 🏠 Welcome always stays on;
+- **🏅 Badges:** take away a badge a kid didn't really earn (only badges they've reached can be ticked), or give it back. A taken-away badge shows "🚫 Taken away by a grown-up" and stays locked, even if the kid keeps logging birds, until a parent gives it back. Pip knows about it too;
+- **🔒 Lock screen:** pause one kid's ChirpQuest with a message (up to 200 characters, like "Dinner time! 🍝"). Their page checks every 10 seconds, so the lock shows up quickly, and it stays until a parent presses 🔓 Unlock screen;
 - give a new password to a kid who forgot theirs;
 - delete an account and all of its progress (it asks once more first).
 It locks again when you close it, or after 15 minutes.
+
+Parent rules (sections, lock, badges) count whenever that kid is logged in, in 🎬 Demo too, and the page remembers the sections and the lock after logging out (like "Time's up") until a parent unlocks Manage Accounts on that computer (`/api/my_controls`, `/api/parent/controls`).
+
+**🧐 Pip checks every sighting:** if a kid logs a bird that's almost never in Texas this month (this month *and* the months just before and after have under 2% of the sightings of its best month, like a Painted Bunting in January), Pip looks up iNaturalist sightings near DFW from the last 30 days. If at least 3 people reported one, it counts, with a "Wow, rare find!" note. If not, Pip blocks it and says when that bird is usually seen, and suggests 📷 Photo ID. Birds arriving or leaving (like Harris's Sparrows in late October) are never blocked. Works for 🎬 Demo ticks and 💾 Normal sightings (`/api/sighting_check`, `pip_sighting_check()`).
 
 **⏱️ Time limits:** while someone is logged in and the page is showing, each minute counts toward today's limit (`/api/playtime`; two open tabs still count only once). The top bar shows "⏱️ 25 min left today", with a warning at 5 minutes. When time's up, a "Time's up for today" screen covers the page, **in Demo mode too on that computer**, until tomorrow or until a parent gives more time (then press 🔄 Check again). Sightings, saving progress and Pip are blocked on the server too. (Someone who never logs in can still use Demo mode; there's no way to time a person without an account.)
 
@@ -155,13 +162,15 @@ All three share the same `.env`.
 - **More birds:** keep adding common North Texas birds (95 now). Check each one's sighting count near DFW first, and only add non-native birds if they're *extremely* common.
   - Already checked, but seen less often: Inca Dove (~440 sightings near DFW), Chimney Swift (~340), Horned Lark (~70).
   - Ideas to check: Gadwall, American Wigeon, Northern Pintail, Lesser Scaup, Snow Goose, Little Blue Heron, Black-crowned Night Heron, White Ibis, Neotropic Cormorant, Franklin's Gull, Forster's Tern, Red-headed Woodpecker, Ladder-backed Woodpecker, Eastern & Spotted Towhee, Orange-crowned Warbler, Common Yellowthroat, Barn Owl, Wild Turkey.
-- **Research helper:** a "🔎 Research this bird" button on Bird Book cards, Bird of the Day and Photo ID results. It would open one page with:
+- **Research helper:** a "🔎 Research this bird" button **below every bird in the Bird Book** (and on Bird of the Day and Photo ID results). It would open one page with:
   - a kid-friendly summary, plus what it eats, where it nests, and how big it is ("about the size of a robin")
   - when and where to find it in North Texas (season chart and map)
   - real photos and recordings
   - its conservation status (how it's doing in the wild)
+  - **advice from Pip, and Pip always cites the evidence**: every fact says where it came from (like "Source: All About Birds"), with a link
   - "Ask Pip" follow-up questions
-  - trusted links: All About Birds, Audubon, Wikipedia, iNaturalist
+  - trusted links to study more: All About Birds, Audubon, Wikipedia, iNaturalist
+- **Pip helps with the draft, not the final:** a kid can write their own report and Pip gives tips (what's missing, which facts need a source, how to say it more clearly), but Pip never writes the finished report for them.
 - **Maybe:** a "My Research Notebook" where kids save facts and notes, then print them as a one-page report for school.
 
 **3. 👨‍👩‍👧 Family accounts** *(added Oct 25, 2026)*
@@ -172,6 +181,16 @@ All three share the same `.env`.
   - How a kid joins a family: the parent makes the kid account, or the kid types a family code when signing up.
   - Keep it kid-safe: no emails or real names needed.
   - What happens to a family's kids if the family is deleted.
+
+**4. 🐦 Bird Count: a live birding event with chat** *(added Oct 28, 2026)*
+- **The idea:** a parent starts a **Bird Count** for a set amount of time (like 1 hour, or a whole weekend). While it's on, every ChirpQuest player can log the birds they see and **chat live with each other about birds**.
+- **Pip checks every chat message first:** Pip "kidifies" it (keeps it friendly and kid-safe), and if a message isn't about birds, Pip doesn't send it.
+- **Prizes:** when the count (or the season) ends, the players who spotted the most birds get special badges: 🥇 1st, 🥈 2nd and 🥉 3rd place.
+- **To figure out first:** how messages show up live for everyone, no personal info in chat (Pip removes names, places and phone numbers), what Pip does with a message it blocks, and how a count ends.
+- **Needs:** more badges (item 5) and accounts (done).
+
+**5. 🏅 More badges** *(added Oct 28, 2026)*
+- New badges for the Bird Count (🥇🥈🥉 top spotters, "Took part in a Bird Count"), and more ideas: seasons (spotted a winter-only bird, a summer-only bird), habitats (5 water birds, 3 night birds), streaks (logged birds 7 days in a row), and research (finished a "Research this bird" page).
 
 ### 💭 Maybe later
 - **3. Demo tour** *(probably not)*: in 🎬 Demo mode, every refresh shows a short "how to use ChirpQuest" walkthrough with Pip pointing at each part, plus a Skip button.
