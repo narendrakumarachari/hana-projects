@@ -8,6 +8,12 @@ Hana's Python programs, written **July to September 2026**. They go from the ver
 >
 > **Note:** everything here runs on the **PC** with normal Python 3 (CPython). None of it is MicroPython running on the ESP32 itself. The ESP32/Arduino side is written in Arduino C++.
 
+## 🚀 How far I've come
+| | Oldest: `01_hello_print.py` (Jul 2026) | Newest: `chirpquest.py` (Oct 2026) |
+|---|---|---|
+| Size | 1 line | 5,700+ lines |
+| Does | Prints `Hello py` | Bird-guide website: 95 birds, AI helper Pip, family accounts, live Bird Counts, bird research |
+
 ## ⭐ Featured: LED From Anywhere
 Two programs in `03_Arduino_ESP32_Companions/` make a web page that controls an LED, and **ngrok** turns that page into a link friends can open from anywhere in the world.
 - **Mission guide for kids:** https://narendrakumarachari.github.io/hana-projects/led-from-anywhere.html
