@@ -115,6 +115,11 @@ def call_gemini(user_message, retries=None, transient_retries=2, model_index=0, 
         except Exception:
             pass
 
+        if resp.status_code == 429 and has_next_model:  # this model's free limit is used up, but the next one has its own
+            log.warning("Gemini model %s is out of free uses (429) — trying the next model.", model)
+            return call_gemini(user_message, retries=retries, transient_retries=transient_retries,
+                               model_index=model_index + 1, system=system)
+
         if resp.status_code in (400, 401, 403, 429) and retries > 0:
             log.warning("Gemini error %s — rotating key and retrying.", resp.status_code)
             rotate_gemini_key()
