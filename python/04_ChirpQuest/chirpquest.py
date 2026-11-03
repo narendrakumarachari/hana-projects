@@ -20,7 +20,7 @@ import logging
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 import requests
-from flask import Flask, Response, jsonify, request, session
+from flask import Flask, Response, abort, jsonify, request, send_from_directory, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 # Load GEMINI_API_KEY from the .env file next to this script (never uploaded).
@@ -2306,6 +2306,31 @@ button { font-family:inherit; }
     color:#0f766e; cursor:pointer; }
 .pager-num.on { background:#14b8a6; border-color:#14b8a6; color:#fff; }
 .pager-gap { align-self:center; color:#94a3b8; }
+/* Pip next to a section title (💬 Ask Pip, 📷 Photo ID, 🐦 Bird Count) */
+.section-pip-row { display:flex; align-items:center; gap:12px; }
+.section-pip-row .tab-title { margin:0; }
+.section-pip { flex:0 0 auto; width:70px; height:82px; }
+.section-pip svg { width:100%; height:100%; }
+/* Calm Pips (Ask Pip, Photo ID): people are busy there, so Pip stays mostly still. He blinks often, his crest and wing go up
+   and down very slowly, and only very, very rarely does his crest lie down. */
+.pip-calm .mascot-svg { animation:none; }
+.pip-calm .mascot-crest { animation:crestCalm 150s ease-in-out infinite; }
+.pip-calm .mascot-wing { animation:wingCalm 30s ease-in-out infinite; }
+@keyframes crestCalm {
+    0%,10%,20.6%,40%,50.6%,70%,80.6%,92%,98.7%,100% { transform:rotate(0deg) scale(1); }
+    15.3%,45.3%,75.3% { transform:rotate(14deg) scale(1.06); }    /* a slow rise and fall */
+    94%,96% { transform:rotate(-26deg) scale(0.92); }              /* lies down: very, very rarely (once in 2½ minutes) */
+}
+@keyframes wingCalm { 0%,40%,60%,100% { transform:rotate(0deg); } 50% { transform:rotate(-8deg); } }
+/* 🐦 Bird Count: Pip cheers when a bird is logged (crest up, wing up, then back to normal; no confetti) */
+.count-pip-row { margin:4px 0 6px; }
+.count-pip-say { position:relative; margin:0; background:#f0fdfa; border:2px solid #99f6e4; border-radius:14px; padding:6px 10px;
+    font-size:0.85em; color:#0f766e; font-weight:bold; }
+.count-pip-say::before { content:""; position:absolute; left:-10px; top:50%; transform:translateY(-50%); border:8px solid transparent; border-right-color:#99f6e4; border-left:0; }
+.section-pip.cheer .mascot-crest { animation:crestCheer 1.8s ease-in-out; }
+.section-pip.cheer .mascot-wing { animation:wingCheer 1.8s ease-in-out; }
+@keyframes crestCheer { 0%,100% { transform:rotate(0deg) scale(1); } 20%,75% { transform:rotate(24deg) scale(1.16); } }
+@keyframes wingCheer { 0%,100% { transform:rotate(0deg); } 20%,40%,60% { transform:rotate(46deg); } 30%,50% { transform:rotate(36deg); } 75% { transform:rotate(44deg); } }
 /* 🎬 Demo tour */
 .tour { position:fixed; left:256px; bottom:16px; z-index:9002; display:flex; align-items:flex-end; gap:6px;
     width:min(calc(20.8vh + 520px), calc(100vw - 272px)); }   /* Pip on the left, just right of the menu (240px), so glowing menu buttons stay visible */
@@ -2353,6 +2378,16 @@ button { font-family:inherit; }
 .help-howto li { margin:4px 0; }
 .help-chat { height:220px; }
 .help-history { grid-column:1 / -1; }   /* full width, under the other cards */
+.history-facts { padding-left:4px; list-style:none; margin:4px 0 10px; }
+.history-facts li { margin:5px 0; }
+.history-pics { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:10px; }
+.history-pics figure { margin:0; text-align:center; flex:0 1 auto; }
+.history-pics img { height:150px; width:auto; max-width:100%; border-radius:14px; border:2px solid #ccfbf1; display:block; }
+.history-pics figcaption { font-size:0.8em; color:#475569; margin-top:4px; }
+.history-pics .history-wide img { height:auto; width:420px; }
+.history-pip-now { height:150px; width:130px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#ecfdf5,#ccfbf1); border-radius:14px; border:2px solid #ccfbf1; }
+.history-pip-now svg { height:130px; width:auto; }
 .history-cols { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
 .history-cols h3 { margin:6px 0; color:#0f766e; font-size:1em; }
 .history-timeline { padding-left:18px; margin:0; }
@@ -2624,7 +2659,8 @@ button { font-family:inherit; }
             <!-- ASK PIP -->
             <section id="tab-chat" class="tab-content">
                 <div class="box">
-                    <h2 class="tab-title">💬 Chat with Pip</h2>
+                    <div class="section-pip-row"><div class="section-pip pip-calm" id="chat-pip" aria-hidden="true"></div>
+                        <h2 class="tab-title">💬 Chat with Pip</h2></div>
                     <div class="chat-box" id="chat-container">
                         <div class="chat-msg bot-msg">Chirp chirp! I'm Pip the Cockatiel! Ask me anything about North Texas birds!</div>
                     </div>
@@ -2664,7 +2700,8 @@ button { font-family:inherit; }
             <!-- PHOTO ID -->
             <section id="tab-photoid" class="tab-content">
                 <div class="box">
-                    <h2 class="tab-title">📷 Pip's Photo ID</h2>
+                    <div class="section-pip-row"><div class="section-pip pip-calm" id="photo-pip" aria-hidden="true"></div>
+                        <h2 class="tab-title">📷 Pip's Photo ID</h2></div>
                     <p class="muted">Took a bird picture, or drew one? Pip uses Google Gemini AI to guess which bird it is (any bird, not just the Bird Book), just like Merlin's Photo ID. Your picture is shrunk first and is only sent to Gemini to ask.</p>
                     <div class="quiz-modes" style="align-items:center;">
                         <b style="color:#0f766e;">This picture is:</b>
@@ -2790,6 +2827,8 @@ button { font-family:inherit; }
                     <div class="count-grid" id="count-grid" hidden>
                         <div class="card">
                             <h2>🏅 Top spotters</h2>
+                            <div class="section-pip-row count-pip-row"><div class="section-pip" id="count-pip" aria-hidden="true"></div>
+                                <p class="count-pip-say" id="count-pip-say" aria-live="polite">Log a bird and I'll cheer for you! 🐦</p></div>
                             <p class="small">Score = how many <b>different</b> birds you log during the count. More sightings breaks a tie.</p>
                             <ol class="count-board" id="count-board"></ol>
                             <div id="count-log"></div>
@@ -2925,7 +2964,25 @@ button { font-family:inherit; }
                         </div>
                         <div class="card help-history" id="help-history">
                             <h2>📜 A little history of ChirpQuest</h2>
-                            <p>🐦 <b>Did you know? Pip is based on a real cockatiel!</b> More stories (and photos) from the ChirpQuest team are coming soon.</p>
+                            <h3>🤫 Did you know?</h3>
+                            <ul class="history-facts">
+                                <li>🧒 ChirpQuest's creator started building it at <b>age 11</b>!</li>
+                                <li>🐦 <b>Pip is based on a real cockatiel!</b></li>
+                                <li>🎨 ChirpQuest's teal-and-mint colors are its creator's <b>favorite color scheme</b>.</li>
+                                <li>🌈 The very first logo was a <b>rainbow wing</b> (see it below!).</li>
+                                <li>🐦‍⬛ ChirpQuest was going to have <b>more mascots</b>, and it still might! One that hasn't been lost to time is <b>Ravi the Raven</b>.</li>
+                            </ul>
+                            <div class="history-pics">
+                                <figure><img src="/history/old_pip_aug_2026.png" alt="The first Pip: a shaded, 3D-style gray cockatiel" loading="lazy">
+                                    <figcaption>The first Pip (Aug 2026)</figcaption></figure>
+                                <figure><div class="history-pip-now" id="history-pip-now"></div>
+                                    <figcaption>Pip today</figcaption></figure>
+                                <figure><img src="/history/old_logo_aug_2026.png" alt="The first ChirpQuest logo: a rainbow wing" loading="lazy">
+                                    <figcaption>The first logo: a rainbow wing 🌈</figcaption></figure>
+                                <figure class="history-wide"><img src="/history/old_birds_aug_2026.png" alt="The first cartoon birds: round, shaded potato-shaped birds" loading="lazy">
+                                    <figcaption>The first cartoon birds (we call them the "potato birds" 🥔🐦)</figcaption></figure>
+                            </div>
+                            <p class="small">More stories (and photos) from the ChirpQuest team are coming soon.</p>
                             <div class="history-cols">
                                 <div>
                                     <h3>🗓️ How ChirpQuest grew</h3>
@@ -2947,6 +3004,9 @@ button { font-family:inherit; }
                                         <tr><td>🏅 Badges</td><td>5</td><td>20</td></tr>
                                         <tr><td>💬 Pip's answers</td><td>10 to 50 words</td><td>2 to 4 full sentences</td></tr>
                                         <tr><td>🤖 AI models</td><td>1</td><td>A team of models, plus a backup key</td></tr>
+                                        <tr><td>📋 Sections</td><td>6: 🏠 Welcome, 💬 Ask Pip, 📖 Bird Book, ✅ Checklist, 📺 Showtime, 🏆 Prizes</td>
+                                            <td>13: all 6, plus 📷 Photo ID, 🎯 Bird Quiz, 🧩 Bird Puzzle, ✏️ Draw Birds, 📰 Events &amp; News,
+                                                🐦 Bird Count and ❓ How can I help? (and the 🔎 Research page)</td></tr>
                                     </table>
                                     <h3>🤖 Pip's AI brains (Google Gemini models)</h3>
                                     <table class="history-table">
@@ -4700,6 +4760,11 @@ function countPick(id){
 }
 function renderCountBoard(){
     const me=account ? account.username.toLowerCase() : "", board=countInfo.board;
+    // someone else logged a bird? Pip cheers for them too (your own sightings get their own cheer above)
+    const total=board.reduce((n,b)=>n+b.sightings,0), mine=board.find(b=>b.username.toLowerCase()===me)?.sightings||0;
+    if(countSightingsSeen && countSightingsSeen.count===countInfo.count.id && countInfo.count.live && total-mine > countSightingsSeen.others)
+        pipCheer("Someone just spotted a bird! Keep looking! 👀🐦");
+    countSightingsSeen={others:total-mine, count:countInfo.count.id};
     $("count-board").innerHTML = board.map(b=>`<li class="${b.username.toLowerCase()===me?"me":""}">
         <span>${MEDAL[b.place]||"#"+b.place}</span> ${esc(b.username)}<span class="score">${plural(b.birds,"bird")} · ${plural(b.sightings,"sighting")}</span></li>`).join("")
         || `<li class="muted">No birds logged yet. Be the first!</li>`;
@@ -4731,11 +4796,21 @@ async function sendCountChat(){
     await refreshCount();
     if(d.changed) addCountNote("✨ Pip made your message extra kid-friendly before sending it.");
 }
+// 🐦 Bird Count's Pip cheers when a bird is logged: crest up, wing up, then back to normal (no confetti)
+let countSightingsSeen=null;
+function pipCheer(text){
+    const pip=$("count-pip"), say=$("count-pip-say"); if(!pip) return;
+    if(text) say.textContent=text;
+    pip.classList.remove("cheer"); void pip.offsetWidth; pip.classList.add("cheer");
+    clearTimeout(pipCheer.timer); pipCheer.timer=setTimeout(()=>pip.classList.remove("cheer"), 1900);
+}
 async function countSighting(){
     if(!countPicked) return;
     $("count-saw").disabled=true;
+    const picked=birdById[countPicked];
     const ok=await addSighting(countPicked);
     if(!ok){ $("count-saw").disabled=false; return; }
+    pipCheer(`Great spot! You logged a ${picked.emoji} ${picked.name}! 🎉`);
     countPicked=null; $("count-picked").textContent="Logged! Type the next bird you see."; // ready for the next bird
     $("count-find").value=""; countFindUpdate(); $("count-find").focus();
     refreshCount();
@@ -4985,6 +5060,9 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     try{
         const m=await (await fetch("/api/mascot")).json(); $("mascot-container").innerHTML=m.svg; $("mascot-container").addEventListener("click",meetPip);
         $("help-pip").innerHTML=m.svg.replaceAll("pipHead","helpPipHead").replaceAll("pipBodyClip","helpPipBodyClip");  // ❓ own ids, so the two Pips don't clash
+        // more Pips (each with its own ids): 📜 Pip today, and calm Pips in 💬 Ask Pip and 📷 Photo ID, and 🐦 Bird Count's Pip
+        for(const [id, prefix] of [["history-pip-now","histPip"],["chat-pip","chatPip"],["photo-pip","photoPip"],["count-pip","countPip"]])
+            if($(id)) $(id).innerHTML=m.svg.replaceAll("pipHead",prefix+"Head").replaceAll("pipBodyClip",prefix+"BodyClip");
     }catch(e){}
     loadFacts(); loadVideos(); loadWeather(32.78,-96.97); loadHoliday();
     try{
@@ -6359,6 +6437,16 @@ def _too_soon(key, gap):
         return True
     session[key] = now
     return False
+
+# 📜 Pictures for "A little history of ChirpQuest" (screenshots of the first version, Aug 2026), in history/
+HISTORY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "history")
+HISTORY_FILES = {"old_pip_aug_2026.png", "old_logo_aug_2026.png", "old_birds_aug_2026.png"}  # only these files are served
+
+@app.route("/history/<name>")
+def history_picture(name):
+    if name not in HISTORY_FILES:
+        abort(404)
+    return send_from_directory(HISTORY_DIR, name, max_age=86400)
 
 @app.route("/api/help_chat", methods=["POST"])
 def help_chat():
