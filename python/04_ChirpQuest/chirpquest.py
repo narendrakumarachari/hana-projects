@@ -13,12 +13,14 @@ import os
 import random
 import re
 import secrets
+import smtplib
 import sqlite3
 import threading
 import time
 import logging
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
+from email.message import EmailMessage
 import requests
 from flask import Flask, Response, abort, jsonify, request, send_from_directory, session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -1094,10 +1096,20 @@ SUMMER_VISITORS = {"bunting", "cliffswallow", "crestedflycatcher", "dickcissel",
 
 assert set(BIRD_ID) == {b["id"] for b in TEXAS_BIRDS}, "every Bird Book bird needs a BIRD_ID entry"
 assert (WINTER_VISITORS | SUMMER_VISITORS) <= set(BIRD_ID) and not WINTER_VISITORS & SUMMER_VISITORS
+# ♂️♀️ Birds whose males and females look CLEARLY different (picked from BIRD_ID's male/female notes), for the
+# 🧩 Male & Female matching puzzle and the 🎲 Mix it up quiz. Birds where the difference is tiny (a little red
+# patch, a mustache stripe) are left out, so kids can really tell them apart from photos.
+SEXES_DIFFER = {"cardinal", "bluebird", "grackle", "hummingbird", "bunting", "goldfinch", "housefinch", "blackbird",
+                "mallard", "kingfisher", "martin", "housesparrow", "woodduck", "shoveler", "indigobunting", "cowbird",
+                "teal", "bufflehead", "ruddyduck", "harrier", "kestrel", "summertanager", "dickcissel"}
+assert SEXES_DIFFER <= set(BIRD_ID)
 for _b in TEXAS_BIRDS:
     _len, _sexes, _alike, _where = BIRD_ID[_b["id"]]
     _b["id_info"] = {"size": size_text(_b["id"], _len), "sexes": _sexes, "lookalike": _alike, "where": _where}
     _b["visitor"] = "winter" if _b["id"] in WINTER_VISITORS else "summer" if _b["id"] in SUMMER_VISITORS else None
+    _b["inches"] = _len  # for the quiz's "how big" and "smallest to biggest" questions
+    _b["sexes"] = ("differ" if _b["id"] in SEXES_DIFFER
+                   else "same" if re.search(r"look the same|look alike|almost the same", _sexes) else None)
 
 # ---- Cartoon art generator ----
 # Every cartoon is built from the same simple shapes (egg body, round head, wing, tail, beak, big eyes)
@@ -1517,6 +1529,21 @@ def inat_get(url, **kwargs):
         time.sleep(3 * (attempt + 1))
     return r
 
+# 🕊️ ChirpQuest only shows LIVING birds. On iNaturalist, people can tag a sighting "Alive or Dead" (attribute 17)
+# = Dead (value 19), and some write "roadkill" or "window strike" instead. Those sightings are skipped everywhere
+# (photos, quiz, puzzles, the live map), because kids found them upsetting (Nov 3, 2026).
+# "dead tree", "dead branch" etc. are fine: birds love to perch on those.
+_DEAD_WORDS = re.compile(r"\b(dead(?!\s+(trees?|branch(es)?|snags?|limbs?|wood|logs?|leaf|leaves|grass|stumps?|plants?|cedars?|oaks?|weeds?|stalks?|end))"
+                         r"|deceased|died|dying|roadkill|road[- ]kill|carcass|corpse|window[- ](strike|collision|kill)|hit by a car)\b", re.I)
+
+def looks_dead(obs):
+    for a in obs.get("annotations") or []:
+        if a.get("controlled_attribute_id") == 17 and a.get("controlled_value_id") == 19 and (a.get("vote_score") or 0) >= 0:
+            return True
+    words = " ".join([obs.get("description") or "", " ".join(obs.get("tags") or []),
+                      " ".join(str(f.get("value") or "") for f in obs.get("ofvs") or [])])
+    return bool(_DEAD_WORDS.search(words))
+
 _photo_cache = {}
 
 def fetch_inat_photo(scientific_name):
@@ -1603,7 +1630,7 @@ def fetch_cc_photos(taxon_name, place_id=TEXAS_PLACE_ID):  # taxon_name: species
         r.raise_for_status()
         photos = []
         for obs in r.json().get("results", []):
-            if obs.get("photos"):
+            if obs.get("photos") and not looks_dead(obs):
                 p = obs["photos"][0]
                 photos.append({"url": p["url"].replace("/square.", "/medium."), "credit": p.get("attribution", "")})
         _cc_photo_cache[key] = photos
@@ -1627,6 +1654,36 @@ def fetch_taxon_photos(taxon):
 def fetch_quiz_photos(bird):
     """Different real photos of one of our birds, taken in Texas."""
     return fetch_cc_photos(bird["inat"])
+
+_sex_photo_cache = {}
+
+def fetch_sex_photos(bird):
+    """Real photos of grown-up males and females of one bird, for ♂️♀️ Male & Female.
+    iNaturalist users tag photos: Sex (attribute 9) = Female 10 / Male 11, and Life Stage (1) = Juvenile 8,
+    which we skip (young birds often look like females). Texas photos first, then anywhere if Texas has too few."""
+    if bird["id"] not in _sex_photo_cache:
+        found = {"male": [], "female": []}
+        for place in (TEXAS_PLACE_ID, None):
+            params = {"taxon_name": bird["inat"], "term_id": 9, "quality_grade": "research", "photos": "true",
+                      "photo_license": "cc-by,cc-by-nc,cc0", "per_page": 60, "order_by": "votes"}
+            if place:
+                params["place_id"] = place
+            r = inat_get(f"{INAT_API}/observations", headers=HTTP_HEADERS, timeout=12, params=params)
+            r.raise_for_status()
+            for obs in r.json().get("results", []):
+                tags = {a.get("controlled_attribute_id"): a.get("controlled_value_id")
+                        for a in obs.get("annotations") or [] if (a.get("vote_score") or 0) >= 0}
+                sex = {10: "female", 11: "male"}.get(tags.get(9))
+                if not sex or tags.get(1) == 8 or not obs.get("photos") or looks_dead(obs):
+                    continue
+                p = obs["photos"][0]
+                url = p["url"].replace("/square.", "/medium.")
+                if url not in (x["url"] for x in found[sex]):
+                    found[sex].append({"url": url, "credit": p.get("attribution", "")})
+            if len(found["male"]) >= 3 and len(found["female"]) >= 3:
+                break
+        _sex_photo_cache[bird["id"]] = found
+    return _sex_photo_cache[bird["id"]]
 
 # ---- Real bird sounds: the best-rated Creative-Commons recordings on iNaturalist ----
 # They are passed through this server (not linked directly) because a browser is only allowed to
@@ -1823,7 +1880,7 @@ def book_taxon_id(bird):
 
 def _sighting_from(o):
     taxon, geo = o.get("taxon") or {}, o.get("geojson") or {}
-    if o.get("obscured") or geo.get("type") != "Point":
+    if o.get("obscured") or geo.get("type") != "Point" or looks_dead(o):  # 🕊️ living birds only
         return None
     book = _book_bird_for(taxon.get("name"))
     photo = (o.get("photos") or [{}])[0]
@@ -2313,11 +2370,10 @@ button { font-family:inherit; }
 .section-pip svg { width:100%; height:100%; }
 /* 💬 Ask Pip / 📷 Photo ID: Pip stands on top of the question box (or the Identify button), on the left */
 .pip-perch { position:relative; }
-.perched-pip { position:absolute; left:14px; bottom:calc(100% - 7px); width:78px; height:92px; z-index:2; pointer-events:none; }
+.perched-pip { position:absolute; left:14px; bottom:calc(100% - 9px); width:98px; height:116px; z-index:2; pointer-events:none; }
 .perched-pip svg { width:100%; height:100%; display:block; }
-.chat-suggest.pip-room { padding-left:100px; }     /* the quick questions start to Pip's right */
-#chat-container { padding-bottom:56px; }   /* the newest message never hides behind Pip */
-.id-result { padding-bottom:64px; }        /* on narrow screens the results box is right above Pip */
+.chat-suggest.pip-room { padding-left:122px; }     /* the quick questions start to Pip's right */
+#chat-container { padding-bottom:76px; }   /* the newest message never hides behind Pip */
 /* Calm Pips (Ask Pip, Photo ID): people are busy there, so Pip stays mostly still. He blinks often, his crest and wing go up
    and down very slowly, and only very, very rarely does his crest lie down. */
 .pip-calm .mascot-svg { animation:none; }
@@ -2477,6 +2533,60 @@ button { font-family:inherit; }
 /* PUZZLE */
 .puzzle-layout { display:grid; grid-template-columns:minmax(0,440px) minmax(0,1fr); gap:20px; margin-top:15px; align-items:start; }
 @media (max-width:900px){ .puzzle-layout { grid-template-columns:1fr; } }
+/* 🔗 matching puzzles (♂️♀️ Male & Female, 🥚 Life Cycle): click a left card, then a right card, and a line is drawn */
+#pz-match[hidden], #pz-picture[hidden], #pz-life[hidden] { display:none; }
+/* 🥚 Life Cycle: 5 round spots around a circle, with arrows going clockwise */
+.life-circle { position:relative; width:min(100%,430px); aspect-ratio:1; margin:14px auto 0; }
+.life-circle svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.life-slot { position:absolute; width:28%; aspect-ratio:1; transform:translate(-50%,-50%); border-radius:50%; border:3px dashed #5eead4; background:#f0fdfa;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font:inherit; font-size:clamp(0.65em,2.6vw,0.85em); font-weight:bold; color:#94a3b8; cursor:pointer; padding:4px; }
+.life-slot.filled { border-style:solid; border-color:#14b8a6; background:#fff; color:#334155; padding:0; overflow:hidden; }
+.life-slot img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.life-slot .life-label { position:absolute; bottom:10%; left:50%; transform:translateX(-50%); background:rgba(255,255,255,0.93); color:#0f172a; border-radius:999px; padding:1px 8px; white-space:nowrap; }
+.life-slot.right, .life-slot.wrong { border-width:5px; }
+.life-card img { width:42px; height:42px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+.life-slot.target { border-color:#f59e0b; background:#fffbeb; }
+.life-slot.right { border-color:#22c55e; background:#f0fdf4; } .life-slot.wrong { border-color:#ef4444; background:#fef2f2; }
+.life-slot .mt-emoji, .life-card .mt-emoji { font-size:1.9em; line-height:1; }
+.life-middle { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:34%; text-align:center; color:#0f766e; font-weight:bold; font-size:clamp(0.7em,2.8vw,0.95em); }
+.life-tray { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:12px; min-height:58px; }
+.life-card { display:flex; align-items:center; gap:6px; background:#fff; border:3px solid #cbd5e1; border-radius:14px; padding:6px 12px; font:inherit; font-weight:bold; color:#334155; cursor:pointer; }
+.life-card:hover { border-color:#14b8a6; } .life-card.sel { border-color:#f59e0b; box-shadow:0 0 0 4px #fde68a; }
+.match-area { position:relative; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:clamp(48px,12vw,140px); margin-top:16px; }
+.match-lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:1; }
+.match-col { display:flex; flex-direction:column; gap:12px; }
+.mt-card { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:84px; background:#fff; border:3px solid #cbd5e1; border-radius:16px; padding:8px; font:inherit; font-size:0.9em; color:#334155; cursor:pointer; text-align:center; transition:border-color 0.15s, transform 0.1s; }
+.mt-card:hover:not(:disabled) { border-color:#14b8a6; transform:translateY(-2px); }
+.mt-card:disabled { cursor:default; }
+.mt-card img { width:100%; height:clamp(90px,22vw,150px); object-fit:cover; border-radius:10px; display:block; }
+.mt-card .mt-emoji { font-size:2.2em; line-height:1; }
+.mt-card .mt-sex { font-size:0.8em; color:#64748b; font-weight:bold; }
+.mt-card.sel { border-color:#f59e0b; box-shadow:0 0 0 4px #fde68a; }
+.mt-card.right { border-color:#22c55e; background:#f0fdf4; }
+.mt-card.wrong { border-color:#ef4444; background:#fef2f2; }
+.match-bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+/* 🎲 Mix it up quiz */
+.mix-tag { background:#ccfbf1; color:#0f766e; border-radius:999px; padding:2px 10px; font-size:0.85em; }
+.mix-q { font-size:1.15em; font-weight:bold; color:#0f172a; margin:10px 0; line-height:1.9; }
+.mix-select, .mix-input { font:inherit; font-size:0.95em; border:3px solid #14b8a6; border-radius:12px; padding:6px 10px; background:#fff; color:#0f172a; max-width:100%; }
+.mix-input { width:min(340px,100%); box-sizing:border-box; }
+.mix-select.right, .mix-input.right { border-color:#22c55e; background:#dcfce7; }
+.mix-select.wrong, .mix-input.wrong { border-color:#ef4444; background:#fee2e2; }
+.mix-row { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:12px; }
+.quiz-picture.small-pic { height:170px; } .quiz-picture.small-pic img { max-height:170px; } .quiz-picture.small-pic .bird-svg { width:160px; height:160px; }
+.order-list { list-style:none; padding:0; margin:12px auto 0; max-width:460px; display:flex; flex-direction:column; gap:8px; text-align:left; }
+.order-item { display:flex; align-items:center; gap:8px; background:#fff; border:3px solid #cbd5e1; border-radius:14px; padding:6px 8px; font-weight:bold; color:#334155; cursor:grab; user-select:none; }
+.order-item.dragging { opacity:0.5; border-style:dashed; }
+.order-item.right { border-color:#22c55e; background:#f0fdf4; } .order-item.wrong { border-color:#ef4444; background:#fef2f2; }
+.order-item .order-num { width:26px; height:26px; flex-shrink:0; border-radius:50%; background:#0f766e; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.85em; }
+.order-item .order-art { width:46px; height:46px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.8em; }
+.order-item .order-art .bird-svg { width:46px; height:46px; }
+.order-item .order-art img { width:46px; height:46px; object-fit:cover; border-radius:10px; }
+.order-item .order-name { flex:1; min-width:0; }
+.order-item .order-btns { display:flex; gap:4px; }
+.order-item .order-btns button { font-size:1em; padding:2px 8px; }
+.two-birds { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+.two-birds .choice .bird-svg { width:120px; height:120px; display:block; margin:0 auto 6px; }
 #puzzle-board { width:100%; max-width:440px; aspect-ratio:1; border-radius:18px; border:4px solid #99f6e4; background:#f0fdfa; cursor:pointer; touch-action:manipulation; display:block; }
 .puzzle-side { background:#f8fafc; border:3px solid #e2e8f0; border-radius:20px; padding:18px; }
 .puzzle-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; text-align:center; margin:10px 0; }
@@ -2731,7 +2841,7 @@ button { font-family:inherit; }
                             </ol>
                         </div>
                     </div>
-                    <div class="pip-perch" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;">
+                    <div class="pip-perch" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:104px;"><!-- the gap above is Pip's room -->
                         <div class="perched-pip pip-calm" id="photo-pip" aria-hidden="true"></div><!-- Pip stands on the Identify button -->
                         <button class="big-btn" id="identify-btn" onclick="identifyPhoto()" disabled>🔍 Identify!</button>
                         <button class="big-btn alt" id="sample-btn" onclick="loadSamplePhoto()">🎲 Try a sample photo</button>
@@ -2743,11 +2853,13 @@ button { font-family:inherit; }
             <section id="tab-quiz" class="tab-content">
                 <div class="box">
                     <h2 class="tab-title">🎯 Bird Quiz</h2>
-                    <p class="muted">Can you name the bird? Photos and Cartoons have 10 questions; Sounds has 8 real recordings. Get 8/8 in Sounds five times to earn the 👂 <b>Owl Ears</b> badge! Best score so far: <b id="quiz-best">0</b></p>
+                    <p class="muted">Can you name the bird? Photos and Cartoons have 10 questions; Sounds has 8 real recordings. Get 8/8 in Sounds five times to earn the 👂 <b>Owl Ears</b> badge!
+                        <b>🎲 Mix it up</b> has 10 different kinds of questions: dropdowns, put it in order, type the name, habitats, male or female and more. Best score so far: <b id="quiz-best">0</b></p>
                     <div class="quiz-modes">
                         <button class="big-btn" onclick="startQuiz('photo')">📸 Real Photos</button>
                         <button class="big-btn warm" onclick="startQuiz('cartoon')">🎨 Cartoons</button>
                         <button class="big-btn alt" onclick="startQuiz('sound')">🔊 Sounds</button>
+                        <button class="big-btn" style="background:#8b5cf6;" onclick="startQuiz('mix')">🎲 Mix it up</button>
                     </div>
                     <div class="quiz-stage" id="quiz-stage">
                         <p style="font-size:3em;margin:20px 0 0;">🐦❓</p>
@@ -2759,8 +2871,48 @@ button { font-family:inherit; }
             <!-- PUZZLE -->
             <section id="tab-puzzle" class="tab-content">
                 <div class="box">
-                    <h2 class="tab-title">🧩 Mystery Bird Puzzle</h2>
-                    <p class="muted">A bird picture got scrambled! Tap two tiles to swap them. Put every tile back to reveal the mystery bird. Solve 5 to earn the 🧩 <b>Puzzle Pro</b> badge. Puzzles solved: <b id="puzzle-solved-count">0</b></p>
+                    <h2 class="tab-title">🧩 Bird Puzzles</h2>
+                    <p class="muted">Pick a puzzle! Solve 5 (any kind) to earn the 🧩 <b>Puzzle Pro</b> badge. Puzzles solved: <b id="puzzle-solved-count">0</b></p>
+                    <div class="quiz-modes">
+                        <button class="chip on" data-pz-mode="picture">🖼️ Mystery Bird</button>
+                        <button class="chip" data-pz-mode="sexes">♂️♀️ Male &amp; Female</button>
+                        <button class="chip" data-pz-mode="life">🥚 Life Cycle</button>
+                    </div>
+                    <div id="pz-match" hidden>
+                        <p class="muted" id="match-help" style="margin-bottom:0;"></p>
+                        <div class="quiz-modes" id="match-sizes">
+                            <button class="chip on" data-mt-size="3">Easy: 3 pairs</button>
+                            <button class="chip" data-mt-size="4">Medium: 4 pairs</button>
+                            <button class="chip" data-mt-size="5">Hard: 5 pairs</button>
+                        </div>
+                        <div class="match-area" id="match-area">
+                            <svg class="match-lines" id="match-lines" aria-hidden="true"></svg>
+                            <div class="match-col" id="match-left"></div>
+                            <div class="match-col" id="match-right"></div>
+                        </div>
+                        <div class="match-bar">
+                            <button class="big-btn" type="button" id="match-submit" onclick="checkMatch()" disabled>✅ Submit</button>
+                            <button class="big-btn alt" type="button" onclick="clearMatchLines()">🧽 Clear lines</button>
+                            <button class="big-btn warm" type="button" onclick="newMatch()">🔄 New puzzle</button>
+                        </div>
+                        <div id="match-message" class="muted" style="margin-top:12px;" role="status"></div>
+                        <p class="small" id="match-credits"></p>
+                    </div>
+                    <div id="pz-life" hidden>
+                        <p class="muted" style="margin-bottom:0;">A bird's life goes around in a <b>circle</b>! Put the 5 stages around the circle in the right order, following the arrows ↻.
+                            Click a stage, then click a spot on the circle. It's a circle, so you can start anywhere! Then press <b>✅ Submit</b>.</p>
+                        <div class="life-circle" id="life-circle"></div>
+                        <div class="life-tray" id="life-tray"></div>
+                        <p class="small" id="life-hint" role="status" style="text-align:center;min-height:1.4em;"></p>
+                        <div class="match-bar" style="justify-content:center;">
+                            <button class="big-btn" type="button" id="life-submit" onclick="checkLife()" disabled>✅ Submit</button>
+                            <button class="big-btn warm" type="button" onclick="newLifeCircle()">🔄 Start over</button>
+                        </div>
+                        <div id="life-message" class="muted" style="margin-top:12px;" role="status"></div>
+                        <p class="small" id="life-credits"></p>
+                    </div>
+                    <div id="pz-picture">
+                    <p class="muted" style="margin-bottom:0;">A bird picture got scrambled! Tap two tiles to swap them. Put every tile back to reveal the mystery bird.</p>
                     <div class="quiz-modes">
                         <button class="chip on" data-pz-pic="photo">📸 Real photo</button>
                         <button class="chip" data-pz-pic="cartoon">🎨 Cartoon</button>
@@ -2784,6 +2936,7 @@ button { font-family:inherit; }
                             </div>
                             <div id="puzzle-message" class="muted" style="margin-top:12px;">Tip: tiles that are in the right spot get a green check ✅.</div>
                         </div>
+                    </div>
                     </div>
                 </div>
             </section>
@@ -3605,7 +3758,8 @@ function openTab(name){
     if(name==="count") refreshCount(true);
     if(name==="events") loadEvents();
     if(name==="research" && researchMap) setTimeout(()=>researchMap.invalidateSize(),50);
-    if(name==="puzzle" && !pz) newPuzzle();
+    if(name==="puzzle" && pzMode==="picture" && !pz) newPuzzle();
+    if(name==="puzzle" && pzMode!=="picture") setTimeout(paintMatch,50);  // lines need the cards' real positions
     if((name==="book" || name==="checklist") && mode==="normal") applyMonthOrder();  // your new sightings can move birds up
     if(name==="welcome" && birdMap) setTimeout(()=>birdMap.invalidateSize(),50);
 }
@@ -3951,8 +4105,8 @@ const TOUR=[
      done:"See? 12 new birds! You can also click a page number. Press Next ▶ to keep going with the tour."},
     {tab:"checklist", title:"✅ Checklist", text:"Saw a bird outside? Check it off here! In 💾 Normal mode, every \"👀 I saw one!\" counts as one more sighting."},
     {tab:"photoid", title:"📷 Photo ID", text:"Show me a photo of a bird, or even your own drawing, and I'll try to guess which bird it is!"},
-    {tab:"quiz", title:"🎯 Bird Quiz", text:"Test yourself with real photos, cartoons or bird sounds. Can you get 8 out of 8?"},
-    {tab:"puzzle", title:"🧩 Bird Puzzle", text:"A mystery bird picture gets scrambled. Swap the tiles to put it back together!"},
+    {tab:"quiz", title:"🎯 Bird Quiz", text:"Test yourself with real photos, cartoons or bird sounds. Or try 🎲 Mix it up: dropdowns, put it in order, type the name and lots more!"},
+    {tab:"puzzle", title:"🧩 Bird Puzzle", text:"Unscramble a mystery bird picture, match male birds with the females, or match the stages of a bird's life cycle!"},
     {tab:"draw", title:"✏️ Draw Birds", text:"Learn to draw any Bird Book bird, one easy step at a time."},
     {tab:"showtime", title:"📺 Showtime", text:"Watch a live bird cam and fun bird videos."},
     {tab:"events", title:"📰 Events & News", text:"Find real bird walks and programs near you, plus kid-friendly bird news."},
@@ -4391,10 +4545,12 @@ let quiz=null;
 function startQuiz(mode){
     if(allBirds.length<4) return;
     const total = mode==="sound" ? 8 : 10;  // the Sound quiz is 8 questions (8/8 = a step toward Owl Ears)
-    quiz={mode, n:0, total, score:0, streak:0, order:shuffle(allBirds).slice(0,total)};
+    quiz={mode, n:0, total, score:0, streak:0, order:shuffle(allBirds).slice(0,total),
+          kinds: mode==="mix" ? shuffle(MIX_KINDS).slice(0,total) : null};  // 🎲 10 different kinds of questions
     nextQuestion();
 }
 async function nextQuestion(){
+    if(quiz.mode==="mix") return nextMixQuestion();
     const stage=$("quiz-stage"), answer=quiz.order[quiz.n];
     const choices=shuffle([answer, ...shuffle(allBirds.filter(b=>b.id!==answer.id)).slice(0,3)]);
     stage.innerHTML=`<div class="quiz-hud"><span>Question ${quiz.n+1} / ${quiz.total}</span><span>⭐ ${quiz.score}</span><span>🔥 Streak ${quiz.streak}</span></div>
@@ -4437,6 +4593,272 @@ function finishQuiz(){
     stage.innerHTML=`<p style="font-size:3em;margin:10px 0;">${part>=0.8?"🏆":part>=0.5?"🎉":"🐣"}</p><h2 style="color:#0f766e;">You scored ${s} / ${quiz.total}</h2><p>${msg}</p>
         ${owl}${newBest?"<p><b>🌟 New best score!</b></p>":""}<button class="big-btn" onclick="startQuiz('${quiz.mode}')">Play again</button>`;
     if(part>=0.8) fireConfetti(stage);
+}
+
+// ---------- 🎲 Mix it up: lots of kinds of questions ----------
+// Each game picks 10 of these, in a random order. "truefalse" is in the list twice, so true-or-false comes up more often.
+const MIX_KINDS=["drop-size","habitat","drop-season","type-cartoon","type-photo","drop-name",
+                 "order-size","order-life","sex-photo","truefalse","truefalse","bigger","mark"];
+const HABITATS={backyard:"🏡 Backyard", water:"💧 Water", open:"🌾 Fields & Sky", night:"🌙 Night"};
+// 🥚 A songbird's life cycle (used by the quiz and by the 🧩 Life Cycle matching puzzle)
+const LIFE_CYCLE=[
+    {key:"egg", emoji:"🥚", name:"Egg", text:["A parent sits on it to keep it warm while a baby bird grows inside.",
+        "Lies in the nest and needs to stay warm for about two weeks before it hatches."]},
+    {key:"hatchling", emoji:"🐣", name:"Hatchling", text:["Just broke out of its shell! Its eyes are closed and it has almost no feathers.",
+        "Brand new and wobbly: it can't see yet and can barely hold its head up."]},
+    {key:"nestling", emoji:"🐥", name:"Nestling", text:["Its eyes are open and feathers are starting to grow, but it still stays in the nest.",
+        "Opens its beak super wide and begs every time a parent brings food to the nest."]},
+    {key:"fledgling", emoji:"🐤", name:"Fledgling", text:["Has most of its feathers and just left the nest. It hops and flutters but can't fly well yet.",
+        "Out of the nest on the ground or a low branch, while its parents stay nearby and feed it."]},
+    {key:"adult", emoji:"🐦", name:"Adult", text:["Fully grown, with grown-up colors. It finds its own food and can build its own nest.",
+        "Flies well, sings or calls to its flock, and can raise babies of its own."]},
+];
+// 📸 Real iNaturalist photos of 3 Bird Book birds at EVERY stage, so one round shows one kind of bird growing up.
+// Picked by hand on Nov 3, 2026, and each one checked to really show that stage (iNaturalist only tags birds as
+// egg / juvenile / adult, so a computer can't tell a hatchling from a fledgling). [observation id, photo, who, license]
+const LIFE_PHOTOS={
+    robin:{egg:[217328568,"384455728/medium.jpg","Kevin Tolan","CC BY-NC"], hatchling:[49652347,"78824052/medium.jpg","phiprime","CC BY-NC"],
+           nestling:[69828184,"113398300/medium.jpeg","annem4g","CC BY-NC"], fledgling:[365595888,"667506030/medium.jpg","VeeLorelei","CC BY-NC"],
+           adult:[2192693,"2541739/medium.jpg","roy pilcher","CC BY-NC"]},
+    bluebird:{egg:[111528323,"188281517/medium.jpeg","Mila C.","CC BY"], hatchling:[348951353,"636490908/medium.jpg","kmoncure","CC BY-NC"],
+           nestling:[173946878,"302136811/medium.jpeg","Kim Springer","CC BY-NC"], fledgling:[122880264,"208101140/medium.jpeg","Miguel A Mejias, PhD.","CC BY-NC"],
+           adult:[10529245,"14657071/medium.jpeg","Marie Hosch","CC BY-NC"]},
+    swallow:{egg:[291296535,"524049263/medium.jpg","Peter Mundale","CC BY-NC"], hatchling:[389805385,"714057043/medium.jpg","Nathan Wahler","CC BY-NC"],
+           nestling:[91895934,"152075581/medium.jpg","Kyle Eaton","CC BY-NC"], fledgling:[13777850,"20316091/medium.jpeg","Kurt Steinbach","CC BY-NC"],
+           adult:[150926924,"260335853/medium.jpg","Leslie S","CC BY-NC"]},
+};
+function lifePhoto(sp, stage){
+    const [obs, file, who, lic]=LIFE_PHOTOS[sp][stage];
+    return {url:"https://inaturalist-open-data.s3.amazonaws.com/photos/"+file, credit:`(c) ${who}, some rights reserved (${lic})`,
+            link:"https://www.inaturalist.org/observations/"+obs};
+}
+function lifeCredits(sp){
+    return "📸 Photos from iNaturalist: "+LIFE_CYCLE.map(s=>{ const p=lifePhoto(sp,s.key);
+        return `<a href="${p.link}" target="_blank" rel="noopener">${s.name}</a> ${esc(p.credit)}`; }).join(" · ");
+}
+const LIFE_FACT="💡 If you find a fledgling hopping on the ground, it's usually OK: its parents are close by, still feeding it! "
+    +"Not every bird grows up this way, though: baby ducks and Killdeer can walk and leave the nest just hours after hatching.";
+function pickOne(a){ return a[Math.floor(Math.random()*a.length)]; }
+function birdsBySize(n, must){  // n birds with clearly different sizes (each one at least 15% longer than the next)
+    const out=must?[must]:[];
+    for(const b of shuffle(allBirds)){
+        if(out.length>=n) break;
+        if(out.every(o=>Math.max(o.inches,b.inches)/Math.min(o.inches,b.inches)>=1.15)) out.push(b);
+    }
+    return out;
+}
+function mixHud(label){
+    return `<div class="quiz-hud"><span>Question ${quiz.n+1} / ${quiz.total}</span><span class="mix-tag">${label}</span><span>⭐ ${quiz.score}</span><span>🔥 Streak ${quiz.streak}</span></div>`;
+}
+function mixPic(o){ return o.pic ? `<div class="quiz-picture small-pic">${o.pic}</div>${o.credit?`<p class="small">${esc(o.credit)}</p>`:""}` : ""; }
+function mixDone(right, fb){  // every kind of question ends here: score it, explain, and show Next
+    if(quiz.answered) return; quiz.answered=true;
+    if(right){ quiz.score++; quiz.streak++; } else quiz.streak=0;
+    const stage=$("quiz-stage");
+    stage.insertAdjacentHTML("beforeend",`<p style="font-weight:bold;color:${right?"#15803d":"#b91c1c"};">${right?"Correct! 🎉":"Not quite!"} <span class="small">${fb}</span></p>
+        <button class="big-btn" type="button" id="quiz-next">${quiz.n+1<quiz.total?"Next ➜":"See my score 🏁"}</button>`);
+    $("quiz-next").addEventListener("click",()=>{ quiz.n++; if(quiz.n<quiz.total) nextQuestion(); else finishQuiz(); });
+    $("quiz-next").scrollIntoView({block:"nearest", behavior:"smooth"});
+}
+async function mixPhoto(b){  // a real photo of the bird, or its cartoon if the photo can't load
+    try{ const d=await (await fetch("/api/quiz_photo?bird="+b.id)).json();
+         if(d.url) return {pic:`<img src="${esc(d.url)}" alt="Mystery bird">`, credit:d.credit||""}; }catch(e){}
+    return {pic:birdArt(b), credit:""};
+}
+// Buttons to click (o.choices = [{v, html}], o.answer = the right v)
+function mixChoices(o){
+    const stage=$("quiz-stage");
+    stage.innerHTML=mixHud(o.label)+mixPic(o)+`<p class="mix-q">${o.q}</p>
+        <div class="${o.grid||"quiz-choices"}">${o.choices.map(c=>`<button class="choice" type="button" data-v="${esc(c.v)}">${c.html}</button>`).join("")}</div>`;
+    stage.querySelectorAll(".choice").forEach(btn=>btn.addEventListener("click",()=>{
+        stage.querySelectorAll(".choice").forEach(x=>{ x.disabled=true; if(x.dataset.v===o.answer) x.classList.add("right"); else if(x===btn) x.classList.add("wrong"); });
+        mixDone(btn.dataset.v===o.answer, o.fb);
+    }));
+}
+// A sentence with a dropdown in it (o.options = [{v, t}])
+function mixDropdown(o){
+    const stage=$("quiz-stage");
+    stage.innerHTML=mixHud(o.label)+mixPic(o)+`<p class="mix-q">${o.before}
+        <select id="mix-select" class="mix-select" aria-label="Pick the answer"><option value="">— pick one —</option>${o.options.map(x=>`<option value="${esc(x.v)}">${esc(x.t)}</option>`).join("")}</select>
+        ${o.after}</p><div class="mix-row"><button class="big-btn" type="button" id="mix-check" disabled>✅ Check</button></div>`;
+    const sel=$("mix-select"), btn=$("mix-check");
+    sel.addEventListener("change",()=>{ btn.disabled=!sel.value; });
+    btn.addEventListener("click",()=>{
+        const ok=sel.value===o.answer; sel.disabled=btn.disabled=true; sel.classList.add(ok?"right":"wrong"); mixDone(ok,o.fb);
+    });
+}
+// ⌨️ Type the bird's name. Small typos are fixed to the closest Bird Book bird; way-off answers aren't guessed.
+function normName(s){ return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/['’`]/g,"").replace(/[^a-z]+/g," ").trim(); }
+function editDistance(a,b){  // how many letters to add, remove or change to turn a into b
+    let prev=[...Array(b.length+1).keys()];
+    for(let i=1;i<=a.length;i++){
+        const cur=[i];
+        for(let j=1;j<=b.length;j++) cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+(a[i-1]===b[j-1]?0:1));
+        prev=cur;
+    }
+    return prev[b.length];
+}
+let nameIndex=null;
+function buildNameIndex(){  // every full name, plus short names like "cardinal" when only ONE bird has them
+    const tails=n=>{ const w=normName(n).split(" "); return w.slice(1).map((_,k)=>w.slice(k+1).join(" ")); };
+    const shortCount={}, idx=[];
+    allBirds.forEach(b=>tails(b.name).forEach(t=>shortCount[t]=(shortCount[t]||0)+1));
+    allBirds.forEach(b=>{
+        idx.push({b, s:normName(b.name).replace(/ /g,"")});
+        tails(b.name).forEach(t=>{ const s=t.replace(/ /g,""); if(shortCount[t]===1 && s.length>=3) idx.push({b, s}); });
+    });
+    return {idx, shortCount};
+}
+function guessBird(text){
+    nameIndex=nameIndex||buildNameIndex();
+    const t=normName(text);
+    if((nameIndex.shortCount[t]||0)>1) return {ask:true, count:nameIndex.shortCount[t]};  // "hawk": which hawk?
+    const s=t.replace(/ /g,"");
+    if(s.length<3) return null;
+    const best={};
+    for(const e of nameIndex.idx){
+        const d=editDistance(s,e.s), cur=best[e.b.id];
+        if(!cur||d<cur.d) best[e.b.id]={b:e.b, d, len:e.s.length};
+    }
+    const [top,next]=Object.values(best).sort((x,y)=>x.d-y.d);
+    if(!top || top.d>Math.max(1,Math.floor(top.len*0.3))) return null;  // too far from every bird name
+    if(next && next.d===top.d) return null;                              // two birds just as close: can't tell
+    return {bird:top.b, exact:top.d===0};
+}
+function mixType(o){
+    const stage=$("quiz-stage"), b=o.bird;
+    stage.innerHTML=mixHud("⌨️ Type it!")+mixPic(o)+`<p class="mix-q">Which bird is it? Type its name:</p>
+        <div class="mix-row"><input id="mix-input" class="mix-input" type="text" autocomplete="off" spellcheck="false" maxlength="40" placeholder="Like: Blue Jay" aria-label="Bird name">
+        <button class="big-btn" type="button" id="mix-check">✅ Check</button></div>
+        <p class="small" id="mix-hint" role="status">Small typos are OK: Pip will figure out what you meant!</p>`;
+    const inp=$("mix-input"), btn=$("mix-check");
+    const go=()=>{
+        if(quiz.answered) return;
+        const text=inp.value.trim();
+        if(!text){ $("mix-hint").textContent="Type a bird name first!"; return; }
+        const g=guessBird(text);
+        if(g && g.ask){ $("mix-hint").textContent=`🤔 There are ${g.count} kinds of "${text}" in the Bird Book. Which one? Type the whole name.`; return; }
+        const ok=!!g && g.bird.id===b.id;
+        inp.disabled=btn.disabled=true; inp.classList.add(ok?"right":"wrong");
+        let fb;
+        if(ok) fb = g.exact ? `It's the ${esc(b.name)}!` : `I think you meant the <b>${esc(b.name)}</b>. Spelled right, it's "${esc(b.name)}".`;
+        else if(g) fb = `"${esc(text)}" sounds like the ${esc(g.bird.name)}, but this one is the <b>${esc(b.name)}</b>.`;
+        else fb = `Pip doesn't know a bird called "${esc(text)}" 🤔. This one is the <b>${esc(b.name)}</b>.`;
+        mixDone(ok, fb+" "+esc(b.marks[0])+".");
+    };
+    btn.addEventListener("click",go);
+    inp.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+    setTimeout(()=>inp.focus({preventScroll:true}),50);
+}
+// 🔢 Put it in order: drag the rows, or use ⬆️ ⬇️ (o.items = [{key, art, name}], o.answer = keys in the right order)
+function mixOrder(o){
+    const stage=$("quiz-stage");
+    let items; do{ items=shuffle(o.items); }while(items.every((it,i)=>it.key===o.answer[i]));  // never start already right
+    stage.innerHTML=mixHud("🔢 Put it in order")+`<p class="mix-q">${o.q}</p><p class="small">Drag them, or use the ⬆️ ⬇️ buttons.</p>
+        <ol class="order-list" id="order-list">${items.map(it=>`<li class="order-item" draggable="true" data-key="${esc(it.key)}">
+            <span class="order-num"></span><span class="order-art">${it.art}</span><span class="order-name">${esc(it.name)}</span>
+            <span class="order-btns"><button class="mini-btn" type="button" data-move="up" aria-label="Move up">⬆️</button><button class="mini-btn" type="button" data-move="down" aria-label="Move down">⬇️</button></span></li>`).join("")}</ol>
+        <div class="mix-row"><button class="big-btn" type="button" id="mix-check">✅ Check</button></div>`;
+    const list=$("order-list"), number=()=>[...list.children].forEach((li,i)=>li.querySelector(".order-num").textContent=i+1);
+    number();
+    list.addEventListener("click",e=>{
+        const btn=e.target.closest("[data-move]"); if(!btn||quiz.answered) return;
+        const li=btn.closest("li");
+        if(btn.dataset.move==="up" && li.previousElementSibling) list.insertBefore(li, li.previousElementSibling);
+        if(btn.dataset.move==="down" && li.nextElementSibling) list.insertBefore(li.nextElementSibling, li);
+        number();
+    });
+    let dragged=null;
+    list.addEventListener("dragstart",e=>{ dragged=e.target.closest("li"); if(!dragged) return; e.dataTransfer.setData("text/plain",""); dragged.classList.add("dragging"); });
+    list.addEventListener("dragend",()=>{ dragged?.classList.remove("dragging"); dragged=null; number(); });
+    list.addEventListener("dragover",e=>{
+        if(!dragged||quiz.answered) return;
+        e.preventDefault();
+        const over=e.target.closest("li"); if(!over||over===dragged) return;
+        const r=over.getBoundingClientRect();
+        list.insertBefore(dragged, e.clientY<r.top+r.height/2 ? over : over.nextElementSibling);
+    });
+    $("mix-check").addEventListener("click",()=>{
+        if(quiz.answered) return;
+        const rows=[...list.children];
+        rows.forEach((li,i)=>{ li.classList.add(li.dataset.key===o.answer[i]?"right":"wrong"); li.draggable=false; li.querySelectorAll("button").forEach(x=>x.disabled=true); });
+        $("mix-check").disabled=true;
+        mixDone(rows.every((li,i)=>li.dataset.key===o.answer[i]), o.fb);
+    });
+}
+async function nextMixQuestion(){
+    const token=quiz, n=quiz.n, kind=quiz.kinds[n], stage=$("quiz-stage"), b=pickOne(allBirds);
+    quiz.answered=false;
+    stage.innerHTML=mixHud("…")+`<div class="quiz-picture small-pic"><div class="skeleton" style="width:160px;height:160px;"></div></div>`;
+    const stale=()=>quiz!==token || quiz.n!==n;  // a new game or question started while a photo was loading
+    const nameChoices=x=>shuffle([x, ...shuffle(allBirds.filter(y=>y.id!==x.id)).slice(0,3)]);
+    if(kind==="drop-size"){
+        mixDropdown({label:"📏 How big?", pic:birdArt(b), before:`The <b>${esc(b.name)}</b> is about`, after:"inches long, from beak to tail.",
+            options:shuffle(birdsBySize(4,b)).map(x=>({v:String(x.inches), t:String(x.inches)})), answer:String(b.inches),
+            fb:`It's ${esc(b.id_info.size)}.`});
+    }else if(kind==="habitat"){
+        mixChoices({label:"🏞️ Habitat", pic:birdArt(b), q:`Which habitat does the <b>${esc(b.name)}</b> live in?`,
+            choices:Object.entries(HABITATS).map(([v,t])=>({v, html:esc(t)})), answer:b.habitat,
+            fb:`In the Bird Book, it's a ${HABITATS[b.habitat]} bird. ${esc(b.id_info.where)}`});
+    }else if(kind==="drop-season"){
+        const v=pickOne(allBirds.filter(x=>x.visitor));
+        mixDropdown({label:"🗓️ Seasons", pic:birdArt(v), before:`In Texas, you'll mostly see the <b>${esc(v.name)}</b> in`, after:".",
+            options:[{v:"winter",t:"❄️ winter"},{v:"summer",t:"☀️ summer"},{v:"all",t:"📅 every month"}], answer:v.visitor,
+            fb: v.visitor==="winter" ? "It's a ❄️ winter visitor: it flies south to Texas for the winter, then goes back north to nest."
+                                     : "It's a ☀️ summer visitor: it comes to Texas to nest, then flies south for the winter."});
+    }else if(kind==="type-cartoon"){
+        mixType({bird:b, pic:birdArt(b)});
+    }else if(kind==="type-photo" || kind==="drop-name"){
+        const ph=await mixPhoto(b); if(stale()) return;
+        if(kind==="type-photo") mixType({bird:b, ...ph});
+        else mixDropdown({label:"📸 Name it", ...ph, before:"This bird is a", after:".",
+            options:nameChoices(b).map(x=>({v:x.id, t:x.name})), answer:b.id, fb:`It's the ${esc(b.name)}! ${esc(b.marks[0])}.`});
+    }else if(kind==="order-size"){
+        const set=birdsBySize(4), up=Math.random()<0.5, sorted=[...set].sort((x,y)=>up ? x.inches-y.inches : y.inches-x.inches);
+        mixOrder({q:`Put these birds in order from <b>${up?"smallest":"biggest"}</b> to <b>${up?"biggest":"smallest"}</b>:`,
+            items:set.map(x=>({key:x.id, art:birdArt(x), name:x.name})), answer:sorted.map(x=>x.id),
+            fb:sorted.map(x=>`${esc(x.name)} (${x.inches} in)`).join(" → ")});
+    }else if(kind==="order-life"){
+        const sp=pickOne(Object.keys(LIFE_PHOTOS)), lb=birdById[sp];
+        mixOrder({q:`Put the <b>${esc(lb?lb.name:"bird")}'s life cycle</b> in order, from first to last:`,
+            items:LIFE_CYCLE.map(s=>({key:s.key, art:`<img src="${lifePhoto(sp,s.key).url}" alt="">`, name:s.name})), answer:LIFE_CYCLE.map(s=>s.key),
+            fb:LIFE_CYCLE.map(s=>s.emoji+" "+s.name).join(" → ")+`<br>${lifeCredits(sp)}`});
+    }else if(kind==="sex-photo"){
+        const s=pickOne(allBirds.filter(x=>x.sexes==="differ")), sex=Math.random()<0.5?"male":"female";
+        let d=null; try{ d=await (await fetch("/api/sex_photos?bird="+s.id)).json(); }catch(e){}
+        if(stale()) return;
+        if(!d || !d[sex]){ quiz.kinds[n]="habitat"; return nextMixQuestion(); }  // no photo: ask something else
+        mixChoices({label:"♂️♀️ Male or female?", pic:`<img src="${esc(d[sex].url)}" alt="A ${esc(s.name)}">`, credit:d[sex].credit,
+            q:`Is this a male or a female <b>${esc(s.name)}</b>?`, choices:[{v:"male",html:"♂ Male"},{v:"female",html:"♀ Female"}], answer:sex,
+            fb:esc(s.id_info.sexes)});
+    }else if(kind==="truefalse"){
+        const makers=[
+            ()=>{ const x=pickOne(allBirds.filter(y=>y.sexes)); return {b:x, s:`A male and a female ${x.name} look different.`, t:x.sexes==="differ", fb:x.id_info.sexes}; },
+            ()=>{ const x=pickOne(allBirds.filter(y=>y.visitor)), say=Math.random()<0.5 ? x.visitor : (x.visitor==="winter"?"summer":"winter");
+                  return {b:x, s:`The ${x.name} visits Texas mostly in ${say}.`, t:say===x.visitor, fb:`It's a ${x.visitor==="winter"?"❄️ winter":"☀️ summer"} visitor.`}; },
+            ()=>{ const h=Math.random()<0.5 ? b.habitat : pickOne(Object.keys(HABITATS).filter(k=>k!==b.habitat));
+                  return {b, s:`In the Bird Book, the ${b.name} is a ${HABITATS[h]} bird.`, t:h===b.habitat, fb:`It's a ${HABITATS[b.habitat]} bird.`}; },
+            ()=>{ const [p,q]=birdsBySize(2); return {s:`The ${p.name} is bigger than the ${q.name}.`, t:p.inches>q.inches, fb:`${p.name}: ${p.inches} in · ${q.name}: ${q.inches} in.`}; },
+            ()=>{ const other=pickOne(allBirds.filter(y=>y.id!==b.id)), real=Math.random()<0.5, m=(real?b:other).marks[0];
+                  return {b, s:`The ${b.name} has this field mark: "${m}".`, t:real, fb:`The ${b.name}'s field marks: ${b.marks.join(" · ")}.`}; },
+            ()=>{ const k=Math.floor(Math.random()*5), real=Math.random()<0.5, said=real?k:pickOne([0,1,2,3,4].filter(j=>j!==k));
+                  const s=LIFE_CYCLE[k]; return {s:`This is what a bird is like as a ${LIFE_CYCLE[said].name.toLowerCase()}: "${LIFE_CYCLE[k].text[0]}"`, t:real,
+                  fb:`That's the ${s.emoji} ${s.name} stage. The life cycle goes: ${LIFE_CYCLE.map(x=>x.name).join(" → ")}.`}; },
+            ()=>{ const x=pickOne(allBirds), night=x.habitat==="night";
+                  return {b:x, s:`The ${x.name} is a 🌙 night bird.`, t:night, fb:night?"Yes! It's a night bird in the Bird Book.":`It's a ${HABITATS[x.habitat]} bird.`}; },
+        ];
+        const st=pickOne(makers)();
+        mixChoices({label:"🤔 True or false?", pic:st.b?birdArt(st.b):"", q:`True or false: ${esc(st.s)}`,
+            choices:[{v:"true",html:"✅ True"},{v:"false",html:"❌ False"}], answer:String(st.t), fb:esc(st.fb)});
+    }else if(kind==="bigger"){
+        const [p,q]=birdsBySize(2), big=p.inches>q.inches?p:q;
+        mixChoices({label:"⚖️ Which is bigger?", q:"Which bird is <b>bigger</b> (longer from beak to tail)?", grid:"two-birds",
+            choices:[p,q].map(x=>({v:x.id, html:birdArt(x)+esc(x.name)})), answer:big.id,
+            fb:`${esc(p.name)}: ${p.inches} in · ${esc(q.name)}: ${q.inches} in.`});
+    }else{  // "mark"
+        mixChoices({label:"🔍 Field marks", q:`Which bird has this? <i>"${esc(b.marks[0])}"</i>`,
+            choices:nameChoices(b).map(x=>({v:x.id, html:esc(x.name)})), answer:b.id, fb:`It's the ${esc(b.name)}! Also: ${esc(b.marks[1]||"")}`});
+    }
 }
 
 // ---------- mystery bird puzzle ----------
@@ -4521,6 +4943,224 @@ function solvePuzzle(){
         <div class="card-buttons" style="justify-content:flex-start;"><button class="mini-btn" onclick="playBirdCall(birdById['${b.id}'])">🔊 Hear its call</button>
         <button class="mini-btn" onclick="newPuzzle()">🧩 Next puzzle</button></div>${pz.credit?`<p class="small">${esc(pz.credit)}</p>`:""}`;
     fireConfetti($("puzzle-message"));
+}
+function puzzleProNote(){
+    return puzzlesSolved===5 ? "<br><b>🧩 You unlocked the Puzzle Pro badge!</b>"
+         : puzzlesSolved<5 ? `<br>${5-puzzlesSolved} more for the Puzzle Pro badge.` : "";
+}
+
+// ---------- 🔗 matching puzzles: ♂️♀️ Male & Female and 🥚 Life Cycle ----------
+// Click a card on one side, then its partner on the other side, and a line is drawn between them.
+// mt.links[leftIndex] = rightIndex. ✅ Submit checks every line (right card's key === left card's key).
+const MATCH_COLORS=["#0ea5e9","#f59e0b","#8b5cf6","#ec4899","#14b8a6"];
+const MATCH_HELP={
+    sexes:"In lots of birds, the males and females look different! Click a <b>male</b> on the left, then the <b>female</b> of the same kind on the right, to draw a line between them. Match them all, then press <b>✅ Submit</b>.",
+};
+let mt=null, pzMode="picture", mtSize=3, mtRound=0;
+document.querySelectorAll(".chip[data-pz-mode]").forEach(ch=>ch.addEventListener("click",()=>setPuzzleMode(ch.dataset.pzMode)));
+document.querySelectorAll(".chip[data-mt-size]").forEach(ch=>ch.addEventListener("click",()=>{
+    document.querySelectorAll(".chip[data-mt-size]").forEach(c=>c.classList.toggle("on",c===ch)); mtSize=Number(ch.dataset.mtSize); newMatch();
+}));
+window.addEventListener("resize",()=>{ if(mt) paintMatch(); });
+function setPuzzleMode(m){
+    pzMode=m;
+    document.querySelectorAll(".chip[data-pz-mode]").forEach(c=>c.classList.toggle("on",c.dataset.pzMode===m));
+    $("pz-picture").hidden = m!=="picture";
+    $("pz-match").hidden = m!=="sexes";
+    $("pz-life").hidden = m!=="life";
+    if(m==="picture"){ if(!pz) newPuzzle(); return; }
+    if(m==="life"){ if(!life) newLifeCircle(); return; }
+    $("match-help").innerHTML = MATCH_HELP[m];
+    newMatch();
+}
+async function newMatch(){
+    const round=++mtRound, mode=pzMode;
+    mt=null; $("match-lines").innerHTML=""; $("match-submit").disabled=true;
+    $("match-message").textContent=""; $("match-credits").textContent="";
+    $("match-left").innerHTML=$("match-right").innerHTML=`<div class="skeleton" style="height:130px;"></div>`.repeat(mtSize);
+    $("match-message").textContent="🔎 Pip is finding photos of male and female birds…";
+    const pool=shuffle(allBirds.filter(b=>b.sexes==="differ")), pairs=[];
+    const getPair=async b=>{ try{ const d=await (await fetch("/api/sex_photos?bird="+b.id)).json(); return d.male&&d.female ? {b, ...d} : null; }catch(e){ return null; } };
+    while(pairs.length<mtSize && pool.length){  // ask for just enough birds; if one has no photos, try another
+        const got=await Promise.all(pool.splice(0, mtSize-pairs.length).map(getPair));
+        if(round!==mtRound) return;  // a newer puzzle was started meanwhile
+        pairs.push(...got.filter(Boolean));
+    }
+    if(pairs.length<2){
+        $("match-left").innerHTML=$("match-right").innerHTML="";
+        $("match-message").textContent="😵 Pip couldn't get the bird photos. Press 🔄 New puzzle to try again.";
+        return;
+    }
+    const left=pairs.map(p=>({key:p.b.id, html:`<img src="${esc(p.male.url)}" alt="Male ${esc(p.b.name)}"><b>${esc(p.b.name)}</b><span class="mt-sex">♂ male</span>`}));
+    const right=shuffle(pairs).map(p=>({key:p.b.id, name:p.b.name,
+        html:`<img src="${esc(p.female.url)}" alt="A mystery female bird"><span class="mt-sex">♀ female: <span class="mt-name">?</span></span>`}));
+    mt={mode, left, right, links:{}, sel:null};
+    $("match-message").textContent="";
+    $("match-credits").textContent="Photos from iNaturalist: "+pairs.flatMap(p=>[p.male.credit,p.female.credit]).filter(Boolean).join(" · ");
+    renderMatch();
+}
+function renderMatch(){
+    const card=(side,it,i)=>`<button type="button" class="mt-card" data-side="${side}" data-i="${i}">${it.html}</button>`;
+    $("match-left").innerHTML=mt.left.map((it,i)=>card("L",it,i)).join("");
+    $("match-right").innerHTML=mt.right.map((it,i)=>card("R",it,i)).join("");
+    document.querySelectorAll("#match-area .mt-card").forEach(c=>c.addEventListener("click",()=>matchClick(c.dataset.side, Number(c.dataset.i))));
+    document.querySelectorAll("#match-area img").forEach(im=>im.addEventListener("load",paintMatch));  // cards change size
+    paintMatch();
+}
+function matchClick(side,i){
+    if(!mt||mt.done) return;
+    if(mt.result) fixRedLines();  // after a check, clicking again means "let me fix it"
+    const s=mt.sel;
+    if(!s || s.side===side) mt.sel = (s && s.side===side && s.i===i) ? null : {side,i};
+    else{
+        const L=side==="L"?i:s.i, R=side==="R"?i:s.i;
+        for(const k in mt.links) if(mt.links[k]===R) delete mt.links[k];  // one line per card
+        mt.links[L]=R; mt.sel=null;
+    }
+    paintMatch();
+}
+function paintMatch(){
+    const svg=$("match-lines");
+    if(!mt){ svg.innerHTML=""; return; }
+    const area=$("match-area").getBoundingClientRect(), L=[...$("match-left").children], R=[...$("match-right").children];
+    const colorOf=li=>{ const r=mt.result?.[li]; return r===true?"#16a34a" : r===false?"#dc2626" : MATCH_COLORS[li%MATCH_COLORS.length]; };
+    const leftOf={}; for(const [li,ri] of Object.entries(mt.links)) leftOf[ri]=Number(li);
+    L.forEach((c,i)=>{ c.classList.toggle("sel", mt.sel?.side==="L" && mt.sel.i===i); c.disabled=!!mt.done;
+                       c.style.borderColor = (i in mt.links && !mt.result) ? colorOf(i) : ""; });
+    R.forEach((c,i)=>{ c.classList.toggle("sel", mt.sel?.side==="R" && mt.sel.i===i); c.disabled=!!mt.done;
+                       c.style.borderColor = (i in leftOf && !mt.result) ? colorOf(leftOf[i]) : ""; });
+    let lines="";
+    for(const [li,ri] of Object.entries(mt.links)){
+        const a=L[li]?.getBoundingClientRect(), b=R[ri]?.getBoundingClientRect();
+        if(!a || !b || !a.width) continue;  // the puzzle tab is hidden right now
+        const x1=a.right-area.left, y1=a.top+a.height/2-area.top, x2=b.left-area.left, y2=b.top+b.height/2-area.top, col=colorOf(li);
+        lines+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="5" stroke-linecap="round"${mt.result?.[li]===false?' stroke-dasharray="10 8"':""}/>
+                <circle cx="${x1}" cy="${y1}" r="7" fill="${col}"/><circle cx="${x2}" cy="${y2}" r="7" fill="${col}"/>`;
+    }
+    svg.innerHTML=lines;
+    $("match-submit").disabled = !!mt.done || !!mt.result || Object.keys(mt.links).length<mt.left.length;
+}
+function clearMatchLines(){
+    if(!mt||mt.done) return;
+    mt.links={}; mt.sel=null; mt.result=null;
+    document.querySelectorAll("#match-area .mt-card").forEach(c=>c.classList.remove("right","wrong"));
+    $("match-message").textContent=""; paintMatch();
+}
+function fixRedLines(){  // keep the green lines, take away the red ones
+    for(const k in mt.result) if(!mt.result[k]) delete mt.links[k];
+    mt.result=null;
+    document.querySelectorAll("#match-area .mt-card").forEach(c=>c.classList.remove("right","wrong"));
+    $("match-message").textContent="";
+}
+function checkMatch(){
+    if(!mt||mt.done||Object.keys(mt.links).length<mt.left.length) return;
+    mt.sel=null; mt.result={};
+    const L=[...$("match-left").children], R=[...$("match-right").children];
+    let good=0;
+    mt.left.forEach((it,i)=>{
+        const ok=mt.right[mt.links[i]].key===it.key; mt.result[i]=ok; if(ok) good++;
+        L[i].classList.add(ok?"right":"wrong"); R[mt.links[i]].classList.add(ok?"right":"wrong");
+    });
+    const total=mt.left.length;
+    if(good===total){
+        mt.done=true; puzzlesSolved+=1; saveProgress(); $("puzzle-solved-count").textContent=puzzlesSolved;
+        revealMatchNames();
+        $("match-message").innerHTML=`<b>🎉 All ${total} right!</b> `+(mt.mode==="life" ? LIFE_FACT
+            : "💡 In lots of birds, the females are plainer colors, which helps them hide while they sit on the nest.")
+            +puzzleProNote()+`<div class="card-buttons" style="justify-content:flex-start;"><button class="mini-btn" type="button" onclick="newMatch()">🔄 Next puzzle</button></div>`;
+        fireConfetti($("match-message"));
+    }else{
+        $("match-message").innerHTML=`<b>${good} / ${total} right.</b> The <b style="color:#dc2626;">red dashed lines</b> are wrong. Click the cards to fix them, then press ✅ Submit again.
+            <div class="card-buttons" style="justify-content:flex-start;"><button class="mini-btn" type="button" onclick="showMatchAnswers()">👀 Show me the answers</button></div>`;
+    }
+    paintMatch();
+}
+function showMatchAnswers(){
+    if(!mt) return;
+    mt.done=true; mt.sel=null; mt.links={}; mt.result={};
+    mt.left.forEach((it,i)=>{ mt.links[i]=mt.right.findIndex(r=>r.key===it.key); mt.result[i]=true; });
+    document.querySelectorAll("#match-area .mt-card").forEach(c=>c.classList.remove("right","wrong"));
+    revealMatchNames(); paintMatch();
+    $("match-message").innerHTML="Here are the right matches! 🦉 Press 🔄 New puzzle to try another one. (Showing the answers doesn't count toward Puzzle Pro.)";
+}
+function revealMatchNames(){
+    [...$("match-right").children].forEach((c,i)=>{ const n=c.querySelector(".mt-name"); if(n) n.textContent=mt.right[i].name; });
+}
+
+// ---------- 🥚 Life Cycle circle: put the 5 stages around the circle, clockwise ----------
+// life.slots[k] = the stage key in spot k (spot 0 is at the top, then clockwise). It's a circle, so any starting
+// spot is OK: it's right when, going clockwise from the Egg, the stages come in LIFE_CYCLE order.
+let life=null;
+const LIFE_R=37;  // how far the spots are from the middle (in % of the circle's width)
+function lifeSpot(k){ const a=(-90+k*72)*Math.PI/180; return {x:50+LIFE_R*Math.cos(a), y:50+LIFE_R*Math.sin(a), a}; }
+function lifeArrows(){  // curved arrows between the spots, all going clockwise
+    const gap=24*Math.PI/180;  // leave room for the round spots
+    let p="";
+    for(let k=0;k<5;k++){
+        const a1=lifeSpot(k).a+gap, a2=lifeSpot(k+1).a-gap;
+        p+=`<path d="M ${50+LIFE_R*Math.cos(a1)} ${50+LIFE_R*Math.sin(a1)} A ${LIFE_R} ${LIFE_R} 0 0 1 ${50+LIFE_R*Math.cos(a2)} ${50+LIFE_R*Math.sin(a2)}"
+              fill="none" stroke="#14b8a6" stroke-width="1.6" stroke-linecap="round" marker-end="url(#life-head)"/>`;
+    }
+    return `<svg viewBox="0 0 100 100" aria-hidden="true"><defs><marker id="life-head" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#14b8a6"/></marker></defs>${p}</svg>`;
+}
+function newLifeCircle(){
+    const others=Object.keys(LIFE_PHOTOS).filter(sp=>sp!==life?.sp);  // a different bird than last time
+    life={sp:pickOne(others), slots:[null,null,null,null,null], tray:shuffle(LIFE_CYCLE.map(s=>s.key)), sel:null, result:null, done:false};
+    $("life-message").textContent=""; $("life-hint").textContent="";
+    $("life-credits").innerHTML=lifeCredits(life.sp);
+    renderLife();
+}
+function renderLife(){
+    const stage=k=>LIFE_CYCLE.find(s=>s.key===k), bird=birdById[life.sp], img=k=>`<img src="${lifePhoto(life.sp,k).url}" alt="">`;
+    $("life-circle").innerHTML=lifeArrows()+`<div class="life-middle">${life.done?"🎉 The circle of life!":"🔄 The life cycle of the"}<br>${esc(bird?bird.name:"")}</div>`
+        +life.slots.map((k,i)=>{ const p=lifeSpot(i), s=k&&stage(k), mark=life.result?(life.result[i]?" right":" wrong"):"";
+            return `<button type="button" class="life-slot${s?" filled":""}${life.sel&&!s?" target":""}${mark}" style="left:${p.x}%;top:${p.y}%;" data-i="${i}"
+                aria-label="${s?s.name+" (click to take it back)":"Empty spot "+(i+1)}">${s?`${img(k)}<span class="life-label">${s.name}</span>`:"?"}</button>`; }).join("");
+    $("life-tray").innerHTML=life.tray.map(k=>{ const s=stage(k);
+        return `<button type="button" class="life-card${life.sel===k?" sel":""}" data-k="${k}">${img(k)}${s.name}</button>`; }).join("")
+        || (life.done?"":`<span class="small">All 5 are on the circle! Press ✅ Submit.</span>`);
+    $("life-circle").querySelectorAll(".life-slot").forEach(b=>b.addEventListener("click",()=>lifeSlotClick(Number(b.dataset.i))));
+    $("life-tray").querySelectorAll(".life-card").forEach(b=>b.addEventListener("click",()=>lifeCardClick(b.dataset.k)));
+    $("life-circle").querySelectorAll(".life-slot").forEach(b=>b.disabled=life.done);
+    $("life-submit").disabled = life.done || !!life.result || life.slots.some(k=>!k);
+}
+function lifeUnmark(){ if(life.result){ life.result=null; $("life-message").textContent=""; } }
+function lifeCardClick(k){
+    if(life.done) return;
+    lifeUnmark();
+    life.sel = life.sel===k ? null : k;
+    const s=LIFE_CYCLE.find(x=>x.key===k);
+    $("life-hint").textContent = life.sel ? `${s.name}: ${pickOne(s.text)} Now click a spot on the circle.` : "";
+    renderLife();
+}
+function lifeSlotClick(i){
+    if(life.done) return;
+    lifeUnmark();
+    const old=life.slots[i];
+    if(life.sel){                         // put the picked stage here (a stage already here goes back to the tray)
+        life.slots[i]=life.sel; life.tray=life.tray.filter(k=>k!==life.sel); if(old) life.tray.push(old); life.sel=null;
+    }else if(old){                        // no stage picked: take this one back
+        life.slots[i]=null; life.tray.push(old);
+    }
+    $("life-hint").textContent="";
+    renderLife();
+}
+function checkLife(){
+    if(!life || life.done || life.slots.some(k=>!k)) return;
+    const e=life.slots.indexOf("egg");    // start wherever the Egg is, then go clockwise
+    life.result=life.slots.map((k,i)=>k===LIFE_CYCLE[(i-e+5)%5].key);
+    const good=life.result.filter(Boolean).length;
+    if(good===5){
+        life.done=true; life.result=null; puzzlesSolved+=1; saveProgress(); $("puzzle-solved-count").textContent=puzzlesSolved;
+        $("life-message").innerHTML=`<b>🎉 You got the whole circle!</b> ${LIFE_CYCLE.map(s=>`<br>${s.emoji} <b>${s.name}:</b> ${esc(s.text[0])}`).join("")}
+            <br>🔄 ...and then the adult lays eggs, so the circle starts all over again!<br>${LIFE_FACT}${puzzleProNote()}
+            <div class="card-buttons" style="justify-content:flex-start;"><button class="mini-btn" type="button" onclick="newLifeCircle()">🔄 Play again</button></div>`;
+        renderLife(); fireConfetti($("life-message"));
+    }else{
+        $("life-message").innerHTML=`<b>${good} / 5 are in the right spot</b> (counting clockwise from the 🥚 Egg). Fix the <b style="color:#dc2626;">red</b> ones: click one to take it back, or click a stage and then a spot.`;
+        renderLife();
+    }
 }
 
 // ---------- draw birds (step-by-step guides made from the cartoons) ----------
@@ -5704,6 +6344,19 @@ def get_quiz_photo():
         photos = []
     return jsonify(random.choice(photos) if photos else {"url": None})
 
+@app.route("/api/sex_photos")
+def get_sex_photos():
+    """♂️♀️ One random male photo and one random female photo of a bird (null if iNaturalist has none)."""
+    bird = BIRDS_BY_ID.get(request.args.get("bird", ""))
+    if not bird or bird["id"] not in SEXES_DIFFER:
+        return jsonify({"error": "unknown bird"}), 404
+    try:
+        found = fetch_sex_photos(bird)
+    except Exception as e:
+        log.warning("Male/female photo fetch failed for %s: %s", bird["name"], e)
+        found = {"male": [], "female": []}
+    return jsonify({s: (random.choice(found[s]) if found[s] else None) for s in ("male", "female")})
+
 @app.route("/api/holiday")
 def get_holiday():
     """Today's bird holiday (with a real photo) and the next one coming up. ?date=2027-05-31 previews any day."""
@@ -6439,6 +7092,31 @@ FEEDBACK_MAX = 1000
 FEEDBACK_GAP_SECONDS = 60          # one idea a minute per browser
 FEEDBACK_DAILY_MAX = 200           # at most this many ideas a day in total (so nobody can flood the team's inbox)
 
+# 📧 Ideas by Gmail: every idea is also emailed to the ChirpQuest team's Gmail (from that Gmail, to itself).
+# Turned on by two lines in .env (never in the code, so the address and password never reach GitHub or the page):
+#   GMAIL_ADDRESS=the team's Gmail     GMAIL_APP_PASSWORD=a 16-letter Gmail "app password" (not the normal password)
+# If they're missing or Gmail says no, the idea is still saved for 👪 Manage Accounts, so nothing is lost.
+def _email_idea(text, username, via_link):
+    address = os.environ.get("GMAIL_ADDRESS", "").strip()
+    password = os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "").strip()
+    if not address or not password:
+        return
+    msg = EmailMessage()
+    msg["Subject"] = "💡 New ChirpQuest idea"
+    msg["From"] = msg["To"] = address
+    who = f"👤 {username}" if username else "no account"
+    where = "🌐 from a shared link" if via_link else "🏠 on this computer"
+    msg.set_content(f"{text}\n\n— {who} · {where} · "
+                    f"{datetime.datetime.now().strftime('%b %d, %Y %I:%M %p')}\n"
+                    "(Also saved in ChirpQuest: 👪 Manage Accounts → 💡 Ideas from players.)")
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20) as s:
+            s.login(address, password)
+            s.send_message(msg)
+        log.info("📧 Emailed the idea to the ChirpQuest team's Gmail.")
+    except Exception as e:  # never log the password; the idea is already saved either way
+        log.warning("📧 Couldn't email the idea (%s). It's still saved in Manage Accounts.", type(e).__name__)
+
 def _too_soon(key, gap):
     """Per-browser wait (kept in the browser's ChirpQuest session cookie). True if it hasn't been `gap` seconds yet."""
     now, last = time.time(), session.get(key, 0)
@@ -6490,9 +7168,13 @@ def send_feedback():
             return _err("The ChirpQuest team's idea box is full for today. Please try again tomorrow!", 429)
         if _too_soon("feedback_last", FEEDBACK_GAP_SECONDS):
             return _err("Thanks! You just sent an idea. Wait a minute before sending another one.", 429)
+        via_link = 0 if _on_this_computer() else 1
         con.execute("INSERT INTO feedback (sent, text, username, via_link) VALUES (?, ?, ?, ?)",
-                    (time.time(), text, user["username"] if user else None, 0 if _on_this_computer() else 1))
+                    (time.time(), text, user["username"] if user else None, via_link))
     log.info("💡 New idea for the ChirpQuest team (%d characters).", len(text))
+    # 📧 send it in the background, so the kid doesn't wait for Gmail
+    threading.Thread(target=_email_idea, args=(text, user["username"] if user else None, bool(via_link)),
+                     daemon=True).start()
     return jsonify({"ok": True})
 
 @app.route("/api/parent/feedback")
