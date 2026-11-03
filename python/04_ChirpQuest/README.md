@@ -211,6 +211,12 @@ All three share the same `.env`.
 - Make ChirpQuest for all of Texas, not just North Texas. This could help kids all Texas-wide.
 - OR make it for all states, and you can select your state, which helps kids all across the United States.
 
+**8. 🧩 New puzzles and quiz questions** *(added Nov 3, 2026)*
+- **🥚 Bird life cycle matching game**, as part of the puzzles: match each stage (egg, hatchling, nestling, fledgling, adult) to its picture or name.
+- **New types of questions in the 🎯 Quiz**, not just multiple choice:
+  - **Dropdowns:** pick the right answer from a dropdown list (like filling in the blank in a sentence).
+  - **Put it in order:** drag things into the right order (like the life cycle stages, or birds from smallest to biggest).
+
 ### 💭 Maybe later
 - **Pip and Gemini when Google is busy:** fixed on Nov 3 with a new key, a backup key and Hana's backup answers. If Pip still gets stuck sometimes, ideas: pause the background fact writer while a kid is chatting, and save its facts to a file so restarts don't redo them.
 - **Season data by place:** the season charts and the "most seen this month" order use all of Texas right now. They could use North Texas only, or wherever 📍 Near me is.
