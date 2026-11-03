@@ -2068,7 +2068,7 @@ WEB_PAGE = r"""
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root { --teal-primary:#0f766e; --card-bg:#ffffff; --text-main:#1e293b; }
-body { font-family:'Comic Sans MS',cursive,sans-serif; background:linear-gradient(135deg,#f0fdf4 0%,#e0f2fe 100%); margin:0; color:var(--text-main); min-height:100vh; display:flex; flex-direction:column; overflow-x:hidden; position:relative; }
+body { font-family:'Comic Sans MS','Comic Sans','Chalkboard SE','Chalkboard','Comic Neue',sans-serif; background:linear-gradient(135deg,#f0fdf4 0%,#e0f2fe 100%); margin:0; color:var(--text-main); min-height:100vh; display:flex; flex-direction:column; overflow-x:hidden; position:relative; }
 
 /* ANIMATIONS */
 @keyframes wingFlap { 0%,100%{transform:rotate(0deg);} 50%{transform:rotate(-12deg);} }
@@ -2182,7 +2182,7 @@ button { font-family:inherit; }
 .top-list li.book .top-bar { background:#f59e0b; }
 .leaflet-marker-icon { filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
 .map-popup img { width:150px; height:110px; object-fit:cover; border-radius:8px; display:block; margin-bottom:4px; }
-.map-popup { font-family:'Comic Sans MS',cursive,sans-serif; }
+.map-popup { font-family:'Comic Sans MS','Comic Sans','Chalkboard SE','Chalkboard','Comic Neue',sans-serif; }
 
 /* BIRD BOOK */
 .book-tools { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px; }
