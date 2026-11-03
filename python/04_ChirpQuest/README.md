@@ -25,6 +25,9 @@ GEMINI_API_KEY_2=a-backup-key   (optional)
 - `.env` is git-ignored, so it never reaches GitHub.
 - **No key?** The app still runs. Pip answers from a small built-in list (cardinal, owl, blue jay, hummingbird, hello).
 
+### 🏠 Share it on your home Wi-Fi
+Add `CHIRPQUEST_WIFI=1` to `.env` and restart ChirpQuest. Then phones, tablets and laptops on the **same Wi-Fi** can open `http://<this computer's Wi-Fi address>:5000` (ChirpQuest prints the address when it starts, like `http://192.168.1.157:5000`). It only works inside the house, not across the internet. Wi-Fi visitors count as visitors, like ngrok users: the 👑 main password still only works on the computer running ChirpQuest. Windows Firewall decides which networks can connect (a grown-up's choice). Leave the line out (or set it to 0) to keep ChirpQuest on this computer only.
+
 ### 👑 Main password (for the ChirpQuest team only)
 **👪 Manage Accounts** (grown-ups only) has two kinds of passwords: each family's own parent password (see 👨‍👩‍👧 Families below), and the **main password** for the ChirpQuest team, which unlocks everything (👪 Manage Accounts → 👑 For the ChirpQuest team only). The first time, ChirpQuest asks the team to **make** the main password, right on the website. Rules that keep it safe:
 - It can only be made when there isn't one yet, and only on **the computer running ChirpQuest** (never through a shared ngrok link), so a stranger can't grab it first.
@@ -175,6 +178,7 @@ All three share the same `.env`.
 
 **1. 🌐 Set up ngrok on Hana's computer** *(next!)*
 - So friends can open ChirpQuest from their own computers. ngrok's settings file (with the sign-in token) is already in `%LOCALAPPDATA%\ngrok\ngrok.yml`, but `ngrok.exe` itself needs to be downloaded again (a grown-up should OK the download). Then run `ngrok http 5000` while ChirpQuest is running.
+- **Nov 3, 2026: Microsoft Defender blocked the ngrok download** (official `ngrok-v3-stable-windows-amd64.zip` from bin.equinox.io, flagged as `Trojan:Win32/Kepavll!rfn` and removed; ngrok often gets flagged because tunnels can be misused, and that's probably why the old `ngrok.exe` disappeared too). Don't turn Defender off. A grown-up decides: (1) **VS Code's Ports panel → Forward a Port → 5000** (no download; sign in with GitHub; can be set so only signed-in people can open it), (2) ngrok from the Microsoft Store, or (3) check Windows Security → Protection history.
 - Already ready for ngrok visitors: the main password only works on this computer, ❓ How can I help? (how-to, Ask Pip about the website, 🛡️ Bird safety, 🎬 demo tour) and 💡 How can we improve?
 
 **2. 🐦 More birds**

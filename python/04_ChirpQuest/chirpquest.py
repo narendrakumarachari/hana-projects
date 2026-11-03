@@ -7053,6 +7053,19 @@ if __name__ == "__main__":
     if key in ("DUMMY_TEST_KEY_REPLACE_ME", "PUT_YOUR_KEY_HERE", ""):
         log.warning("No real Gemini key set. Set it with:  export GEMINI_API_KEY='your_key'")
     threading.Thread(target=warm_caches, daemon=True).start()
+    # 🏠 Home Wi-Fi sharing is OFF unless CHIRPQUEST_WIFI=1 (in .env). When it's on, phones and laptops on the same Wi-Fi
+    # can open ChirpQuest at http://<this computer's Wi-Fi address>:5000. They count as visitors, like ngrok users:
+    # the 👑 main password still only works on this computer. Windows Firewall decides who can actually connect.
+    wifi = os.environ.get("CHIRPQUEST_WIFI", "").strip().lower() in ("1", "yes", "true", "on")
+    if wifi:
+        import socket
+        try:  # this computer's Wi-Fi address (no data is sent, it only asks Windows which network card it would use)
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                s.connect(("192.168.1.1", 9))
+                lan = s.getsockname()[0]
+        except OSError:
+            lan = "this-computer's-address"
+        log.info("🏠 Home Wi-Fi sharing is ON: other devices on the same Wi-Fi can open http://%s:5000", lan)
     # debug=False: ChirpQuest gets shared through ngrok, and Flask's debugger
     # would let strangers run code on this laptop if an error page appeared.
-    app.run(debug=False, host="127.0.0.1", port=5000, load_dotenv=False, threaded=True)
+    app.run(debug=False, host="0.0.0.0" if wifi else "127.0.0.1", port=5000, load_dotenv=False, threaded=True)
