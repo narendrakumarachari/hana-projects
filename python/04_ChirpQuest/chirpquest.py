@@ -2311,6 +2311,13 @@ button { font-family:inherit; }
 .section-pip-row .tab-title { margin:0; }
 .section-pip { flex:0 0 auto; width:70px; height:82px; }
 .section-pip svg { width:100%; height:100%; }
+/* 💬 Ask Pip / 📷 Photo ID: Pip stands on top of the question box (or the Identify button), on the left */
+.pip-perch { position:relative; }
+.perched-pip { position:absolute; left:14px; bottom:calc(100% - 7px); width:78px; height:92px; z-index:2; pointer-events:none; }
+.perched-pip svg { width:100%; height:100%; display:block; }
+.chat-suggest.pip-room { padding-left:100px; }     /* the quick questions start to Pip's right */
+#chat-container { padding-bottom:56px; }   /* the newest message never hides behind Pip */
+.id-result { padding-bottom:64px; }        /* on narrow screens the results box is right above Pip */
 /* Calm Pips (Ask Pip, Photo ID): people are busy there, so Pip stays mostly still. He blinks often, his crest and wing go up
    and down very slowly, and only very, very rarely does his crest lie down. */
 .pip-calm .mascot-svg { animation:none; }
@@ -2659,18 +2666,18 @@ button { font-family:inherit; }
             <!-- ASK PIP -->
             <section id="tab-chat" class="tab-content">
                 <div class="box">
-                    <div class="section-pip-row"><div class="section-pip pip-calm" id="chat-pip" aria-hidden="true"></div>
-                        <h2 class="tab-title">💬 Chat with Pip</h2></div>
+                    <h2 class="tab-title">💬 Chat with Pip</h2>
                     <div class="chat-box" id="chat-container">
                         <div class="chat-msg bot-msg">Chirp chirp! I'm Pip the Cockatiel! Ask me anything about North Texas birds!</div>
                     </div>
-                    <div class="chat-suggest">
+                    <div class="chat-suggest pip-room">
                         <button class="mini-btn" onclick="askPip('Why do birds migrate?')">Why do birds migrate?</button>
                         <button class="mini-btn" onclick="askPip('How can I attract hummingbirds to my yard?')">Attract hummingbirds?</button>
                         <button class="mini-btn" onclick="askPip('Which North Texas bird is the fastest?')">Fastest bird?</button>
                         <button class="mini-btn" onclick="askPip('How do owls see at night?')">Owl night vision?</button>
                     </div>
-                    <div class="chat-controls">
+                    <div class="chat-controls pip-perch">
+                        <div class="perched-pip pip-calm" id="chat-pip" aria-hidden="true"></div><!-- Pip stands on the question box -->
                         <input type="text" id="user-input" class="chat-input" placeholder="Type your bird question here..." onkeydown="if(event.key==='Enter') sendChatMessage()">
                         <button class="chat-send-btn" id="send-btn" type="button" onclick="sendChatMessage()">Send</button>
                     </div>
@@ -2700,8 +2707,7 @@ button { font-family:inherit; }
             <!-- PHOTO ID -->
             <section id="tab-photoid" class="tab-content">
                 <div class="box">
-                    <div class="section-pip-row"><div class="section-pip pip-calm" id="photo-pip" aria-hidden="true"></div>
-                        <h2 class="tab-title">📷 Pip's Photo ID</h2></div>
+                    <h2 class="tab-title">📷 Pip's Photo ID</h2>
                     <p class="muted">Took a bird picture, or drew one? Pip uses Google Gemini AI to guess which bird it is (any bird, not just the Bird Book), just like Merlin's Photo ID. Your picture is shrunk first and is only sent to Gemini to ask.</p>
                     <div class="quiz-modes" style="align-items:center;">
                         <b style="color:#0f766e;">This picture is:</b>
@@ -2725,7 +2731,8 @@ button { font-family:inherit; }
                             </ol>
                         </div>
                     </div>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;">
+                    <div class="pip-perch" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;">
+                        <div class="perched-pip pip-calm" id="photo-pip" aria-hidden="true"></div><!-- Pip stands on the Identify button -->
                         <button class="big-btn" id="identify-btn" onclick="identifyPhoto()" disabled>🔍 Identify!</button>
                         <button class="big-btn alt" id="sample-btn" onclick="loadSamplePhoto()">🎲 Try a sample photo</button>
                     </div>
@@ -2966,9 +2973,10 @@ button { font-family:inherit; }
                             <h2>📜 A little history of ChirpQuest</h2>
                             <h3>🤫 Did you know?</h3>
                             <ul class="history-facts">
-                                <li>🧒 ChirpQuest's creator started building it at <b>age 11</b>!</li>
-                                <li>🐦 <b>Pip is based on a real cockatiel!</b></li>
-                                <li>🎨 ChirpQuest's teal-and-mint colors are its creator's <b>favorite color scheme</b>.</li>
+                                <li>🧒 <b>Hana</b> started building ChirpQuest at <b>age 11</b>!</li>
+                                <li>🤝 ChirpQuest is a <b>team effort</b>: Hana builds it with help from her parents and AI helpers like Claude and other AI models.</li>
+                                <li>🐦 Pip is based on a real cockatiel: Hana's pet cockatiel, <b>Krish</b>!</li>
+                                <li>🎨 ChirpQuest's teal-and-mint colors are Hana's <b>favorite color scheme</b>.</li>
                                 <li>🌈 The very first logo was a <b>rainbow wing</b> (see it below!).</li>
                                 <li>🐦‍⬛ ChirpQuest was going to have <b>more mascots</b>, and it still might! One that hasn't been lost to time is <b>Ravi the Raven</b>.</li>
                             </ul>
@@ -6402,8 +6410,9 @@ HOW CHIRPQUEST WORKS (the menu on the left, top to bottom):
   📜 History of Bird Count keeps the winners.
 - 🏆 Prizes: badges. They are: {badges}.
 - ❓ How can I help?: this page. There's a box to send the ChirpQuest team an idea to make ChirpQuest better, a 🛡️ Bird safety
-  card, the 🎬 demo tour, and 📜 A little history of ChirpQuest (it started on Aug 27, 2026 with 16 birds and 5 badges; now
-  95 birds and 20 badges; Pip is based on a real cockatiel).
+  card, the 🎬 demo tour, and 📜 A little history of ChirpQuest (Hana started building it at age 11, with help from her
+  parents and AI helpers like Claude and other AI models; it started on
+  Aug 27, 2026 with 16 birds and 5 badges, now 95 birds and 20 badges; Pip is based on Hana's pet cockatiel, Krish).
 
 MODES (switch at the top right): 🎬 Demo is for trying things out, no account needed, and everything resets when you
 refresh the page. 💾 Normal saves your progress to your own account: press 👤 at the top right to sign up (a username and a
