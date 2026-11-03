@@ -2352,6 +2352,14 @@ button { font-family:inherit; }
 .help-howto ul { padding-left:18px; margin:6px 0; }
 .help-howto li { margin:4px 0; }
 .help-chat { height:220px; }
+.help-history { grid-column:1 / -1; }   /* full width, under the other cards */
+.history-cols { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
+.history-cols h3 { margin:6px 0; color:#0f766e; font-size:1em; }
+.history-timeline { padding-left:18px; margin:0; }
+.history-timeline li { margin:5px 0; }
+.history-table { width:100%; border-collapse:collapse; font-size:0.85em; margin-bottom:8px; }
+.history-table th, .history-table td { border:1px solid #e2e8f0; padding:5px 7px; text-align:left; vertical-align:top; overflow-wrap:anywhere; }
+.history-table th { background:#f0fdfa; color:#0f766e; }
 .idea-row { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:8px 10px; margin-top:6px; overflow-wrap:anywhere; white-space:pre-wrap; }
 .count-history { margin-top:14px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:14px; padding:8px 12px; }
 .count-history summary { cursor:pointer; font-weight:bold; color:#0f766e; }
@@ -2913,6 +2921,44 @@ button { font-family:inherit; }
                             <div class="row" style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
                                 <button class="big-btn" type="button" id="feedback-send" onclick="sendFeedback()">📨 Send to the ChirpQuest team</button>
                                 <span class="small" id="feedback-note" role="status"></span>
+                            </div>
+                        </div>
+                        <div class="card help-history" id="help-history">
+                            <h2>📜 A little history of ChirpQuest</h2>
+                            <p>🐦 <b>Did you know? Pip is based on a real cockatiel!</b> More stories (and photos) from the ChirpQuest team are coming soon.</p>
+                            <div class="history-cols">
+                                <div>
+                                    <h3>🗓️ How ChirpQuest grew</h3>
+                                    <ul class="history-timeline">
+                                        <li><b>Aug 27, 2026</b>: the very first ChirpQuest! 16 birds, 5 badges, and Pip answered in 10 to 50 words.</li>
+                                        <li><b>Sep 5</b>: Pip got a new personality: a patient bird expert who answers in 2 to 4 full sentences, and says "I'm still learning" instead of guessing. His eyes started to blink, too.</li>
+                                        <li><b>Oct 24</b>: the big upgrade day: 55, then 73, then 95 birds! Cartoon birds, the live bird map, Photo ID, the quiz, the puzzle, drawing guides, real bird recordings and the Pip Badge logo.</li>
+                                        <li><b>Oct 25</b>: your own account (💾 Normal mode), and 👪 Manage Accounts for grown-ups.</li>
+                                        <li><b>Oct 28</b>: parent rules for each kid, and Pip started checking sightings.</li>
+                                        <li><b>Oct 30</b>: families, 🔎 Research this bird, 🐦 Bird Count and 📰 Events &amp; News.</li>
+                                        <li><b>Nov 3</b>: this ❓ How can I help? page, the 🎬 demo tour, 🔍 How to ID it, scientific names, 6 new badges and 📜 History of Bird Count.</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h3>📈 Then and now</h3>
+                                    <table class="history-table">
+                                        <tr><th></th><th>First version (Aug 27)</th><th>Now (Nov 3)</th></tr>
+                                        <tr><td>🐦 Birds</td><td>16</td><td>95</td></tr>
+                                        <tr><td>🏅 Badges</td><td>5</td><td>20</td></tr>
+                                        <tr><td>💬 Pip's answers</td><td>10 to 50 words</td><td>2 to 4 full sentences</td></tr>
+                                        <tr><td>🤖 AI models</td><td>1</td><td>A team of models, plus a backup key</td></tr>
+                                    </table>
+                                    <h3>🤖 Pip's AI brains (Google Gemini models)</h3>
+                                    <table class="history-table">
+                                        <tr><th>Model</th><th>Speed</th><th>What it does</th></tr>
+                                        <tr><td>gemini-flash-latest</td><td>?</td><td>The only model in the first versions (Aug–Sep)</td></tr>
+                                        <tr><td>gemini-3.8-flash</td><td>🐢 about 20 s</td><td>The newest and smartest: Pip tries it first for chats and Photo ID</td></tr>
+                                        <tr><td>gemini-3.6-flash</td><td>🐇 about 3 s</td><td>Pip's backup when the first one is busy</td></tr>
+                                        <tr><td>gemini-3.1-flash-lite</td><td>⚡ about 2 s</td><td>Quick jobs: checking Bird Count chat, picking bird news, writing bird facts</td></tr>
+                                    </table>
+                                    <p class="small">If one model is busy or out of free uses, Pip moves on to the next one, and then to a backup key.
+                                        Some day ChirpQuest might have its very own AI!</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -6277,7 +6323,9 @@ HOW CHIRPQUEST WORKS (the menu on the left, top to bottom):
   the bird), chat (Pip checks every message), and the top 3 win 🥇🥈🥉. Results clear an hour after it ends;
   📜 History of Bird Count keeps the winners.
 - 🏆 Prizes: badges. They are: {badges}.
-- ❓ How can I help?: this page. There's a box to send the ChirpQuest team an idea to make ChirpQuest better.
+- ❓ How can I help?: this page. There's a box to send the ChirpQuest team an idea to make ChirpQuest better, a 🛡️ Bird safety
+  card, the 🎬 demo tour, and 📜 A little history of ChirpQuest (it started on Aug 27, 2026 with 16 birds and 5 badges; now
+  95 birds and 20 badges; Pip is based on a real cockatiel).
 
 MODES (switch at the top right): 🎬 Demo is for trying things out, no account needed, and everything resets when you
 refresh the page. 💾 Normal saves your progress to your own account: press 👤 at the top right to sign up (a username and a
