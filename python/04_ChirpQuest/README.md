@@ -200,10 +200,11 @@ All three share the same `.env`.
 **3. 📜 The history of ChirpQuest** *(updated Nov 6, 2026)*
 - Hana says the **📜 A little history of ChirpQuest** card on ❓ How can I help? is great just where it is, so it needs no other improvements.
 - **Later: add more photos**, like the things around the house that ChirpQuest was based on, and Krish, the real cockatiel Pip is based on.
-- **A fun fact to add later:** the bird sightings map happened by accident! Hana asked for a "map" when she meant a "migration map". (So a real migration map is still coming: see #15.)
+- Added Nov 6 to 🤫 Did you know?: the bird sightings map happened by accident! Hana asked for a "map" when she meant a "migration map". (A real migration map is still coming: see #15.)
+- The oldest early message Hana has found so far is her complaining that Ravi the Raven was "just not working out".
 
-**🐦 Pip: more animations and a voice** *(added Nov 3, 2026)*
-- **Make more Pip animations.**
+**🐦 Pip: more animations and a voice** *(added Nov 3, 2026; Hana's next project after the code cleanup!)*
+- **Make more Pip animations.** Hana's rule, from the early days: before anyone says an animation looks good, **actually look at it running on the page**. (Once, animations were called "pretty good" when Pip was really a black blob!) Hana decides if Pip looks cute and chibi.
 - **Add a voice** for Pip.
 
 **4. 📚 Books on birds** *(added Nov 3, 2026)*
@@ -251,6 +252,12 @@ All three share the same `.env`.
 
 **15. 🗺️ Seasonal bird migration map** *(added Nov 6, 2026)*
 - Make a **migration pattern map** that shows where birds go in each season. It would sit alongside the live bird sightings map.
+
+**16. 📌 The side menu follows you** *(added Nov 6, 2026)*
+- When you scroll far down a page, the section buttons on the side scroll away. They should **follow you while you scroll**, so they're always there. (On phones the menu moves to the top, so check how it should work there too.)
+
+**17. 🎮 Birdbound** *(added Nov 6, 2026)*
+- **Birdbound (project version 1)** is a game Hana was planning to build as its own website while building ChirpQuest. Maybe bring it in as a **section in ChirpQuest**. Hana can tell us how the game works when we get to it.
 
 
 ### 💭 Maybe later
