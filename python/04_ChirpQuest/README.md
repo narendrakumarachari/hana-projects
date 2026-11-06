@@ -174,12 +174,21 @@ All three share the same `.env`.
 2. Make sure `04_ChirpQuest/.env` exists and has a working `GEMINI_API_KEY` (and the backup `GEMINI_API_KEY_2`). Test the keys first; if one is broken, get a new one at <https://aistudio.google.com/apikey> and change it **only in `.env`**, never in the code.
 3. Run it: `python 04_ChirpQuest\chirpquest.py` and open <http://127.0.0.1:5000>.
 
-### 🎯 Next up (updated Nov 3, 2026)
+### 🎯 Next up (updated Nov 6, 2026)
 
-**1. 🌐 Set up ngrok on Hana's computer** *(next!)*
-- So friends can open ChirpQuest from their own computers. ngrok's settings file (with the sign-in token) is already in `%LOCALAPPDATA%\ngrok\ngrok.yml`, but `ngrok.exe` itself needs to be downloaded again (a grown-up should OK the download). Then run `ngrok http 5000` while ChirpQuest is running.
-- **Nov 3, 2026: Microsoft Defender blocked the ngrok download** (official `ngrok-v3-stable-windows-amd64.zip` from bin.equinox.io, flagged as `Trojan:Win32/Kepavll!rfn` and removed; ngrok often gets flagged because tunnels can be misused, and that's probably why the old `ngrok.exe` disappeared too). Don't turn Defender off. A grown-up decides: (1) **VS Code's Ports panel → Forward a Port → 5000** (no download; sign in with GitHub; can be set so only signed-in people can open it), (2) ngrok from the Microsoft Store, or (3) check Windows Security → Protection history.
-- Already ready for ngrok visitors: the main password only works on this computer, ❓ How can I help? (how-to, Ask Pip about the website, 🛡️ Bird safety, 🎬 demo tour) and 💡 How can we improve?
+**🚨🚨🚨 TOP PRIORITY: 🧹 Code cleanup. A VERY, VERY, VERY, VERY, VERY, VERY, VERY, VERY, VERY MAJOR THING! 🚨🚨🚨** *(added Nov 3, 2026; made top priority Nov 6, 2026)*
+- **Do this before anything else on this list.** Hana says the code is failing, so find out what's failing and fix it as part of the cleanup.
+- Make the code as short as possible with **exactly the same features and no changes for the user at all**.
+- More important than fewer lines: changes that make ChirpQuest **faster and more efficient** (for example fewer repeated iNaturalist and Gemini requests, less work on every page load).
+- Could also split the HTML/CSS/JS out of `chirpquest.py` into `templates/` and `static/` files (see "Maybe later").
+
+**🎂 Make the age selectable** *(added Nov 6, 2026)*
+- Let each player pick their age, and make the website behave differently depending on that age. A 7-year-old is using ChirpQuest now, so it can't assume everyone is 8 to 12 (Pip's report helper already says "6 to 12").
+
+**1. 🌐 Sharing with friends: VS Code ports, not ngrok** *(decided Nov 6, 2026)*
+- **ngrok isn't needed anymore.** Hana uses **VS Code's Ports panel → Forward a Port → 5000**. It works well and is much easier. (Microsoft Defender also blocked the ngrok download on Nov 3.)
+- Who can open it: right-click the port → **Port Visibility** → **Private** (only you, signed in) or **Public** (anyone with the link).
+- **Still to check:** the "main password only works on this computer" rule was written with ngrok in mind. Try it through a forwarded link and make sure the main password is refused there. The code's notes also still say "ngrok"; tidy them in the cleanup.
 
 **2. 🐦 More birds**
 - Keep adding common North Texas birds (95 now). Check each one's sighting count near DFW first, and only add non-native birds if they're *extremely* common.
@@ -188,18 +197,18 @@ All three share the same `.env`.
 - New birds also need a `BIRD_ID` entry (🔍 How to ID it) and, if they only visit in winter or summer, a spot in `WINTER_VISITORS` / `SUMMER_VISITORS`.
 - **Maybe:** a "My Research Notebook" where kids save facts and notes from 🔎 Research, then print them as a one-page report for school.
 
-**3. 📜 The history of ChirpQuest** *(added Nov 3, 2026)*
-- For now there's a small **📜 A little history of ChirpQuest** card on ❓ How can I help? (timeline, birds and badges then and now, Pip's AI models). Hana will add the more personal stories, like the real cockatiel Pip is based on.
-- The history of ChirpQuest: how it started and how it grew (the first version was Aug 27, 2026; see "Versions" above).
-- Hana will send **photos of things around the house that ChirpQuest was based on**, and later this week a **photo of Krish, the real cockatiel Pip is based on**.
-- Add a **screenshot of how the old logo looked** (before the "Pip Badge" logo). The old versions in `old_versions/` can be run to take it.
+**3. 📜 The history of ChirpQuest** *(updated Nov 6, 2026)*
+- Hana says the **📜 A little history of ChirpQuest** card on ❓ How can I help? is great just where it is, so it needs no other improvements.
+- **Later: add more photos**, like the things around the house that ChirpQuest was based on, and Krish, the real cockatiel Pip is based on.
+- **A fun fact to add later:** the bird sightings map happened by accident! Hana asked for a "map" when she meant a "migration map". (So a real migration map is still coming: see #15.)
 
 **🐦 Pip: more animations and a voice** *(added Nov 3, 2026)*
 - **Make more Pip animations.**
 - **Add a voice** for Pip.
 
 **4. 📚 Books on birds** *(added Nov 3, 2026)*
-- Books on birds, written by Hana. The first one: **bird brains**. Hana has been doing lots of research on bird intelligence and planned to write a small passage about it, but it could turn into a book in ChirpQuest.
+- Books on birds, written by Hana. The first one: **bird brains**. Hana has been doing lots of research on bird intelligence and planned to write a small passage about it, but it could turn into a book in ChirpQuest. *(Nov 6: not started yet.)*
+- **📚 A temporary library for now:** add a library section with starter passages until Hana writes the real paragraphs, the same way the 📜 history card got started. Hana's own writing replaces the starter text later.
 
 **5. 📧 Ideas by Gmail** *(built Nov 3, 2026: just needs the Gmail lines in `.env`)*
 - Every 💡 How can we improve? idea is saved in ChirpQuest (read it in 👪 Manage Accounts with the 👑 main password) **and** emailed to the team's Gmail, sent from that Gmail to itself (`_email_idea()`), so the address never shows on the website.
@@ -215,7 +224,6 @@ All three share the same `.env`.
 **8. ✅ New puzzles and quiz questions** *(added and built Nov 3, 2026; see 🧩 Bird Puzzle and 🎯 Bird Quiz above)*
 - Done: 🥚 Life Cycle circle (one bird, real photos of every stage), ♂️♀️ Male & Female matching with lines and Submit, and 🎲 Mix it up (dropdowns, put it in order, type the name with typo fixing, habitats, true or false and more).
 - Also done the same day: 🕊️ **no dead birds**: every iNaturalist photo and map pin skips sightings tagged "Dead" or described as roadkill, window strikes etc. (`looks_dead()`), after a player asked "Why does ChirpQuest have dead birds in it?"; and **bigger Pips** in 💬 Ask Pip and 📷 Photo ID.
-- **More life-cycle birds:** add more species to `LIFE_PHOTOS`, but only with photos a person has checked really show each stage.
 
 **9. 🚨 Safety alerts for parents** *(added Nov 3, 2026)*
 - When a kid sends something **threatening or inappropriate**, **shares private information** (real name, address, phone, email, school), or does something bad on the website, their parents get an **email** at home.
@@ -227,12 +235,25 @@ All three share the same `.env`.
 - Parents get emails for major things: the 🚨 safety alerts from #9, a **big 🐦 Bird Count has started**, a **new section** was added to ChirpQuest, and similar news. Not for every little thing.
 - Uses the same Gmail setup as #5 (`GMAIL_ADDRESS` / `GMAIL_APP_PASSWORD` in `.env`).
 
-**11. 🧹 Code cleanup** *(added Nov 3, 2026)*
-- Make the code as short as possible with **exactly the same features and no changes for the user at all**.
-- More important than fewer lines: changes that make ChirpQuest **faster and more efficient** (for example fewer repeated iNaturalist and Gemini requests, less work on every page load).
-- Could also split the HTML/CSS/JS out of `chirpquest.py` into `templates/` and `static/` files (see "Maybe later").
+**11. 🥚 More bird life cycle things** *(added Nov 6, 2026)*
+- Add more about bird life cycles. For example, more birds in the 🥚 Life Cycle circle (`LIFE_PHOTOS`, only with photos a person has checked really show each stage).
+
+**12. 🎉 Major ChirpQuest Events** *(added Nov 6, 2026; the name can change later)*
+- Do other events, not just the 🐦 Bird Count, all in one section. Ideas: **📸 photography challenges** and **✏️ drawing challenges**.
+
+**13. 🎂 A ChirpQuest holiday** *(added Nov 6, 2026)*
+- Make **October 24** a ChirpQuest holiday, to celebrate the big upgrade day (55, then 73, then 95 birds, the live map, Photo ID, the quiz and the puzzle).
+- The day can change if another one beats it, because ChirpQuest will hopefully be under development forever! Lines of code added in `chirpquest.py` so far, going by the dates in the git history: **Oct 24: about 2,960** · Nov 3: about 2,100 · Oct 30: about 1,410 · Oct 25: about 1,040.
+- It could go in `BIRD_HOLIDAYS`, so the Welcome banner says "Happy ...!" on that day.
+
+**14. 📖 More information and more sources** *(added Nov 6, 2026)*
+- Add more things that help kids find information on the website, and **more sources of information** (right now: iNaturalist, Wikipedia and a few others, see "Data sources" above).
+
+**15. 🗺️ Seasonal bird migration map** *(added Nov 6, 2026)*
+- Make a **migration pattern map** that shows where birds go in each season. It would sit alongside the live bird sightings map.
+
 
 ### 💭 Maybe later
 - **Pip and Gemini when Google is busy:** fixed on Nov 3 with a new key, a backup key and Hana's backup answers. If Pip still gets stuck sometimes, ideas: pause the background fact writer while a kid is chatting, and save its facts to a file so restarts don't redo them.
 - **Season data by place:** the season charts and the "most seen this month" order use all of Texas right now. They could use North Texas only, or wherever 📍 Near me is.
-- **Code cleanup:** split the HTML/CSS/JS out of `chirpquest.py` into `templates/` and `static/` files (part of to-do #11).
+- **Code cleanup:** split the HTML/CSS/JS out of `chirpquest.py` into `templates/` and `static/` files (part of the 🚨 top-priority cleanup).
